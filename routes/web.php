@@ -62,15 +62,23 @@ Route::prefix('admin')->group(function () {
         return view('admin.dashboard');
     });
 
+    Route::get('/data', function () {
+        return view('admin.data');
+    });
+
+    Route::get('/queue', function () {
+        return view('admin.queue');
+    });
+
+    Route::get('/invoice', function () {
+        return view('admin.invoice');
+    });
+
     Route::get('/payment', function () {
         return view('admin.payment');
     });
 
-    Route::get('/add', function () {
-        return view('admin.add');
-    });
-
-    Route::get('/data', function () {
-        return view('admin.data');
+    Route::get('/report', function () {
+        return view('admin.report');
     });
 });
