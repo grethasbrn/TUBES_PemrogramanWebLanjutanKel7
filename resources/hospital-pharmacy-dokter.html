@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Pharmacy — Dokter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F2EA;--cream2:#EEE7D8;--cream3:#E4DDD0;--cream4:#D8CFC0;
+  --blue:#3A7CA5;--blue2:#2C6080;--blue-light:#E8F2F9;--blue-mid:#C5DCF0;
+  --teal:#2A9D8F;--teal-light:#E0F5F2;
+  --orange:#E76F51;--orange-light:#FCEEE9;
+  --text:#1E2D3A;--text2:#4A6275;--text3:#8FA3B1;
+  --white:#FAFCFE;--sidebar:#E4EEF5;
+  --green:#52B788;--green-light:#E8F5EE;
+  --red:#E63946;--red-light:#FDECEE;
+  --amber:#F4A261;--amber-light:#FEF3E8;
+  --purple:#8B7DB8;--purple-light:#EDEBF8;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;background:var(--white);border-bottom:1px solid var(--cream3);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:1000;box-shadow:0 1px 8px rgba(58,124,165,.06)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+.logo-text .l1{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;letter-spacing:.2em;color:var(--text)}
+.logo-text .l2{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:400;letter-spacing:.2em;color:var(--text2)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.date-chip{font-size:12px;color:var(--text2);background:var(--cream2);padding:5px 10px;border-radius:6px}
+.notif-btn{position:relative;width:34px;height:34px;border-radius:8px;border:1px solid var(--cream3);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.notif-badge{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--white)}
+.avatar-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--blue2)}
+.avatar-info{line-height:1.2}
+.avatar-name{font-size:13px;font-weight:500;color:var(--text)}
+.avatar-role{font-size:11px;color:var(--text3)}
+
+/* SIDEBAR */
+.sidebar{width:220px;height:100vh;background:var(--sidebar);position:fixed;left:0;top:60px;padding:20px 0;overflow-y:auto;border-right:1px solid var(--blue-mid)}
+.nav-section{font-size:10px;color:var(--text3);padding:16px 24px 6px;letter-spacing:.08em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 24px;font-size:14px;font-family:'Cormorant Garamond',serif;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;letter-spacing:.02em}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.5)}
+.nav-item.active{color:var(--blue2);background:var(--white);font-weight:600;border-right:3px solid var(--blue)}
+.nav-icon{font-size:15px;opacity:.7;flex-shrink:0;width:18px;text-align:center}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;font-family:'DM Sans',sans-serif}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden;margin-left:220px;width:calc(100% - 220px)}
+.content{flex:1;overflow-y:auto;padding:24px;margin-top:60px}
+.page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--text)}
+.page-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;border:1px solid var(--cream3);background:var(--white);color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--cream2);color:var(--text)}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-primary:hover{background:var(--blue2);color:white}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-teal{background:var(--teal);color:white;border-color:var(--teal)}
+.btn-teal:hover{background:#248a7d;color:white}
+.btn-green{background:var(--green);color:white;border-color:var(--green)}
+.btn-green:hover{background:#3e9a6d;color:white}
+.btn-danger{background:var(--red);color:white;border-color:var(--red)}
+.btn-danger:hover{background:#c52d38;color:white}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:18px}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.metric{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:16px}
+.metric-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text)}
+.metric-sub{font-size:11px;margin-top:5px;color:var(--text3)}
+.metric-sub.up{color:var(--green)}
+.metric-sub.dn{color:var(--red)}
+.metric-sub.info{color:var(--blue)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.grid22{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.b-bpjs{background:var(--teal-light);color:#0F6E56}
+.b-mandiri{background:var(--purple-light);color:#534AB7}
+.b-baru{background:#E6F1FB;color:#185FA5}
+.b-validasi{background:#EDEBF8;color:#534AB7}
+.b-siap{background:var(--teal-light);color:#0F6E56}
+.b-selesai{background:var(--green-light);color:#1F6B43}
+.b-ditolak{background:var(--red-light);color:#9B1C24}
+.b-diganti{background:var(--amber-light);color:#7A4A0A}
+.b-laki{background:#E8F2F9;color:#2C6080}
+.b-perempuan{background:#FBEAF0;color:#72243E}
+.b-standar{background:var(--teal-light);color:#0F6E56}
+.b-premium{background:#EDEBF8;color:#534AB7}
+.b-aktif{background:var(--green-light);color:#1F6B43}
+.b-rawat-inap{background:#FEF3E8;color:#854F0B}
+.b-rawat-jalan{background:#E8F2F9;color:#185FA5}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--cream3)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--white)}
+th{padding:10px 14px;text-align:left;border-bottom:1px solid var(--cream3);font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;background:var(--cream2)}
+td{padding:10px 14px;border-bottom:1px solid var(--cream3);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--cream)}
+
+/* SEARCH */
+.search-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.search-input{flex:1;min-width:180px;padding:8px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--blue-light);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.search-input::placeholder{color:var(--text3)}
+.search-input:focus{border-color:var(--blue)}
+.filter-sel{padding:8px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream2);color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,45,58,.5);z-index:200;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;margin-bottom:40px}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:18px;color:var(--text)}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);margin-top:-4px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--cream3)}
+.modal-section{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--cream3)}
+
+/* PASIEN CARD */
+.pasien-card{border:1px solid var(--cream3);border-radius:12px;padding:14px 16px;cursor:pointer;background:var(--white);margin-bottom:8px;transition:all .15s;display:flex;align-items:center;gap:14px}
+.pasien-card:hover{background:var(--cream);border-color:var(--blue-mid)}
+.pasien-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.pasien-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--blue2);flex-shrink:0}
+.pasien-info{flex:1;min-width:0}
+.pasien-nama{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--text)}
+.pasien-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.pasien-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+
+/* RESEP FORM */
+.obat-item{border:1px solid var(--cream3);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--cream);position:relative}
+.obat-item.bpjs-item{border-color:var(--teal);background:var(--teal-light)}
+.obat-item.mandiri-item{border-color:var(--purple);background:var(--purple-light)}
+.obat-remove{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1}
+.obat-remove:hover{color:var(--red)}
+.obat-type-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.tag-standar{background:var(--teal-light);color:#0F6E56;border:1px solid #a0ddd7}
+.tag-premium{background:var(--purple-light);color:#534AB7;border:1px solid #c5bde8}
+
+/* RESEP STATUS */
+.rx-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;align-items:start}
+.rx-item{border:1px solid var(--cream3);border-radius:10px;padding:13px 15px;cursor:pointer;background:var(--white);margin-bottom:8px;transition:all .15s}
+.rx-item:hover{background:var(--cream)}
+.rx-item.selected{border-color:var(--blue);background:var(--blue-light)}
+.rx-no{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;color:var(--text)}
+.rx-meta{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* STEPPER STATUS */
+.status-stepper{display:flex;align-items:flex-start;gap:0;margin:14px 0}
+.step-node{display:flex;flex-direction:column;align-items:center;flex:1}
+.step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--cream3);background:var(--cream2);color:var(--text3);transition:all .3s}
+.step-circle.done{background:var(--green);border-color:var(--green);color:white}
+.step-circle.active{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 0 0 4px var(--blue-light)}
+.step-circle.warn{background:var(--amber);border-color:var(--amber);color:white}
+.step-label{font-size:10px;color:var(--text3);margin-top:5px;text-align:center;max-width:60px}
+.step-label.done{color:var(--green)}
+.step-label.active{color:var(--blue);font-weight:500}
+.step-connector{flex:1;height:2px;background:var(--cream3);margin-top:14px;align-self:flex-start}
+.step-connector.done{background:var(--green)}
+
+/* DETAIL PANEL */
+.detail-panel{background:var(--white);border:1px solid var(--cream3);border-radius:12px;overflow:hidden}
+.detail-header{background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);padding:18px 20px;color:white}
+.detail-header-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600}
+.detail-header-sub{font-size:12px;opacity:.8;margin-top:2px}
+.detail-body{padding:18px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.info-item label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px}
+.info-item span{font-size:13px;color:var(--text);font-weight:500}
+.riwayat-item{padding:8px 0;border-bottom:1px solid var(--cream3);font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.riwayat-item:last-child{border-bottom:none}
+.riwayat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* OBAT PREVIEW BOX */
+.obat-preview{border:1px solid var(--cream3);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+.obat-preview.standar{border-left:3px solid var(--teal)}
+.obat-preview.premium{border-left:3px solid var(--purple)}
+.obat-preview-name{font-weight:500;color:var(--text)}
+.obat-preview-meta{font-size:11px;color:var(--text2);margin-top:3px}
+
+/* SUBSTITUSI NOTICE */
+.subs-notice{background:var(--amber-light);border:1px solid var(--amber);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;color:#7A4A0A;display:flex;align-items:flex-start;gap:8px}
+
+/* ACTIVITY */
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);font-size:13px}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--cream3)}
+.tab-btn{padding:8px 16px;border:none;background:none;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab-btn.active{color:var(--blue2);border-bottom-color:var(--blue)}
+.tab-btn:hover{color:var(--text)}
+
+/* JENIS BAYAR TOGGLE */
+.bayar-toggle{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--cream3);margin-bottom:14px}
+.bayar-opt{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-family:'Cormorant Garamond',serif;font-weight:500;color:var(--text2);transition:all .2s;border:none;background:var(--cream2)}
+.bayar-opt.bpjs.active{background:var(--teal);color:white}
+.bayar-opt.mandiri.active{background:var(--purple);color:white}
+.bayar-opt:first-child{border-right:1px solid var(--cream3)}
+
+/* OBAT CATALOG */
+.obat-catalog{max-height:200px;overflow-y:auto;border:1px solid var(--cream3);border-radius:8px;background:var(--white);margin-bottom:8px}
+.catalog-item{padding:9px 12px;border-bottom:1px solid var(--cream3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:space-between;transition:background .1s}
+.catalog-item:last-child{border-bottom:none}
+.catalog-item:hover{background:var(--blue-light)}
+.catalog-item.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* PAGE SECTIONS */
+.page-section{display:none}
+.page-section.active{display:block}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--text);color:var(--white);padding:12px 18px;border-radius:10px;font-size:13px;min-width:260px;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideIn .3s ease;display:flex;align-items:center;gap:10px}
+.toast.success{background:#1F6B43}
+.toast.danger{background:var(--red)}
+.toast.warn{background:#7A4A0A}
+.toast.info{background:var(--blue2)}
+@keyframes slideIn{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-state .icon{font-size:40px;margin-bottom:12px}
+.empty-state .label{font-family:'Cormorant Garamond',serif;font-size:16px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <div class="logo-text">
+      <div class="l1">HOSPITAL</div>
+      <div class="l2">PHARMACY</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="date-chip" id="dateChip"></div>
+    <button class="notif-btn" onclick="showSection('resep-status')">
+      <span>🔔</span>
+      <span class="notif-badge" id="notifBadge" style="display:none"></span>
+    </button>
+    <div class="avatar-wrap">
+      <div class="avatar">HW</div>
+      <div class="avatar-info">
+        <div class="avatar-name">Dr. Hendra W.</div>
+        <div class="avatar-role">Dokter Umum</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="nav-section">Menu</div>
+  <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+    <span class="nav-icon">⊞</span> Dashboard
+  </div>
+  <div class="nav-item" onclick="showSection('pasien')" id="nav-pasien">
+    <span class="nav-icon">👤</span> Data Pasien
+  </div>
+  <div class="nav-section">Resep</div>
+  <div class="nav-item" onclick="showSection('buat-resep')" id="nav-buat-resep">
+    <span class="nav-icon">✍️</span> Buat Resep
+  </div>
+  <div class="nav-item" onclick="showSection('resep-status')" id="nav-resep-status">
+    <span class="nav-icon">📋</span> Status Resep
+    <span class="nav-badge" id="navBadgeResep" style="display:none">0</span>
+  </div>
+  <div class="nav-section">Laporan</div>
+  <div class="nav-item" onclick="showSection('riwayat')" id="nav-riwayat">
+    <span class="nav-icon">📅</span> Riwayat Pasien
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+<div class="content">
+
+<!-- ===== DASHBOARD ===== -->
+<div class="page-section active" id="sec-dashboard">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Selamat pagi, Dr. Tirta — Kamis, 24 April 2026</div>
+    </div>
+    <button class="btn btn-primary" onclick="showSection('buat-resep')">✍️ Buat Resep Baru</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Pasien Hari Ini</div>
+      <div class="metric-val" id="m-pasien-hari">12</div>
+      <div class="metric-sub up">+3 vs kemarin</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Resep Dibuat</div>
+      <div class="metric-val" id="m-resep-dibuat">8</div>
+      <div class="metric-sub info">Hari ini</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Divalidasi Apoteker</div>
+      <div class="metric-val" id="m-divalidasi" style="color:var(--teal)">5</div>
+      <div class="metric-sub up">Siap diambil</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Substitusi Obat</div>
+      <div class="metric-val warn" id="m-substitusi" style="color:var(--amber)">2</div>
+      <div class="metric-sub warn">Perlu diketahui</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Antrian Pasien Hari Ini</div>
+      <div id="dashAntrianList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Status Resep Terbaru</div>
+      <div id="dashResepList"></div>
+    </div>
+  </div>
+
+  <div class="grid22">
+    <div class="card">
+      <div class="card-title">Aktivitas Terbaru</div>
+      <div id="activityList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribusi Pasien Bulan Ini</div>
+      <canvas id="chartPasien" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DATA PASIEN ===== -->
+<div class="page-section" id="sec-pasien">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Data Pasien</div>
+      <div class="page-sub">Daftar pasien yang dikirim oleh admin</div>
+    </div>
+  </div>
+
+  <div class="pasien-layout">
+    <!-- List -->
+    <div>
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="Cari nama atau No. RM..." id="pasienSearch" oninput="renderPasienList()">
+        <select class="filter-sel" id="pasienFilterBayar" onchange="renderPasienList()">
+          <option value="">Semua</option>
+          <option value="BPJS">BPJS</option>
+          <option value="Mandiri">Mandiri</option>
+        </select>
+      </div>
+      <div id="pasienList"></div>
+    </div>
+
+    <!-- Detail -->
+    <div id="pasienDetail">
+      <div class="empty-state card">
+        <div class="icon">👤</div>
+        <div class="label">Pilih pasien untuk detail</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BUAT RESEP ===== -->
+<div class="page-section" id="sec-buat-resep">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Buat Resep</div>
+      <div class="page-sub">Tulis resep obat untuk pasien</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="align-items:start">
+    <!-- Form Resep -->
+    <div class="card" id="formResepCard">
+      <!-- Step 1: Pilih Pasien -->
+      <div id="step1">
+        <div class="card-title">① Pilih Pasien</div>
+        <div class="search-row">
+          <input type="text" class="search-input" placeholder="Cari pasien..." id="resepPasienSearch" oninput="renderResepPasienList()">
+        </div>
+        <div id="resepPasienList" style="max-height:300px;overflow-y:auto"></div>
+      </div>
+
+      <!-- Step 2: Form Resep -->
+      <div id="step2" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">② Isi Resep</div>
+          <button class="btn btn-sm" onclick="resetResepForm()">← Ganti Pasien</button>
+        </div>
+
+        <!-- Pasien terpilih info -->
+        <div id="selectedPasienInfo" style="background:var(--blue-light);border-radius:10px;padding:12px 14px;margin-bottom:16px;border:1px solid var(--blue-mid)"></div>
+
+        <!-- Jenis pembayaran indicator -->
+        <div id="bayarInfo" style="margin-bottom:14px"></div>
+
+        <div class="modal-section">Diagnosa & Keluhan</div>
+        <div class="fg">
+          <label>Diagnosa</label>
+          <input type="text" id="rDiagnosa" placeholder="Contoh: Hipertensi Grade I, Diabetes Mellitus Tipe 2...">
+        </div>
+        <div class="fr">
+          <div class="fg">
+            <label>Keluhan Utama</label>
+            <input type="text" id="rKeluhan" placeholder="Keluhan pasien saat ini">
+          </div>
+          <div class="fg">
+            <label>Tekanan Darah</label>
+            <input type="text" id="rTD" placeholder="Contoh: 130/80 mmHg">
+          </div>
+        </div>
+
+        <div class="modal-section">Obat yang Diresepkan</div>
+        <div id="obatListForm"></div>
+        <button class="btn btn-sm" style="margin-bottom:14px;width:100%" onclick="openCatalog()">＋ Tambah Obat</button>
+
+        <div class="modal-section">Catatan untuk Apoteker</div>
+        <div class="fg">
+          <label>Catatan / Instruksi Khusus</label>
+          <textarea id="rCatatanApoteker" rows="3" placeholder="Contoh: Pasien alergi penisilin. Jika stok amoxicillin habis, gunakan eritromisin. Mohon hubungi jika ada substitusi..."></textarea>
+        </div>
+        <div class="fr">
+          <div class="fg">
+            <label>Kontrol Ulang</label>
+            <input type="date" id="rKontrol">
+          </div>
+          <div class="fg">
+            <label>Cara Konsumsi</label>
+            <select id="rCara">
+              <option>Sesuai dosis tertera</option>
+              <option>Sesudah makan</option>
+              <option>Sebelum makan</option>
+              <option>Bersama makan</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn btn-sm" onclick="simpanDraft()">💾 Simpan Draft</button>
+          <button class="btn btn-primary" style="flex:1" onclick="kirimResep()">📤 Kirim ke Apoteker</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Resep -->
+    <div id="resepPreviewPanel">
+      <div class="card" style="text-align:center;padding:40px 20px;color:var(--text3)">
+        <div style="font-size:32px;margin-bottom:10px">✍️</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px">Pilih pasien untuk mulai menulis resep</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATUS RESEP ===== -->
+<div class="page-section" id="sec-resep-status">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Status Resep</div>
+      <div class="page-sub">Pantau validasi dan proses resep oleh apoteker</div>
+    </div>
+  </div>
+
+  <div class="rx-layout">
+    <div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterStatus('semua',this)">Semua</button>
+        <button class="tab-btn" onclick="filterStatus('baru',this)">Baru</button>
+        <button class="tab-btn" onclick="filterStatus('validasi',this)">Divalidasi</button>
+        <button class="tab-btn" onclick="filterStatus('siap',this)">Siap Ambil</button>
+        <button class="tab-btn" onclick="filterStatus('selesai',this)">Selesai</button>
+      </div>
+      <div id="statusResepList"></div>
+    </div>
+    <div id="statusResepDetail">
+      <div class="empty-state card">
+        <div class="icon">📋</div>
+        <div class="label">Pilih resep untuk detail</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RIWAYAT PASIEN ===== -->
+<div class="page-section" id="sec-riwayat">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Riwayat Pasien</div>
+      <div class="page-sub">Rekam medis dan riwayat resep pasien</div>
+    </div>
+  </div>
+
+  <div class="pasien-layout">
+    <div>
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="Cari pasien..." id="riwayatSearch" oninput="renderRiwayatList()">
+      </div>
+      <div id="riwayatPasienList"></div>
+    </div>
+    <div id="riwayatDetail">
+      <div class="empty-state card">
+        <div class="icon">📅</div>
+        <div class="label">Pilih pasien untuk lihat riwayat</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===== MODAL KATALOG OBAT ===== -->
+<div class="modal-overlay" id="modalCatalog">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="closeModal('modalCatalog')">✕</button>
+    <h3 id="catalogTitle">Katalog Obat</h3>
+    <div id="catalogDesc" style="font-size:13px;margin-bottom:14px;padding:10px 12px;border-radius:8px"></div>
+    <div class="fg">
+      <label>Cari Obat</label>
+      <input type="text" id="catalogSearch" oninput="renderCatalog()" placeholder="Ketik nama obat...">
+    </div>
+    <div class="obat-catalog" id="catalogList"></div>
+    <div id="selectedObatForm" style="display:none">
+      <div class="modal-section">Detail Obat Dipilih</div>
+      <div id="selectedObatName" style="font-weight:600;font-family:'Cormorant Garamond',serif;font-size:16px;margin-bottom:10px"></div>
+      <div class="fr">
+        <div class="fg">
+          <label>Dosis</label>
+          <input type="text" id="catalogDosis" placeholder="Contoh: 3x1">
+        </div>
+        <div class="fg">
+          <label>Durasi</label>
+          <input type="text" id="catalogDurasi" placeholder="Contoh: 5 hari">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Instruksi Konsumsi</label>
+        <select id="catalogInstruksi">
+          <option>Sesudah makan</option>
+          <option>Sebelum makan</option>
+          <option>Saat makan</option>
+          <option>Sesuai kebutuhan</option>
+          <option>Malam sebelum tidur</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Catatan Obat Ini</label>
+        <input type="text" id="catalogCatatan" placeholder="Opsional...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalCatalog')">Batal</button>
+      <button class="btn btn-primary" id="catalogAddBtn" onclick="addObatFromCatalog()" disabled>＋ Tambah ke Resep</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===================== DATA =====================
+const today = new Date();
+
+// Katalog obat BPJS (standar formularium nasional)
+const obatBPJS = [
+  {nama:'Paracetamol 500mg',kategori:'Analgetik',tipe:'Tablet',keterangan:'Analgetik-antipiretik standar'},
+  {nama:'Amoxicillin 500mg',kategori:'Antibiotik',tipe:'Kapsul',keterangan:'Antibiotik broad-spectrum lini pertama'},
+  {nama:'Metformin 500mg',kategori:'Antidiabetik',tipe:'Tablet',keterangan:'Antidiabetik oral lini pertama'},
+  {nama:'Captopril 25mg',kategori:'Antihipertensi',tipe:'Tablet',keterangan:'ACE inhibitor lini pertama'},
+  {nama:'Antasida DOEN',kategori:'GI',tipe:'Tablet',keterangan:'Antasida untuk dispepsia'},
+  {nama:'Cetirizine 10mg',kategori:'Antihistamin',tipe:'Tablet',keterangan:'Antihistamin generasi 2'},
+  {nama:'Omeprazole 20mg',kategori:'GI',tipe:'Kapsul',keterangan:'PPI untuk GERD/ulkus peptik'},
+  {nama:'Salep Betametason',kategori:'Dermatologi',tipe:'Salep',keterangan:'Kortikosteroid topikal'},
+  {nama:'OBH Combi Sirup',kategori:'Respirasi',tipe:'Sirup',keterangan:'Ekspektoran untuk batuk'},
+  {nama:'Ibuprofen 400mg',kategori:'NSAID',tipe:'Tablet',keterangan:'Antiinflamasi NSAID'},
+  {nama:'Clopidogrel 75mg',kategori:'Antiplatelet',tipe:'Tablet',keterangan:'Antiplatelet untuk penyakit kardiovaskuler'},
+  {nama:'Glibenclamide 5mg',kategori:'Antidiabetik',tipe:'Tablet',keterangan:'Sulfonilurea untuk DM tipe 2'},
+  {nama:'Amlodipine 5mg',kategori:'Antihipertensi',tipe:'Tablet',keterangan:'Calcium channel blocker'},
+  {nama:'Furosemide 40mg',kategori:'Diuretik',tipe:'Tablet',keterangan:'Diuretik kuat untuk edema/gagal jantung'},
+];
+
+// Katalog obat Mandiri (plus obat premium non-formularium)
+const obatMandiri = [
+  ...obatBPJS,
+  {nama:'Paracetamol 500mg (Panadol)',kategori:'Analgetik',tipe:'Tablet',keterangan:'Branded, lebih cepat diserap',premium:true},
+  {nama:'Levofloxacin 500mg',kategori:'Antibiotik',tipe:'Tablet',keterangan:'Fluoroquinolon generasi 3 — spektrum luas',premium:true},
+  {nama:'Metformin XR 500mg',kategori:'Antidiabetik',tipe:'Tablet',keterangan:'Extended release, toleransi GI lebih baik',premium:true},
+  {nama:'Candesartan 8mg',kategori:'Antihipertensi',tipe:'Tablet',keterangan:'ARB, lebih sedikit efek samping vs ACE-I',premium:true},
+  {nama:'Esomeprazole 20mg (Nexium)',kategori:'GI',tipe:'Tablet',keterangan:'PPI branded, lebih efektif untuk GERD berat',premium:true},
+  {nama:'Fexofenadine 120mg',kategori:'Antihistamin',tipe:'Tablet',keterangan:'Antihistamin non-sedatif premium',premium:true},
+  {nama:'Insulin Novorapid',kategori:'Antidiabetik',tipe:'Injeksi',keterangan:'Insulin rapid-acting analog',premium:true},
+  {nama:'Atorvastatin 20mg',kategori:'Lipid-lowering',tipe:'Tablet',keterangan:'Statin untuk dislipidemia',premium:true},
+  {nama:'Salbutamol Inhaler',kategori:'Respirasi',tipe:'Inhaler',keterangan:'Bronkodilator inhalasi untuk asma/PPOK',premium:true},
+];
+
+// Data Pasien dari Admin
+let pasienData = [
+  {id:'P001',nama:'Budi Santoso',rm:'RM-2026-0001',usia:45,jk:'L',bayar:'BPJS',poli:'Umum',status:'Menunggu',tgl:'2026-04-24',
+   alergi:'Penisilin',riwayat:'Hipertensi sejak 2020, kontrol rutin',bb:72,tb:168,td:'145/90',
+   keluhan:'Pusing, tekanan darah tinggi'},
+  {id:'P002',nama:'Sari Dewi',rm:'RM-2026-0042',usia:32,jk:'P',bayar:'Mandiri',poli:'Umum',status:'Menunggu',tgl:'2026-04-24',
+   alergi:'-',riwayat:'Tidak ada riwayat penyakit kronis',bb:55,tb:160,td:'120/80',
+   keluhan:'Batuk pilek 3 hari, nyeri tenggorokan'},
+  {id:'P003',nama:'Ahmad Ridwan',rm:'RM-2026-0078',usia:58,jk:'L',bayar:'BPJS',poli:'Umum',status:'Sedang Diperiksa',tgl:'2026-04-24',
+   alergi:'-',riwayat:'DM tipe 2 sejak 2018, hipertensi',bb:80,tb:170,td:'150/95',
+   keluhan:'Gula darah tidak terkontrol, sering haus'},
+  {id:'P004',nama:'Nur Halimah',rm:'RM-2026-0091',usia:29,jk:'P',bayar:'Mandiri',poli:'Umum',status:'Selesai',tgl:'2026-04-24',
+   alergi:'-',riwayat:'',bb:50,tb:155,td:'110/70',
+   keluhan:'Nyeri kepala, demam ringan'},
+  {id:'P005',nama:'Hadi Susanto',rm:'RM-2026-0102',usia:70,jk:'L',bayar:'BPJS',poli:'Umum',status:'Menunggu',tgl:'2026-04-24',
+   alergi:'Aspirin',riwayat:'Penyakit jantung koroner, pasca stent 2023',bb:65,tb:163,td:'130/85',
+   keluhan:'Sesak nafas ringan, nyeri dada kadang'},
+  {id:'P006',nama:'Ratna Kusuma',rm:'RM-2026-0115',usia:41,jk:'P',bayar:'Mandiri',poli:'Umum',status:'Menunggu',tgl:'2026-04-24',
+   alergi:'-',riwayat:'GERD sejak 2022',bb:58,tb:158,td:'118/75',
+   keluhan:'Nyeri ulu hati, asam lambung naik'},
+];
+
+// Data Resep (shared knowledge dgn apoteker)
+let resepData = [
+  {id:'RX-2026-001',pasienId:'P001',pasien:'Budi Santoso',rm:'RM-2026-0001',bayar:'BPJS',
+   diagnosa:'Hipertensi Grade II',keluhan:'Pusing, TD 145/90',td:'145/90',cara:'Sesudah makan',
+   tanggal:'2026-04-24',status:'baru',catatanApoteker:'Pasien alergi penisilin. Mohon konfirmasi jika ada substitusi.',
+   kontrol:'2026-05-08',
+   obat:[
+     {nama:'Captopril 25mg',dosis:'2x1',durasi:'30 hari',instruksi:'Pagi dan malam',tipe:'standar',catatan:''},
+     {nama:'Antasida DOEN',dosis:'3x1',durasi:'7 hari',instruksi:'Sebelum makan',tipe:'standar',catatan:'Jika ada keluhan maag'},
+   ]},
+  {id:'RX-2026-002',pasienId:'P002',pasien:'Sari Dewi',rm:'RM-2026-0042',bayar:'Mandiri',
+   diagnosa:'ISPA Viral + Faringitis',keluhan:'Batuk pilek 3 hari',td:'120/80',cara:'Sesudah makan',
+   tanggal:'2026-04-24',status:'validasi',catatanApoteker:'Tidak ada alergi. Pasien pilih obat branded jika tersedia.',
+   kontrol:'2026-04-29',
+   obat:[
+     {nama:'Levofloxacin 500mg',dosis:'1x1',durasi:'5 hari',instruksi:'Sesudah makan',tipe:'premium',catatan:''},
+     {nama:'Fexofenadine 120mg',dosis:'1x1',durasi:'5 hari',instruksi:'Malam sebelum tidur',tipe:'premium',catatan:'Untuk rhinitis'},
+     {nama:'Paracetamol 500mg (Panadol)',dosis:'3x1',durasi:'3 hari',instruksi:'Saat demam',tipe:'premium',catatan:'Jika demam >38°C'},
+   ],
+   substitusi:[{asli:'Levofloxacin 500mg',pengganti:'Amoxicillin 500mg',alasan:'Stok levofloxacin habis'}]},
+  {id:'RX-2026-003',pasienId:'P003',pasien:'Ahmad Ridwan',rm:'RM-2026-0078',bayar:'BPJS',
+   diagnosa:'DM Tipe 2 + Hipertensi',keluhan:'GDP 280, TD 150/95',td:'150/95',cara:'Sesudah makan',
+   tanggal:'2026-04-23',status:'siap',catatanApoteker:'Pasien sudah pakai Metformin lama. Naikkan dosis.',
+   kontrol:'2026-05-07',
+   obat:[
+     {nama:'Metformin 500mg',dosis:'2x1',durasi:'30 hari',instruksi:'Sesudah makan',tipe:'standar',catatan:'Dosis dinaikkan dari 1x1'},
+     {nama:'Captopril 25mg',dosis:'1x1',durasi:'30 hari',instruksi:'Pagi',tipe:'standar',catatan:''},
+     {nama:'Glibenclamide 5mg',dosis:'1x1',durasi:'30 hari',instruksi:'Pagi sebelum makan',tipe:'standar',catatan:'Monitor GDP'},
+   ]},
+  {id:'RX-2026-004',pasienId:'P004',pasien:'Nur Halimah',rm:'RM-2026-0091',bayar:'Mandiri',
+   diagnosa:'Tension Headache',keluhan:'Nyeri kepala, demam ringan',td:'110/70',cara:'Sesudah makan',
+   tanggal:'2026-04-23',status:'selesai',catatanApoteker:'',
+   kontrol:'',
+   obat:[
+     {nama:'Ibuprofen 400mg',dosis:'3x1',durasi:'3 hari',instruksi:'Sesudah makan',tipe:'standar',catatan:''},
+   ]},
+];
+
+let selectedPasien = null;
+let currentObatList = [];
+let selectedCatalogObat = null;
+let currentStatusResep = null;
+let statusFilter = 'semua';
+let currentRiwayatPasien = null;
+
+// ===================== HELPERS =====================
+function formatDate(d){
+  if(!d) return '-';
+  return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+}
+function showToast(msg, type='success'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  const ico={success:'✅',danger:'❌',warn:'⚠️',info:'ℹ️'}[type]||'ℹ️';
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${ico}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.animation='fadeOut .3s ease forwards';setTimeout(()=>t.remove(),300)},3200);
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});
+});
+function badgeBayar(b){
+  return b==='BPJS'?`<span class="badge b-bpjs">BPJS</span>`:`<span class="badge b-mandiri">Mandiri</span>`;
+}
+function badgeStatus(s){
+  const m={baru:'b-baru',validasi:'b-validasi',siap:'b-siap',selesai:'b-selesai',ditolak:'b-ditolak',draft:'b-warn'};
+  const l={baru:'Baru',validasi:'Divalidasi',siap:'Siap Ambil',selesai:'Selesai',ditolak:'Ditolak',draft:'Draft'};
+  return `<span class="badge ${m[s]||''}">${l[s]||s}</span>`;
+}
+
+// ===================== NAV =====================
+function showSection(name){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='pasien') renderPasienList();
+  if(name==='buat-resep') renderResepPasienList();
+  if(name==='resep-status'){renderStatusResepList(statusFilter);}
+  if(name==='riwayat') renderRiwayatList();
+}
+
+// ===================== DATE =====================
+document.getElementById('dateChip').textContent = today.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// ===================== PASIEN LIST =====================
+function renderPasienList(){
+  const q=(document.getElementById('pasienSearch').value||'').toLowerCase();
+  const fb=document.getElementById('pasienFilterBayar').value;
+  let data=pasienData.filter(p=>{
+    if(q && !p.nama.toLowerCase().includes(q) && !p.rm.toLowerCase().includes(q)) return false;
+    if(fb && p.bayar!==fb) return false;
+    return true;
+  });
+  document.getElementById('pasienList').innerHTML=data.map(p=>`
+    <div class="pasien-card ${selectedPasien&&selectedPasien.id===p.id?'selected':''}" onclick="selectPasien('${p.id}','pasien')">
+      <div class="pasien-avatar">${p.nama.charAt(0)}</div>
+      <div class="pasien-info">
+        <div class="pasien-nama">${p.nama}</div>
+        <div class="pasien-meta">${p.rm} · ${p.usia} thn · ${p.jk==='L'?'Laki-laki':'Perempuan'}</div>
+        <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap">
+          ${badgeBayar(p.bayar)}
+          <span class="badge ${p.status==='Menunggu'?'b-baru':p.status==='Sedang Diperiksa'?'b-validasi':'b-selesai'}">${p.status}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  if(!data.length) document.getElementById('pasienList').innerHTML=`<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Tidak ada pasien ditemukan</div>`;
+}
+
+function selectPasien(id, context='pasien'){
+  selectedPasien=pasienData.find(p=>p.id===id);
+  if(context==='pasien') renderPasienDetail();
+  if(context==='resep') renderResepPasienList();
+}
+
+function renderPasienDetail(){
+  const p=selectedPasien;
+  if(!p){document.getElementById('pasienDetail').innerHTML=`<div class="empty-state card"><div class="icon">👤</div><div class="label">Pilih pasien</div></div>`;return;}
+  const resepPasien=resepData.filter(r=>r.pasienId===p.id);
+  document.getElementById('pasienDetail').innerHTML=`
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="detail-header-title">${p.nama}</div>
+            <div class="detail-header-sub">${p.rm} · Dikirim oleh Admin</div>
+          </div>
+          ${badgeBayar(p.bayar)}
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="info-grid">
+          <div class="info-item"><label>Usia</label><span>${p.usia} tahun</span></div>
+          <div class="info-item"><label>Jenis Kelamin</label><span>${p.jk==='L'?'Laki-laki':'Perempuan'}</span></div>
+          <div class="info-item"><label>Poliklinik</label><span>${p.poli}</span></div>
+          <div class="info-item"><label>Tanggal Datang</label><span>${formatDate(p.tgl)}</span></div>
+          <div class="info-item"><label>Berat Badan</label><span>${p.bb} kg</span></div>
+          <div class="info-item"><label>Tinggi Badan</label><span>${p.tb} cm</span></div>
+          <div class="info-item"><label>Tekanan Darah</label><span>${p.td}</span></div>
+          <div class="info-item"><label>Status</label><span>${p.status}</span></div>
+        </div>
+        <div style="background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px">
+          <div style="color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Keluhan</div>
+          <div>${p.keluhan||'-'}</div>
+        </div>
+        ${p.alergi&&p.alergi!=='-'?`<div style="background:var(--red-light);border:1px solid #f7c1c1;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--red)">⚠️ <strong>Alergi:</strong> ${p.alergi}</div>`:''}
+        ${p.riwayat?`<div style="background:var(--blue-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px"><div style="color:var(--text3);font-size:11px;text-transform:uppercase;margin-bottom:4px">Riwayat Penyakit</div><div>${p.riwayat}</div></div>`:''}
+        <div style="margin-bottom:10px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Resep Terakhir</div>
+        ${resepPasien.length?resepPasien.slice(0,3).map(r=>`
+          <div style="border:1px solid var(--cream3);border-radius:8px;padding:9px 12px;margin-bottom:6px;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-weight:500">${r.id}</div><div style="color:var(--text3);font-size:11px">${r.diagnosa} · ${formatDate(r.tanggal)}</div></div>
+            ${badgeStatus(r.status)}
+          </div>`).join(''):`<div style="color:var(--text3);font-size:13px;padding:10px 0">Belum ada resep</div>`}
+        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px" onclick="startResepForPasien('${p.id}')">✍️ Buat Resep untuk Pasien Ini</button>
+      </div>
+    </div>`;
+}
+
+function startResepForPasien(id){
+  selectedPasien=pasienData.find(p=>p.id===id);
+  showSection('buat-resep');
+  activateStep2();
+}
+
+// ===================== BUAT RESEP =====================
+function renderResepPasienList(){
+  const q=(document.getElementById('resepPasienSearch')?.value||'').toLowerCase();
+  let data=pasienData.filter(p=>p.status!=='Selesai');
+  if(q) data=data.filter(p=>p.nama.toLowerCase().includes(q)||p.rm.toLowerCase().includes(q));
+  document.getElementById('resepPasienList').innerHTML=data.map(p=>`
+    <div class="pasien-card ${selectedPasien&&selectedPasien.id===p.id?'selected':''}" onclick="pilihPasienResep('${p.id}')">
+      <div class="pasien-avatar">${p.nama.charAt(0)}</div>
+      <div class="pasien-info">
+        <div class="pasien-nama">${p.nama}</div>
+        <div class="pasien-meta">${p.rm} · ${p.usia} thn</div>
+        <div style="margin-top:4px;display:flex;gap:6px">${badgeBayar(p.bayar)}<span class="badge b-baru">${p.status}</span></div>
+      </div>
+      ${p.alergi&&p.alergi!=='-'?`<span style="font-size:10px;color:var(--red);background:var(--red-light);padding:2px 7px;border-radius:4px;flex-shrink:0">⚠ Alergi</span>`:''}
+    </div>`).join('');
+  // Auto activate step 2 if pasien already selected
+  if(selectedPasien && document.getElementById('step1').style.display!=='none'){
+    // keep step1 if no pasien selected
+  }
+}
+
+function pilihPasienResep(id){
+  selectedPasien=pasienData.find(p=>p.id===id);
+  currentObatList=[];
+  activateStep2();
+}
+
+function activateStep2(){
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  const p=selectedPasien;
+  // Pasien info box
+  document.getElementById('selectedPasienInfo').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="pasien-avatar" style="width:36px;height:36px;font-size:14px">${p.nama.charAt(0)}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px">${p.nama}</div>
+        <div style="font-size:12px;color:var(--text2)">${p.rm} · ${p.usia} thn · ${p.td}</div>
+        ${p.alergi&&p.alergi!=='-'?`<div style="font-size:11px;color:var(--red);margin-top:3px">⚠️ Alergi: ${p.alergi}</div>`:''}
+      </div>
+      <div style="margin-left:auto">${badgeBayar(p.bayar)}</div>
+    </div>`;
+  // Bayar info
+  const isBPJS=p.bayar==='BPJS';
+  document.getElementById('bayarInfo').innerHTML=isBPJS?
+    `<div style="background:var(--teal-light);border:1px solid #a0ddd7;border-radius:8px;padding:9px 12px;font-size:12px;color:#0F6E56">🏥 <strong>BPJS:</strong> Resep menggunakan obat standar formularium nasional (FORNAS)</div>`:
+    `<div style="background:var(--purple-light);border:1px solid #c5bde8;border-radius:8px;padding:9px 12px;font-size:12px;color:#534AB7">💳 <strong>Mandiri:</strong> Dapat memilih obat standar atau obat premium (branded/non-formularium)</div>`;
+  renderResepPreview();
+}
+
+function resetResepForm(){
+  selectedPasien=null;
+  currentObatList=[];
+  document.getElementById('step1').style.display='block';
+  document.getElementById('step2').style.display='none';
+  document.getElementById('resepPreviewPanel').innerHTML=`<div class="card" style="text-align:center;padding:40px 20px;color:var(--text3)"><div style="font-size:32px;margin-bottom:10px">✍️</div><div style="font-family:'Cormorant Garamond',serif;font-size:16px">Pilih pasien untuk mulai menulis resep</div></div>`;
+  renderResepPasienList();
+}
+
+function renderObatForm(){
+  const container=document.getElementById('obatListForm');
+  if(!currentObatList.length){
+    container.innerHTML=`<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0;border:1px dashed var(--cream3);border-radius:8px;margin-bottom:8px">Belum ada obat. Klik tombol di bawah untuk menambah.</div>`;
+    return;
+  }
+  container.innerHTML=currentObatList.map((o,idx)=>`
+    <div class="obat-item ${o.tipe==='premium'?'mandiri-item':'bpjs-item'}">
+      <button class="obat-remove" onclick="removeObat(${idx})">✕</button>
+      <span class="obat-type-tag ${o.tipe==='premium'?'tag-premium':'tag-standar'}">${o.tipe==='premium'?'⭐ Premium':'✓ Standar'}</span>
+      <div style="font-weight:600;font-size:14px;font-family:'Cormorant Garamond',serif">${o.nama}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px">${o.dosis} · ${o.durasi} · ${o.instruksi}</div>
+      ${o.catatan?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📌 ${o.catatan}</div>`:''}
+    </div>`).join('');
+  renderResepPreview();
+}
+
+function removeObat(idx){
+  currentObatList.splice(idx,1);
+  renderObatForm();
+}
+
+function openCatalog(){
+  if(!selectedPasien) return;
+  const isBPJS=selectedPasien.bayar==='BPJS';
+  document.getElementById('catalogTitle').textContent=isBPJS?'Katalog Obat BPJS (Formularium)':'Katalog Obat';
+  document.getElementById('catalogDesc').innerHTML=isBPJS?
+    `<div style="background:var(--teal-light);border-radius:6px;padding:8px 10px;font-size:12px;color:#0F6E56">🏥 Hanya menampilkan obat sesuai <strong>Formularium Nasional (FORNAS)</strong></div>`:
+    `<div style="background:var(--purple-light);border-radius:6px;padding:8px 10px;font-size:12px;color:#534AB7">💳 Pasien mandiri dapat memilih <strong>obat standar</strong> atau <strong>obat premium (branded)</strong></div>`;
+  document.getElementById('catalogSearch').value='';
+  selectedCatalogObat=null;
+  document.getElementById('selectedObatForm').style.display='none';
+  document.getElementById('catalogAddBtn').disabled=true;
+  renderCatalog();
+  openModal('modalCatalog');
+}
+
+function renderCatalog(){
+  const q=(document.getElementById('catalogSearch').value||'').toLowerCase();
+  const isBPJS=selectedPasien?.bayar==='BPJS';
+  const catalog=isBPJS?obatBPJS:obatMandiri;
+  const filtered=catalog.filter(o=>!q||o.nama.toLowerCase().includes(q)||o.kategori.toLowerCase().includes(q));
+  document.getElementById('catalogList').innerHTML=filtered.map(o=>`
+    <div class="catalog-item" onclick="selectCatalogObat('${o.nama}')">
+      <div>
+        <div style="font-weight:500">${o.nama} ${o.premium?`<span style="font-size:10px;background:var(--purple-light);color:var(--purple2);padding:1px 6px;border-radius:4px;margin-left:4px">Premium</span>`:''}</div>
+        <div style="font-size:11px;color:var(--text3)">${o.kategori} · ${o.tipe} — ${o.keterangan}</div>
+      </div>
+      <span style="font-size:11px;color:var(--text3)">→</span>
+    </div>`).join('');
+  if(!filtered.length) document.getElementById('catalogList').innerHTML=`<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Tidak ditemukan</div>`;
+}
+
+function selectCatalogObat(nama){
+  const isBPJS=selectedPasien?.bayar==='BPJS';
+  const catalog=isBPJS?obatBPJS:obatMandiri;
+  selectedCatalogObat=catalog.find(o=>o.nama===nama);
+  document.getElementById('selectedObatName').textContent=nama;
+  document.getElementById('selectedObatForm').style.display='block';
+  document.getElementById('catalogAddBtn').disabled=false;
+  // highlight selected
+  document.querySelectorAll('.catalog-item').forEach(el=>{
+    el.style.background=el.textContent.includes(nama)?'var(--blue-light)':'';
+  });
+}
+
+function addObatFromCatalog(){
+  if(!selectedCatalogObat) return;
+  const dosis=document.getElementById('catalogDosis').value.trim()||'Sesuai petunjuk';
+  const durasi=document.getElementById('catalogDurasi').value.trim()||'Sesuai kebutuhan';
+  const instruksi=document.getElementById('catalogInstruksi').value;
+  const catatan=document.getElementById('catalogCatatan').value.trim();
+  const isBPJS=selectedPasien?.bayar==='BPJS';
+  const tipe=selectedCatalogObat.premium?'premium':'standar';
+  // BPJS can't have premium
+  if(isBPJS&&tipe==='premium'){showToast('Obat premium tidak bisa diresepkan untuk pasien BPJS','danger');return;}
+  currentObatList.push({nama:selectedCatalogObat.nama,dosis,durasi,instruksi,tipe,catatan});
+  closeModal('modalCatalog');
+  renderObatForm();
+  showToast(`${selectedCatalogObat.nama} ditambahkan ke resep`);
+  document.getElementById('catalogDosis').value='';
+  document.getElementById('catalogDurasi').value='';
+  document.getElementById('catalogCatatan').value='';
+}
+
+function renderResepPreview(){
+  if(!selectedPasien){return;}
+  const p=selectedPasien;
+  const diagnosa=document.getElementById('rDiagnosa')?.value||'—';
+  const hasSubstitusi = false;
+  document.getElementById('resepPreviewPanel').innerHTML=`
+    <div class="card" style="position:sticky;top:0">
+      <div class="card-title">Preview Resep</div>
+      <div style="background:var(--cream);border-radius:8px;padding:12px;margin-bottom:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600">${p.nama}</div>
+        <div style="font-size:12px;color:var(--text2)">${p.rm} · ${p.usia} thn · ${p.td}</div>
+        <div style="margin-top:6px">${badgeBayar(p.bayar)}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Obat Diresepkan (${currentObatList.length})</div>
+      ${currentObatList.length?currentObatList.map(o=>`
+        <div class="obat-preview ${o.tipe}">
+          <div class="obat-preview-name">${o.nama}</div>
+          <div class="obat-preview-meta">${o.dosis} · ${o.durasi} · ${o.instruksi}</div>
+        </div>`).join(''):`<div style="color:var(--text3);font-size:13px;padding:8px 0">Belum ada obat ditambahkan</div>`}
+      <div style="border-top:1px solid var(--cream3);margin-top:12px;padding-top:10px;font-size:12px;color:var(--text3)">
+        Dr. Hendra Wijaya · ${today.toLocaleDateString('id-ID')}
+      </div>
+    </div>`;
+}
+
+function simpanDraft(){
+  if(!selectedPasien||!currentObatList.length){showToast('Pilih pasien dan minimal 1 obat','danger');return;}
+  const newRx = buatObjekResep('draft');
+  resepData.unshift(newRx);
+  showToast(`Draft ${newRx.id} disimpan`,'info');
+}
+
+function kirimResep(){
+  if(!selectedPasien){showToast('Pilih pasien terlebih dahulu','danger');return;}
+  if(!currentObatList.length){showToast('Tambahkan minimal 1 obat','danger');return;}
+  const diagnosa=document.getElementById('rDiagnosa').value.trim();
+  if(!diagnosa){showToast('Isi diagnosa terlebih dahulu','danger');return;}
+  const newRx=buatObjekResep('baru');
+  resepData.unshift(newRx);
+  // Update pasien status
+  const pIdx=pasienData.findIndex(p=>p.id===selectedPasien.id);
+  if(pIdx>=0) pasienData[pIdx].status='Sedang Diperiksa';
+  showToast(`Resep ${newRx.id} berhasil dikirim ke Apoteker! 📤`);
+  updateNotifBadge();
+  document.getElementById('m-resep-dibuat').textContent=parseInt(document.getElementById('m-resep-dibuat').textContent)+1;
+  resetResepForm();
+}
+
+function buatObjekResep(status){
+  const p=selectedPasien;
+  return {
+    id:'RX-'+new Date().getFullYear()+'-'+String(resepData.length+1).padStart(3,'0'),
+    pasienId:p.id,pasien:p.nama,rm:p.rm,bayar:p.bayar,
+    diagnosa:document.getElementById('rDiagnosa').value.trim()||'-',
+    keluhan:document.getElementById('rKeluhan').value.trim()||p.keluhan,
+    td:document.getElementById('rTD').value.trim()||p.td,
+    cara:document.getElementById('rCara').value,
+    tanggal:today.toISOString().split('T')[0],
+    status,
+    catatanApoteker:document.getElementById('rCatatanApoteker').value.trim(),
+    kontrol:document.getElementById('rKontrol').value,
+    obat:[...currentObatList],
+    substitusi:[],
+  };
+}
+
+// ===================== STATUS RESEP =====================
+function filterStatus(f,el){
+  statusFilter=f;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderStatusResepList(f);
+}
+
+function renderStatusResepList(filter){
+  let data=resepData;
+  if(filter!=='semua') data=resepData.filter(r=>r.status===filter);
+  document.getElementById('statusResepList').innerHTML=data.map(r=>`
+    <div class="rx-item ${currentStatusResep&&currentStatusResep.id===r.id?'selected':''}" onclick="selectStatusResep('${r.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="rx-no">${r.id}</span>
+        ${badgeStatus(r.status)}
+      </div>
+      <div class="rx-meta">${r.pasien} · ${r.diagnosa}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+        ${badgeBayar(r.bayar)}
+        <span style="font-size:11px;color:var(--text3)">${formatDate(r.tanggal)}</span>
+      </div>
+      ${r.substitusi&&r.substitusi.length?`<div style="font-size:11px;color:var(--amber);margin-top:4px">🔄 Ada ${r.substitusi.length} substitusi obat</div>`:''}
+    </div>`).join('');
+  if(!data.length) document.getElementById('statusResepList').innerHTML=`<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Tidak ada resep</div>`;
+}
+
+function selectStatusResep(id){
+  currentStatusResep=resepData.find(r=>r.id===id);
+  renderStatusResepDetail();
+  renderStatusResepList(statusFilter);
+}
+
+function renderStatusResepDetail(){
+  const r=currentStatusResep;
+  if(!r){document.getElementById('statusResepDetail').innerHTML=`<div class="empty-state card"><div class="icon">📋</div><div class="label">Pilih resep</div></div>`;return;}
+
+  // Stepper
+  const steps=['Baru','Divalidasi','Siap Ambil','Selesai'];
+  const stepKeys=['baru','validasi','siap','selesai'];
+  const curIdx=stepKeys.indexOf(r.status);
+  const stepperHtml=`
+    <div class="status-stepper">
+      ${steps.map((s,i)=>{
+        const state=i<curIdx?'done':i===curIdx?'active':'';
+        return `
+          <div class="step-node">
+            <div class="step-circle ${state}">${i<curIdx?'✓':i+1}</div>
+            <div class="step-label ${state}">${s}</div>
+          </div>
+          ${i<steps.length-1?`<div class="step-connector ${i<curIdx?'done':''}"></div>`:''}
+        `;
+      }).join('')}
+    </div>`;
+
+  // Substitusi notices
+  const subsHtml=r.substitusi&&r.substitusi.length?r.substitusi.map(s=>`
+    <div class="subs-notice">
+      <span style="font-size:16px;flex-shrink:0">🔄</span>
+      <div>
+        <strong>Substitusi oleh Apoteker:</strong> ${s.asli} → <strong>${s.pengganti}</strong>
+        <div style="margin-top:2px;font-size:11px;opacity:.8">Alasan: ${s.alasan}</div>
+      </div>
+    </div>`).join(''):'' ;
+
+  document.getElementById('statusResepDetail').innerHTML=`
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="detail-header-title">${r.id}</div>
+            <div class="detail-header-sub">${r.pasien} · ${formatDate(r.tanggal)}</div>
+          </div>
+          ${badgeStatus(r.status)}
+        </div>
+      </div>
+      <div class="detail-body">
+        ${stepperHtml}
+
+        <div class="info-grid" style="margin-bottom:10px">
+          <div class="info-item"><label>Diagnosa</label><span>${r.diagnosa}</span></div>
+          <div class="info-item"><label>Pembayaran</label><span>${r.bayar}</span></div>
+          <div class="info-item"><label>Tekanan Darah</label><span>${r.td}</span></div>
+          <div class="info-item"><label>Kontrol Ulang</label><span>${formatDate(r.kontrol)}</span></div>
+        </div>
+
+        ${subsHtml?`<div style="margin-bottom:12px">${subsHtml}</div>`:''}
+
+        ${r.catatanApoteker?`<div style="background:var(--blue-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--blue2)">📌 <strong>Catatan untuk Apoteker:</strong> ${r.catatanApoteker}</div>`:''}
+
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Daftar Obat (${r.obat.length})</div>
+        ${r.obat.map(o=>`
+          <div class="obat-preview ${o.tipe==='premium'?'premium':'standar'}">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="obat-preview-name">${o.nama}</div>
+              <span class="obat-type-tag ${o.tipe==='premium'?'tag-premium':'tag-standar'}" style="font-size:9px">${o.tipe==='premium'?'Premium':'Standar'}</span>
+            </div>
+            <div class="obat-preview-meta">${o.dosis} · ${o.durasi} · ${o.instruksi}</div>
+            ${o.catatan?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📌 ${o.catatan}</div>`:''}
+          </div>`).join('')}
+
+        ${r.status==='selesai'?`<div style="background:var(--green-light);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:13px;color:#1F6B43;display:flex;align-items:center;gap:8px">✅ <strong>Resep selesai — obat sudah diserahkan kepada pasien</strong></div>`:''}
+      </div>
+    </div>`;
+}
+
+// ===================== RIWAYAT =====================
+function renderRiwayatList(){
+  const q=(document.getElementById('riwayatSearch')?.value||'').toLowerCase();
+  let data=pasienData;
+  if(q) data=pasienData.filter(p=>p.nama.toLowerCase().includes(q));
+  document.getElementById('riwayatPasienList').innerHTML=data.map(p=>`
+    <div class="pasien-card ${currentRiwayatPasien&&currentRiwayatPasien.id===p.id?'selected':''}" onclick="selectRiwayat('${p.id}')">
+      <div class="pasien-avatar">${p.nama.charAt(0)}</div>
+      <div class="pasien-info">
+        <div class="pasien-nama">${p.nama}</div>
+        <div class="pasien-meta">${p.rm} · ${p.usia} thn</div>
+        <div style="margin-top:4px">${badgeBayar(p.bayar)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectRiwayat(id){
+  currentRiwayatPasien=pasienData.find(p=>p.id===id);
+  const p=currentRiwayatPasien;
+  const resepPasien=resepData.filter(r=>r.pasienId===p.id);
+  document.getElementById('riwayatDetail').innerHTML=`
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header-title">${p.nama}</div>
+        <div class="detail-header-sub">${p.rm} · Riwayat Lengkap</div>
+      </div>
+      <div class="detail-body">
+        <div style="background:var(--cream);border-radius:8px;padding:12px;margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">
+            <div><span style="color:var(--text3)">Usia:</span> ${p.usia} thn</div>
+            <div><span style="color:var(--text3)">JK:</span> ${p.jk==='L'?'Laki-laki':'Perempuan'}</div>
+            <div><span style="color:var(--text3)">BB/TB:</span> ${p.bb}kg / ${p.tb}cm</div>
+            <div><span style="color:var(--text3)">Bayar:</span> ${p.bayar}</div>
+          </div>
+          ${p.alergi&&p.alergi!=='-'?`<div style="margin-top:8px;color:var(--red);font-size:12px">⚠️ Alergi: ${p.alergi}</div>`:''}
+          ${p.riwayat?`<div style="margin-top:6px;font-size:12px;color:var(--text2)">📋 ${p.riwayat}</div>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Riwayat Resep (${resepPasien.length})</div>
+        ${resepPasien.length?resepPasien.map(r=>`
+          <div style="border:1px solid var(--cream3);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-family:'Cormorant Garamond',serif;font-weight:600">${r.id}</span>
+              ${badgeStatus(r.status)}
+            </div>
+            <div style="font-size:13px;font-weight:500">${r.diagnosa}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">${formatDate(r.tanggal)} · ${r.bayar}</div>
+            <div style="margin-top:8px;border-top:1px solid var(--cream3);padding-top:8px">
+              ${r.obat.map(o=>`<div style="font-size:12px;color:var(--text2);margin-bottom:3px">• ${o.nama} — ${o.dosis}</div>`).join('')}
+            </div>
+            ${r.substitusi&&r.substitusi.length?`<div style="font-size:11px;color:var(--amber);margin-top:6px">🔄 ${r.substitusi.length} obat disubstitusi</div>`:''}
+          </div>`).join(''):`<div style="color:var(--text3);font-size:13px;padding:10px 0">Belum ada riwayat resep</div>`}
+      </div>
+    </div>`;
+  renderRiwayatList();
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard(){
+  // Antrian hari ini
+  const antrian=pasienData.filter(p=>p.tgl==='2026-04-24').slice(0,5);
+  document.getElementById('dashAntrianList').innerHTML=antrian.map((p,i)=>`
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${p.status==='Selesai'?'var(--green)':p.status==='Sedang Diperiksa'?'var(--blue)':'var(--text3)'}"></div>
+      <div style="flex:1">
+        <div style="font-weight:500">${p.nama}</div>
+        <div style="font-size:12px;color:var(--text2)">${p.keluhan}</div>
+      </div>
+      <div>${badgeBayar(p.bayar)}</div>
+    </div>`).join('');
+
+  // Resep terbaru
+  const resepTerbaru=resepData.slice(0,4);
+  document.getElementById('dashResepList').innerHTML=resepTerbaru.map(r=>`
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${r.status==='selesai'?'var(--green)':r.status==='siap'?'var(--teal)':r.status==='validasi'?'var(--purple)':'var(--text3)'}"></div>
+      <div style="flex:1">
+        <div style="font-weight:500">${r.pasien}</div>
+        <div style="font-size:12px;color:var(--text2)">${r.id} · ${r.diagnosa}</div>
+        ${r.substitusi&&r.substitusi.length?`<div style="font-size:11px;color:var(--amber)">🔄 ${r.substitusi.length} substitusi</div>`:''}
+      </div>
+      ${badgeStatus(r.status)}
+    </div>`).join('');
+
+  // Aktivitas
+  const acts=[
+    {dot:'var(--green)',text:`Resep RX-2026-003 siap diambil oleh Ahmad Ridwan`,time:'10:30'},
+    {dot:'var(--blue)',text:`Resep RX-2026-002 divalidasi apoteker (1 substitusi)`,time:'10:15'},
+    {dot:'var(--amber)',text:`Levofloxacin diganti Amoxicillin — stok habis`,time:'10:15'},
+    {dot:'var(--teal)',text:`Pasien Ratna Kusuma baru terdaftar dari admin`,time:'09:45'},
+    {dot:'var(--text3)',text:`Draft resep Hadi Susanto disimpan`,time:'09:20'},
+  ];
+  document.getElementById('activityList').innerHTML=acts.map(a=>`
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.dot}"></div>
+      <div style="flex:1">${a.text}</div>
+      <div style="font-size:11px;color:var(--text3)">${a.time}</div>
+    </div>`).join('');
+}
+
+function updateNotifBadge(){
+  const siap=resepData.filter(r=>r.status==='siap').length;
+  const substitusi=resepData.filter(r=>r.substitusi&&r.substitusi.length&&r.status!=='selesai').length;
+  const total=siap+substitusi;
+  document.getElementById('notifBadge').style.display=total?'block':'none';
+  document.getElementById('navBadgeResep').style.display=total?'inline':'none';
+  document.getElementById('navBadgeResep').textContent=total;
+}
+
+// ===================== CHART =====================
+function initChart(){
+  const ctx=document.getElementById('chartPasien').getContext('2d');
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['BPJS','Mandiri'],
+      datasets:[{data:[62,38],backgroundColor:['#2A9D8F','#8B7DB8'],borderWidth:0}]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans'},padding:14,boxWidth:10}}},cutout:'68%'}
+  });
+}
+
+// ===================== INIT =====================
+setInterval(()=>{
+  const d=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('dateChip').textContent=d;
+},60000);
+
+renderDashboard();
+renderPasienList();
+renderResepPasienList();
+renderStatusResepList('semua');
+updateNotifBadge();
+setTimeout(initChart,100);
+
+// Live preview update on resep form input
+['rDiagnosa','rKeluhan','rTD'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',()=>{if(selectedPasien) renderResepPreview();});
+});
+</script>
+</body>
+</html>

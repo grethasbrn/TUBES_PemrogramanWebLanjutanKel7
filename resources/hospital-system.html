@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCare HMS — Hospital Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F2EA;--cream2:#EEE7D8;--cream3:#E4DDD0;--cream4:#D5CBBA;
+  --purple:#8B7DB8;--purple2:#6B5E9A;--purple3:#4A3F7A;--purple-light:#EDEBF8;--purple-pale:#F5F3FD;
+  --teal:#2A9D8F;--teal2:#1F7A6F;--teal-light:#E0F5F2;
+  --orange:#E76F51;--orange-light:#FCEEE9;
+  --text:#2C2416;--text2:#6B5E4E;--text3:#A8998A;--text4:#C8BEB4;
+  --white:#FDFAF5;--white2:#FAF6EF;--sidebar:#D0DFEA;
+  --green:#52B788;--green-light:#EAF3DE;
+  --red:#E63946;--red-light:#FDECEE;
+  --amber:#F4A261;--amber-light:#FEF3E8;
+  --blue:#4A90D9;--blue-light:#EBF4FD;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px}
+
+/* ── ROLE SWITCHER ── */
+.role-switcher{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--cream) 0%,var(--purple-pale) 100%);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.role-switcher.hidden{display:none}
+.rs-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.rs-logo-icon{width:52px;height:52px}
+.rs-logo-text .l1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;letter-spacing:.2em;color:var(--text)}
+.rs-logo-text .l2{font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:.25em;color:var(--text2)}
+.rs-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text2);margin-bottom:30px;letter-spacing:.05em}
+.rs-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.rs-card{background:var(--white);border:1px solid var(--cream3);border-radius:20px;padding:32px 28px;width:200px;cursor:pointer;text-align:center;transition:all .2s;position:relative;overflow:hidden}
+.rs-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.rs-card.admin::before{background:var(--purple)}
+.rs-card.dokter::before{background:var(--teal)}
+.rs-card.apoteker::before{background:var(--amber)}
+.rs-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(44,36,22,.12)}
+.rs-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.rs-card.admin .rs-icon{background:var(--purple-light)}
+.rs-card.dokter .rs-icon{background:var(--teal-light)}
+.rs-card.apoteker .rs-icon{background:var(--amber-light)}
+.rs-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;margin-bottom:4px}
+.rs-desc{font-size:12px;color:var(--text3)}
+
+/* ── APP SHELL ── */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{background:var(--white);border-bottom:1px solid var(--cream3);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-text .l1{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;letter-spacing:.2em;color:var(--text)}
+.logo-text .l2{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:400;letter-spacing:.2em;color:var(--text2)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.date-chip{font-size:12px;color:var(--text2);background:var(--cream2);padding:5px 10px;border-radius:6px}
+.notif-btn{position:relative;width:34px;height:34px;border-radius:8px;border:1px solid var(--cream3);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.notif-badge{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--white)}
+.avatar-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--purple2)}
+.avatar-name{font-size:13px;font-weight:500;color:var(--text)}
+.avatar-role{font-size:11px;color:var(--text3)}
+.switch-role-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream2);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.switch-role-btn:hover{background:var(--cream3)}
+
+/* ── ROLE BAR ── */
+.role-bar{height:3px;flex-shrink:0}
+.role-bar.admin{background:linear-gradient(90deg,var(--purple),var(--purple3))}
+.role-bar.dokter{background:linear-gradient(90deg,var(--teal),var(--teal2))}
+.role-bar.apoteker{background:linear-gradient(90deg,var(--amber),var(--orange))}
+
+/* ── LAYOUT ── */
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;background:var(--sidebar);flex-shrink:0;display:flex;flex-direction:column;padding:20px 0;overflow-y:auto}
+.nav-section{font-size:10px;color:var(--text3);padding:14px 24px 5px;letter-spacing:.08em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 24px;font-size:14px;font-family:'Cormorant Garamond',serif;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;letter-spacing:.02em;position:relative}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.4)}
+.nav-item.active{color:var(--purple2);background:var(--white);font-weight:600}
+.nav-item.active::after{content:'';position:absolute;right:0;top:4px;bottom:4px;width:3px;border-radius:2px;background:var(--purple)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.65}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:10px;font-family:'DM Sans',sans-serif;font-weight:500;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── PAGES ── */
+.page{display:none;flex-direction:column;gap:16px;animation:fadeIn .2s ease}
+.page.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--text)}
+.page-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* ── COMMON ── */
+.btn{padding:8px 16px;border-radius:8px;border:1px solid var(--cream3);background:var(--white);color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--cream2);color:var(--text)}
+.btn-primary{background:var(--purple);color:white;border-color:var(--purple)}
+.btn-primary:hover{background:var(--purple2);color:white}
+.btn-teal{background:var(--teal);color:white;border-color:var(--teal)}
+.btn-teal:hover{background:var(--teal2);color:white}
+.btn-amber{background:var(--amber);color:white;border-color:var(--amber)}
+.btn-amber:hover{background:var(--orange);color:white}
+.btn-danger{background:var(--red);color:white;border-color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.card{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:18px}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.metrics3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.metric{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:15px}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--text)}
+.metric-sub{font-size:11px;margin-top:4px;color:var(--text3)}
+.metric-sub.up{color:var(--green)}
+.metric-sub.down{color:var(--red)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+.grid22{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.b-baru{background:#E6F1FB;color:#185FA5}
+.b-diproses{background:var(--purple-light);color:var(--purple2)}
+.b-siap{background:var(--teal-light);color:var(--teal2)}
+.b-selesai{background:var(--green-light);color:#1F6B43}
+.b-lunas{background:var(--green-light);color:#1F6B43}
+.b-batal{background:var(--red-light);color:#9B1C24}
+.b-menunggu{background:var(--amber-light);color:#7A4A0A}
+.b-diganti{background:var(--orange-light);color:#7A3020}
+.b-tablet{background:var(--purple-light);color:var(--purple2)}
+.b-sirup{background:var(--teal-light);color:var(--teal2)}
+.b-kapsul{background:var(--orange-light);color:#7A3020}
+.b-injeksi{background:var(--amber-light);color:#7A4A0A}
+.b-salep{background:#FBEAF0;color:#72243E}
+.b-bpjs{background:var(--blue-light);color:#1A5C9A}
+.b-mandiri{background:var(--green-light);color:#1F6B43}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--cream3)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--white)}
+th{padding:10px 14px;text-align:left;border-bottom:1px solid var(--cream3);font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;background:var(--cream2)}
+td{padding:10px 14px;border-bottom:1px solid var(--cream3);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--cream)}
+
+/* ── SEARCH ROW ── */
+.search-row{display:flex;gap:8px;flex-wrap:wrap}
+.search-input{flex:1;min-width:180px;padding:8px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--purple-light);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.search-input::placeholder{color:var(--text3)}
+.search-input:focus{border-color:var(--purple)}
+.filter-sel{padding:8px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream2);color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+
+/* ── FORM ── */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:10px;color:var(--text2);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--purple);background:var(--white)}
+.fg textarea{resize:vertical;min-height:70px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(44,36,22,.45);z-index:200;align-items:flex-start;justify-content:center;padding:50px 20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:28px;width:100%;max-width:540px;animation:fadeIn .2s ease}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:18px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--cream3)}
+.modal-lg{max-width:700px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;max-width:300px;color:white;animation:fadeIn .2s ease}
+.toast-success{background:var(--green)}
+.toast-danger{background:var(--red)}
+.toast-info{background:var(--purple)}
+.toast-warn{background:var(--amber)}
+
+/* ── ALERT ── */
+.alert{padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px}
+.alert-warn{background:var(--amber-light);border:1px solid #F4C990;color:#7A4A0A}
+.alert-danger{background:var(--red-light);border:1px solid #F09595;color:#9B1C24}
+.alert-info{background:var(--blue-light);border:1px solid #A8CCF0;color:#185FA5}
+
+/* ── RESEP LIST ── */
+.resep-list-item{border:1px solid var(--cream3);border-radius:10px;padding:13px 15px;background:var(--white);margin-bottom:8px;cursor:pointer;transition:all .15s}
+.resep-list-item:hover{background:var(--cream);border-color:var(--cream4)}
+.resep-list-item.selected{border-color:var(--purple);background:var(--purple-pale)}
+.rli-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.rli-no{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--text)}
+.rli-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.rli-bottom{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* ── DETAIL PANEL ── */
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--cream3);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-obat-nama{font-weight:500}
+.detail-obat-info{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── STEPPER ── */
+.step-bar{display:flex;align-items:center;margin-bottom:22px}
+.step-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text3)}
+.step-item.done{color:var(--green)}
+.step-item.active{color:var(--purple2);font-weight:500}
+.step-dot{width:22px;height:22px;border-radius:50%;border:1px solid var(--cream3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;background:var(--cream2);color:var(--text3);flex-shrink:0}
+.step-dot.done{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.step-dot.active{background:var(--purple);border-color:var(--purple);color:white}
+.step-line{flex:1;height:1px;background:var(--cream3);margin:0 8px}
+.step-line.done{background:var(--green)}
+
+/* ── OBAT ITEM ── */
+.rx-obat-item{border:1px solid var(--cream3);border-radius:8px;padding:12px;background:var(--cream2);margin-bottom:8px}
+.rx-obat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rx-obat-nama{font-weight:500;font-size:13px}
+.btn-remove{font-size:11px;color:var(--red);cursor:pointer;padding:2px 8px;border-radius:4px;border:1px solid #F09595;background:transparent;font-family:'DM Sans',sans-serif}
+
+/* ── INVOICE ── */
+.invoice-section{background:var(--cream2);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.invoice-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.invoice-total{display:flex;justify-content:space-between;font-size:15px;font-weight:600;padding:10px 0;border-top:1px solid var(--cream3);margin-top:6px}
+
+/* ── STOK ALERT ── */
+.stok-alert-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;margin-bottom:6px;font-size:13px}
+.stok-alert-item.exp{background:var(--red-light);border:1px solid #F09595}
+.stok-alert-item.near-exp{background:var(--amber-light);border:1px solid #F4C990}
+.stok-alert-item.low{background:var(--blue-light);border:1px solid #A8CCF0}
+
+/* ── ACTIVITY LIST ── */
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);font-size:13px}
+.activity-item:last-child{border-bottom:none}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- ROLE SWITCHER -->
+<div class="role-switcher" id="roleSwitcher">
+  <div class="rs-logo">
+    <svg class="rs-logo-icon" viewBox="0 0 52 52" fill="none">
+      <path d="M26 4C26 4 14 16 14 28C14 34.6 19.4 40 26 40C32.6 40 38 34.6 38 28C38 16 26 4 26 4Z" fill="#8B7DB8" opacity=".75"/>
+      <path d="M18 22C18 22 12 30 12 36C12 40 15.6 43 20 43" stroke="#6B5E9A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="rs-logo-text">
+      <div class="l1">MEDICARE HMS</div>
+      <div class="l2">HOSPITAL MANAGEMENT SYSTEM</div>
+    </div>
+  </div>
+  <div class="rs-title">Pilih peran Anda untuk masuk ke sistem</div>
+  <div class="rs-cards">
+    <div class="rs-card admin" onclick="loginAs('admin')">
+      <div class="rs-icon">🏥</div>
+      <div class="rs-name">Admin</div>
+      <div class="rs-desc">Registrasi pasien, pembayaran & laporan</div>
+    </div>
+    <div class="rs-card dokter" onclick="loginAs('dokter')">
+      <div class="rs-icon">🩺</div>
+      <div class="rs-name">Dokter</div>
+      <div class="rs-desc">Lihat pasien & tulis resep</div>
+    </div>
+    <div class="rs-card apoteker" onclick="loginAs('apoteker')">
+      <div class="rs-icon">💊</div>
+      <div class="rs-name">Apoteker</div>
+      <div class="rs-desc">Kelola stok & validasi resep</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appShell" style="display:none">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <path d="M16 3C16 3 9 9.5 9 17C9 20.9 12.1 24 16 24C19.9 24 23 20.9 23 17C23 9.5 16 3 16 3Z" fill="#8B7DB8" opacity=".75"/>
+      <path d="M11 13C11 13 7.5 17 7.5 21C7.5 23.5 9.5 25.5 12 25.5" stroke="#6B5E9A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="logo-text">
+      <div class="l1">MEDICARE HMS</div>
+      <div class="l2" id="topbarRoleLabel">ADMIN</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="date-chip" id="dateChip"></div>
+    <button class="notif-btn" id="notifBtn">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v2.5L2.5 10.5h11L12 8.5V6a4 4 0 0 0-4-4Z" stroke="#6B5E4E" stroke-width="1.2"/><path d="M6.5 12.5a1.5 1.5 0 0 0 3 0" stroke="#6B5E4E" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <div class="notif-badge" id="notifBadge" style="display:none"></div>
+    </button>
+    <button class="switch-role-btn" onclick="switchRole()">Ganti Peran</button>
+    <div class="avatar-wrap">
+      <div class="avatar" id="topbarAvatar">AD</div>
+      <div>
+        <div class="avatar-name" id="topbarName">Admin</div>
+        <div class="avatar-role" id="topbarRole">Administrator</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="role-bar" id="roleBar"></div>
+
+<div class="main">
+<!-- SIDEBAR -->
+<div class="sidebar" id="appSidebar"></div>
+
+<div class="content" id="appContent">
+  <!-- Pages rendered here by JS -->
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════ -->
+
+<!-- Modal: Tambah Pasien (Admin) -->
+<div class="modal-overlay" id="modalPasien">
+  <div class="modal">
+    <h3>Daftarkan Pasien Baru</h3>
+    <div class="fr">
+      <div class="fg"><label>Nama Lengkap *</label><input id="mpNama" type="text" placeholder="Nama pasien"></div>
+      <div class="fg"><label>NIK *</label><input id="mpNIK" type="text" placeholder="16 digit NIK"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Tanggal Lahir *</label><input id="mpTgl" type="date"></div>
+      <div class="fg"><label>Jenis Kelamin</label>
+        <select id="mpJK"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Alamat</label><textarea id="mpAlamat" placeholder="Alamat lengkap..."></textarea></div>
+    <div class="fr">
+      <div class="fg"><label>Jenis Pasien *</label>
+        <select id="mpJenisPasien" onchange="toggleBPJS()">
+          <option value="mandiri">Mandiri</option>
+          <option value="bpjs">BPJS</option>
+        </select>
+      </div>
+      <div class="fg" id="bpjsField" style="display:none"><label>No. BPJS *</label><input id="mpBPJS" type="text" placeholder="No. BPJS / JKN"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>No. Telepon</label><input id="mpTelp" type="text" placeholder="08xx-xxxx-xxxx"></div>
+      <div class="fg"><label>Poli Tujuan *</label>
+        <select id="mpPoli">
+          <option>Umum</option><option>Anak</option><option>Penyakit Dalam</option><option>Bedah</option><option>Kandungan</option><option>Jantung</option><option>Ortopedi</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalPasien')">Batal</button>
+      <button class="btn btn-primary" onclick="savePasien()">Daftar & Kirim ke Dokter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Bayar Pasien (Admin) -->
+<div class="modal-overlay" id="modalBayar">
+  <div class="modal">
+    <h3>Proses Pembayaran</h3>
+    <div id="bayarContent"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalBayar')">Batal</button>
+      <button class="btn btn-teal" onclick="prosesLunas()">Konfirmasi Lunas</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tambah Stok Obat (Apoteker) -->
+<div class="modal-overlay" id="modalObat">
+  <div class="modal">
+    <h3>Input Stok Obat (Batch)</h3>
+    <div class="fr">
+      <div class="fg"><label>Nama Obat *</label><input id="moNama" type="text" placeholder="cth. Paracetamol 500mg"></div>
+      <div class="fg"><label>Tipe Obat</label>
+        <select id="moTipe">
+          <option value="Tablet">Tablet</option><option value="Kapsul">Kapsul</option>
+          <option value="Sirup">Sirup</option><option value="Injeksi">Injeksi</option>
+          <option value="Salep">Salep</option><option value="Tetes">Tetes</option><option value="Supositoria">Supositoria</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr3">
+      <div class="fg"><label>Jumlah *</label><input id="moJumlah" type="number" placeholder="0" min="1"></div>
+      <div class="fg"><label>Satuan</label>
+        <select id="moSatuan"><option>tablet</option><option>kapsul</option><option>botol</option><option>ampul</option><option>tube</option></select>
+      </div>
+      <div class="fg"><label>Harga Satuan (Rp) *</label><input id="moHarga" type="number" placeholder="0" min="0"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>No. Batch</label><input id="moBatch" type="text" placeholder="BATCH-2026-XXX"></div>
+      <div class="fg"><label>Tgl Kadaluarsa *</label><input id="moExp" type="date"></div>
+    </div>
+    <div class="fg"><label>Kategori</label>
+      <select id="moKategori">
+        <option value="standar">Obat Standar (BPJS & Mandiri)</option>
+        <option value="premium">Obat Premium (Mandiri only)</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalObat')">Batal</button>
+      <button class="btn btn-primary" onclick="saveObat()">Simpan Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Validasi Resep (Apoteker) -->
+<div class="modal-overlay" id="modalValidasi">
+  <div class="modal modal-lg">
+    <h3>Validasi & Siapkan Resep</h3>
+    <div id="validasiContent"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modalValidasi')">Tutup</button>
+      <button class="btn btn-teal" onclick="kirimInvoice()">Kirim Invoice ke Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Laporan Bulanan (Admin) -->
+<div class="modal-overlay" id="modalLaporan">
+  <div class="modal modal-lg">
+    <h3>Laporan Bulanan</h3>
+    <div id="laporanContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('modalLaporan')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  SHARED DATA STORE
+// ══════════════════════════════════════════
+let currentRole = null;
+
+// Pasien
+let pasienDB = [
+  {id:1,rm:'RM-2026-0091',nama:'Siti Rahayu',nik:'1271010101850001',tgl:'1985-01-01',jk:'P',alamat:'Jl. Melati No.3, Medan',jenis:'bpjs',bpjs:'0001234567890',telp:'081234567890',poli:'Umum',dokterTarget:'dr. Hendra Wijaya',status:'dikirim',tanggal:'2026-04-24'},
+  {id:2,rm:'RM-2026-0088',nama:'Ahmad Fauzi',nik:'1271010201900002',tgl:'1990-02-01',jk:'L',alamat:'Jl. Dahlia No.7, Medan',jenis:'mandiri',bpjs:null,telp:'082345678901',poli:'Penyakit Dalam',dokterTarget:'dr. Sari Dewi',status:'dikirim',tanggal:'2026-04-24'},
+  {id:3,rm:'RM-2026-0087',nama:'Maya Putri',nik:'1271011001951003',tgl:'1995-10-10',jk:'P',alamat:'Jl. Anggrek No.12, Medan',jenis:'bpjs',bpjs:'0009876543210',telp:'083456789012',poli:'Kandungan',dokterTarget:'dr. Budi Santoso',status:'selesai_bayar',tanggal:'2026-04-23'},
+  {id:4,rm:'RM-2026-0085',nama:'Rudi Hartono',nik:'1271010505880004',tgl:'1988-05-05',jk:'L',alamat:'Jl. Mawar No.5, Medan',jenis:'mandiri',bpjs:null,telp:'084567890123',poli:'Bedah',dokterTarget:'dr. Hendra Wijaya',status:'invoice_masuk',tanggal:'2026-04-24',invoiceId:'INV-2026-0042'},
+  {id:5,rm:'RM-2026-0082',nama:'Dewi Lestari',nik:'1271010202930005',tgl:'1993-02-02',jk:'P',alamat:'Jl. Kamboja No.8, Deli Serdang',jenis:'bpjs',bpjs:'0005432167890',telp:'085678901234',poli:'Anak',dokterTarget:'dr. Sari Dewi',status:'dikirim',tanggal:'2026-04-24'},
+];
+let nextPasienId = 6;
+
+// Obat (stok)
+let obatDB = [
+  {id:1,nama:'Paracetamol 500mg',tipe:'Tablet',jumlah:120,satuan:'tablet',harga:500,batch:'BATCH-2026-001',exp:'2027-06-30',kategori:'standar'},
+  {id:2,nama:'Amoxicillin 250mg',tipe:'Kapsul',jumlah:80,satuan:'kapsul',harga:1500,batch:'BATCH-2026-002',exp:'2026-09-30',kategori:'standar'},
+  {id:3,nama:'OBH Combi Sirup',tipe:'Sirup',jumlah:25,satuan:'botol',harga:18000,batch:'BATCH-2026-003',exp:'2027-03-15',kategori:'standar'},
+  {id:4,nama:'Metformin 500mg',tipe:'Tablet',jumlah:200,satuan:'tablet',harga:800,batch:'BATCH-2026-004',exp:'2027-12-31',kategori:'standar'},
+  {id:5,nama:'Cetirizine 10mg',tipe:'Tablet',jumlah:8,satuan:'tablet',harga:1200,batch:'BATCH-2026-005',exp:'2027-08-20',kategori:'standar'},
+  {id:6,nama:'Salep Betametason',tipe:'Salep',jumlah:15,satuan:'tube',harga:35000,batch:'BATCH-2026-006',exp:'2026-05-10',kategori:'standar'},
+  {id:7,nama:'Azithromycin 500mg',tipe:'Tablet',jumlah:50,satuan:'tablet',harga:8500,batch:'BATCH-2026-007',exp:'2027-11-30',kategori:'premium'},
+  {id:8,nama:'Lansoprazole 30mg',tipe:'Kapsul',jumlah:60,satuan:'kapsul',harga:3500,batch:'BATCH-2026-008',exp:'2027-04-15',kategori:'standar'},
+  {id:9,nama:'Vitamin C 500mg',tipe:'Tablet',jumlah:3,satuan:'tablet',harga:2000,batch:'BATCH-2026-009',exp:'2027-01-31',kategori:'standar'},
+  {id:10,nama:'Insulin Glargine',tipe:'Injeksi',jumlah:12,satuan:'ampul',harga:85000,batch:'BATCH-2026-010',exp:'2026-05-01',kategori:'premium'},
+];
+let nextObatId = 11;
+
+// Resep
+let resepDB = [
+  {id:'RX-2026-0041',pasienId:1,pasien:'Siti Rahayu',rm:'RM-2026-0091',poli:'Umum',jenisPasien:'bpjs',diagnosis:'ISPA, batuk berdahak',catatan:'Berikan obat standar',tanggal:'2026-04-24',dokter:'dr. Hendra Wijaya',
+   obat:[{id:1,nama:'Paracetamol 500mg',tipe:'Tablet',jml:10,satuan:'tablet',aturan:'3x1 setelah makan',harga:500,kategori:'standar',diganti:false}],
+   status:'diproses',total:5000},
+  {id:'RX-2026-0040',pasienId:2,pasien:'Ahmad Fauzi',rm:'RM-2026-0088',poli:'Penyakit Dalam',jenisPasien:'mandiri',diagnosis:'Diabetes mellitus tipe 2',catatan:'Pasien bisa mendapat obat premium',tanggal:'2026-04-24',dokter:'dr. Sari Dewi',
+   obat:[{id:7,nama:'Azithromycin 500mg',tipe:'Tablet',jml:5,satuan:'tablet',aturan:'1x1',harga:8500,kategori:'premium',diganti:false},{id:4,nama:'Metformin 500mg',tipe:'Tablet',jml:30,satuan:'tablet',aturan:'2x1 setelah makan',harga:800,kategori:'standar',diganti:false}],
+   status:'siap',total:66500},
+  {id:'RX-2026-0039',pasienId:4,pasien:'Rudi Hartono',rm:'RM-2026-0085',poli:'Bedah',jenisPasien:'mandiri',diagnosis:'Post-operasi, antibiotik profilaksis',catatan:'',tanggal:'2026-04-23',dokter:'dr. Hendra Wijaya',
+   obat:[{id:2,nama:'Amoxicillin 250mg',tipe:'Kapsul',jml:21,satuan:'kapsul',aturan:'3x1',harga:1500,kategori:'standar',diganti:false}],
+   status:'invoice_terkirim',total:31500,invoiceId:'INV-2026-0042'},
+  {id:'RX-2026-0038',pasienId:3,pasien:'Maya Putri',rm:'RM-2026-0087',poli:'Kandungan',jenisPasien:'bpjs',diagnosis:'Kontrol kehamilan',catatan:'',tanggal:'2026-04-23',dokter:'dr. Budi Santoso',
+   obat:[{id:3,nama:'OBH Combi Sirup',tipe:'Sirup',jml:1,satuan:'botol',aturan:'3x5ml',harga:18000,kategori:'standar',diganti:false}],
+   status:'selesai',total:18000},
+];
+let nextResepId = 42;
+
+// Invoice
+let invoiceDB = [
+  {id:'INV-2026-0042',resepId:'RX-2026-0039',pasienId:4,pasien:'Rudi Hartono',tanggal:'2026-04-23',items:[{nama:'Amoxicillin 250mg',jml:21,satuan:'kapsul',harga:1500}],subtotal:31500,adminFee:5000,total:36500,status:'belum_lunas'},
+];
+let nextInvId = 43;
+
+// Shared validasi state
+let validasiResepId = null;
+let validasiObatList = [];
+let selectedBayarInvId = null;
+
+// ══════════════════════════════════════════
+//  LOGIN / ROLE
+// ══════════════════════════════════════════
+const roleProfiles = {
+  admin:{name:'Admin Pendaftaran',initials:'AD',role:'Administrator',label:'ADMIN',bar:'admin'},
+  dokter:{name:'dr. Hendra Wijaya',initials:'HW',role:'Dokter Umum',label:'DOKTER',bar:'dokter'},
+  apoteker:{name:'Apt. Rini Kurnia',initials:'RK',role:'Apoteker',label:'APOTEKER',bar:'apoteker'},
+};
+
+function loginAs(role){
+  currentRole=role;
+  document.getElementById('roleSwitcher').classList.add('hidden');
+  document.getElementById('appShell').style.display='flex';
+  const p=roleProfiles[role];
+  document.getElementById('topbarRoleLabel').textContent=p.label;
+  document.getElementById('topbarName').textContent=p.name;
+  document.getElementById('topbarRole').textContent=p.role;
+  document.getElementById('topbarAvatar').textContent=p.initials;
+  document.getElementById('roleBar').className='role-bar '+p.bar;
+  document.getElementById('dateChip').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  buildSidebar(role);
+  renderFirstPage(role);
+  updateNotifBadge();
+}
+
+function switchRole(){
+  document.getElementById('roleSwitcher').classList.remove('hidden');
+  document.getElementById('appShell').style.display='none';
+  currentRole=null;
+}
+
+// ══════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════
+const sidebars={
+  admin:[
+    {section:'Menu'},{nav:'dashboard-admin',icon:'grid',label:'Dashboard'},{section:'Pasien'},
+    {nav:'daftar-pasien',icon:'user+',label:'Daftar Pasien'},
+    {nav:'antrian',icon:'list',label:'Antrian Pasien'},
+    {section:'Keuangan'},
+    {nav:'invoice',icon:'invoice',label:'Invoice Masuk',badge:'invoiceBadge'},
+    {nav:'pembayaran',icon:'pay',label:'Pembayaran'},
+    {nav:'laporan',icon:'chart',label:'Laporan Bulanan'},
+  ],
+  dokter:[
+    {section:'Menu'},{nav:'dashboard-dokter',icon:'grid',label:'Dashboard'},
+    {section:'Pasien'},
+    {nav:'pasien-dokter',icon:'user',label:'Pasien Masuk',badge:'navBadgePasien'},
+    {section:'Resep'},
+    {nav:'tulis-resep',icon:'edit',label:'Tulis Resep'},
+    {nav:'riwayat-resep',icon:'doc',label:'Riwayat Resep'},
+  ],
+  apoteker:[
+    {section:'Menu'},{nav:'dashboard-apoteker',icon:'grid',label:'Dashboard'},
+    {section:'Stok Obat'},
+    {nav:'stok',icon:'pill',label:'Stok Obat'},
+    {nav:'alert-stok',icon:'warn',label:'Alert Stok',badge:'navBadgeAlert'},
+    {section:'Resep'},
+    {nav:'antrian-resep',icon:'list',label:'Antrian Resep',badge:'navBadgeResep'},
+    {nav:'riwayat-apoteker',icon:'doc',label:'Riwayat'},
+  ],
+};
+
+const iconSVG={
+  grid:'<rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" fill="currentColor"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".5"/>',
+  user:'<circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  'user+':'<circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M1 14c0-2.5 2.2-4.5 5-4.5s5 2 5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M13 5v5M10.5 7.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  list:'<path d="M3 4h10M3 8h10M3 12h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  invoice:'<rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>',
+  pay:'<path d="M2 5h12v8H2z" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="9" r="2" stroke="currentColor" stroke-width="1.1"/>',
+  chart:'<path d="M2 12l3-4 3 2 3-5 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+  edit:'<path d="M10 3L13 6L6 13H3V10L10 3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/>',
+  doc:'<rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>',
+  pill:'<ellipse cx="8" cy="8" rx="5" ry="3" stroke="currentColor" stroke-width="1.2" transform="rotate(-30 8 8)" fill="none"/><line x1="5.3" y1="5.3" x2="10.7" y2="10.7" stroke="currentColor" stroke-width="1.1"/>',
+  warn:'<path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/><path d="M8 6v4M8 11.5v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+};
+
+function buildSidebar(role){
+  const items=sidebars[role]||[];
+  let html='';
+  items.forEach(item=>{
+    if(item.section){html+=`<div class="nav-section">${item.section}</div>`;return;}
+    const icon=iconSVG[item.icon]||iconSVG.doc;
+    const badge=item.badge?`<span class="nav-badge" id="${item.badge}" style="display:none">0</span>`:'';
+    html+=`<div class="nav-item" id="nav-${item.nav}" onclick="showPage('${item.nav}',this)">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none">${icon}</svg>${item.label}${badge}</div>`;
+  });
+  document.getElementById('appSidebar').innerHTML=html;
+}
+
+// ══════════════════════════════════════════
+//  PAGE RENDERER
+// ══════════════════════════════════════════
+function renderFirstPage(role){
+  if(role==='admin') showPage('dashboard-admin',null);
+  else if(role==='dokter') showPage('dashboard-dokter',null);
+  else if(role==='apoteker') showPage('dashboard-apoteker',null);
+}
+
+function showPage(pageId, el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navEl=el||document.getElementById('nav-'+pageId);
+  if(navEl)navEl.classList.add('active');
+  const renderer=pageRenderers[pageId];
+  if(renderer) renderer();
+}
+
+const pageRenderers = {
+  'dashboard-admin': renderAdminDashboard,
+  'daftar-pasien': renderDaftarPasien,
+  'antrian': renderAntrianAdmin,
+  'invoice': renderInvoiceAdmin,
+  'pembayaran': renderPembayaranAdmin,
+  'laporan': renderLaporan,
+  'dashboard-dokter': renderDokterDashboard,
+  'pasien-dokter': renderPasienDokter,
+  'tulis-resep': ()=>renderTulisResep(null),
+  'riwayat-resep': renderRiwayatDokter,
+  'dashboard-apoteker': renderApotekerDashboard,
+  'stok': renderStok,
+  'alert-stok': renderAlertStok,
+  'antrian-resep': renderAntrianResep,
+  'riwayat-apoteker': renderRiwayatApoteker,
+};
+
+function setContent(html){document.getElementById('appContent').innerHTML=html;}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function fmtRp(v){return'Rp'+Number(v).toLocaleString('id-ID')}
+function fmtDate(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}catch{return d}}
+function statusBadge(s){
+  const m={'baru':'b-baru','diproses':'b-diproses','siap':'b-siap','selesai':'b-selesai','batal':'b-batal','invoice_terkirim':'b-menunggu','invoice_masuk':'b-menunggu','selesai_bayar':'b-lunas','lunas':'b-lunas','belum_lunas':'b-baru'};
+  const l={'baru':'Baru','diproses':'Diproses','siap':'Siap Diambil','selesai':'Selesai','batal':'Batal','invoice_terkirim':'Invoice Terkirim','invoice_masuk':'Invoice Masuk','selesai_bayar':'Lunas','lunas':'Lunas','belum_lunas':'Belum Lunas'};
+  return`<span class="badge ${m[s]||''}">${l[s]||s}</span>`;
+}
+function tipeBadge(t){const m={Tablet:'b-tablet',Sirup:'b-sirup',Kapsul:'b-kapsul',Injeksi:'b-injeksi',Salep:'b-salep'};return`<span class="badge ${m[t]||''}">${t}</span>`}
+function jenisBadge(j){return j==='bpjs'?`<span class="badge b-bpjs">BPJS</span>`:`<span class="badge b-mandiri">Mandiri</span>`}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function toast(msg,type='info'){
+  const el=document.createElement('div');el.className=`toast toast-${type}`;el.textContent=msg;
+  document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(()=>el.remove(),300)},2800);
+}
+
+function updateNotifBadge(){
+  const inv=invoiceDB.filter(i=>i.status==='belum_lunas').length;
+  const res=resepDB.filter(r=>r.status==='baru'||r.status==='diproses').length;
+  const total=inv+res;
+  const badge=document.getElementById('notifBadge');
+  if(badge){badge.style.display=total>0?'block':'none';}
+  const ib=document.getElementById('invoiceBadge');
+  if(ib){ib.style.display=inv>0?'inline-block':'none';ib.textContent=inv;}
+  const rb=document.getElementById('navBadgeResep');
+  if(rb){rb.style.display=res>0?'inline-block':'none';rb.textContent=res;}
+  const pb=document.getElementById('navBadgePasien');
+  if(pb){
+    const mc=pasienDB.filter(p=>p.status==='dikirim').length;
+    pb.style.display=mc>0?'inline-block':'none';pb.textContent=mc;
+  }
+  const ab=document.getElementById('navBadgeAlert');
+  if(ab){
+    const ac=getAlertObat().length;
+    ab.style.display=ac>0?'inline-block':'none';ab.textContent=ac;
+  }
+}
+
+function getAlertObat(){
+  const today=new Date();const soon=new Date();soon.setDate(soon.getDate()+30);
+  return obatDB.filter(o=>{
+    const exp=new Date(o.exp);
+    return exp<today || exp<soon || o.jumlah<10;
+  });
+}
+
+// ══════════════════════════════════════════
+//  ██████  ADMIN PAGES
+// ══════════════════════════════════════════
+
+function renderAdminDashboard(){
+  const totalPasienHariIni=pasienDB.filter(p=>p.tanggal==='2026-04-24').length;
+  const invoiceBelumLunas=invoiceDB.filter(i=>i.status==='belum_lunas').length;
+  const totalPemasukan=invoiceDB.filter(i=>i.status==='lunas').reduce((s,i)=>s+i.total,0);
+  const pasienBPJS=pasienDB.filter(p=>p.jenis==='bpjs').length;
+  setContent(`
+<div class="page active" id="page-dashboard-admin">
+  <div class="page-header">
+    <div><div class="page-title">Dashboard Admin 👋</div><div class="page-sub">Ringkasan aktivitas hari ini</div></div>
+    <button class="btn btn-primary" onclick="openModal('modalPasien')">+ Daftar Pasien Baru</button>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Pasien Hari Ini</div><div class="metric-val">${totalPasienHariIni}</div><div class="metric-sub">Total terdaftar hari ini</div></div>
+    <div class="metric"><div class="metric-label">Invoice Masuk</div><div class="metric-val" style="color:var(--amber)">${invoiceBelumLunas}</div><div class="metric-sub">Menunggu pembayaran</div></div>
+    <div class="metric"><div class="metric-label">Total Pasien</div><div class="metric-val">${pasienDB.length}</div><div class="metric-sub up">Pasien terdaftar</div></div>
+    <div class="metric"><div class="metric-label">Pasien BPJS</div><div class="metric-val" style="color:var(--blue)">${pasienBPJS}</div><div class="metric-sub">${pasienDB.length-pasienBPJS} Mandiri</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Antrian Pasien Aktif</div>
+      ${pasienDB.filter(p=>p.status==='dikirim'||p.status==='invoice_masuk').map(p=>`
+      <div class="activity-item">
+        <div class="act-dot" style="background:${p.status==='invoice_masuk'?'var(--amber)':'var(--teal)'}"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${p.nama} ${jenisBadge(p.jenis)}</div>
+          <div style="font-size:11px;color:var(--text3)">${p.poli} · ${p.rm}</div>
+        </div>
+        ${statusBadge(p.status)}
+      </div>`).join('') || '<div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px">Tidak ada antrian aktif</div>'}
+    </div>
+    <div class="card">
+      <div class="card-title">Invoice Menunggu Bayar</div>
+      ${invoiceDB.filter(i=>i.status==='belum_lunas').map(i=>`
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--amber)"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${i.pasien}</div>
+          <div style="font-size:11px;color:var(--text3)">${i.id} · ${fmtRp(i.total)}</div>
+        </div>
+        <button class="btn btn-xs btn-teal" onclick="openBayar('${i.id}')">Bayar</button>
+      </div>`).join('') || '<div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px">Tidak ada invoice pending</div>'}
+    </div>
+  </div>
+</div>`);
+}
+
+function renderDaftarPasien(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Daftar Pasien</div><div class="page-sub">Kelola data semua pasien terdaftar</div></div>
+    <button class="btn btn-primary" onclick="openModal('modalPasien')">+ Pasien Baru</button>
+  </div>
+  <div class="search-row">
+    <input class="search-input" type="text" placeholder="Cari nama / NIK / RM..." id="cariPasien" oninput="filterPasienTable()">
+    <select class="filter-sel" id="filterJenis" onchange="filterPasienTable()">
+      <option value="">Semua Jenis</option><option value="bpjs">BPJS</option><option value="mandiri">Mandiri</option>
+    </select>
+    <select class="filter-sel" id="filterPoli" onchange="filterPasienTable()">
+      <option value="">Semua Poli</option><option>Umum</option><option>Anak</option><option>Penyakit Dalam</option><option>Bedah</option><option>Kandungan</option><option>Jantung</option>
+    </select>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>RM</th><th>Nama</th><th>NIK</th><th>Tgl Lahir</th><th>Jenis</th><th>Poli</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody id="pasienTableBody"></tbody>
+  </table></div>
+</div>`);
+  filterPasienTable();
+}
+
+function filterPasienTable(){
+  const q=(document.getElementById('cariPasien')?.value||'').toLowerCase();
+  const fj=document.getElementById('filterJenis')?.value||'';
+  const fp=document.getElementById('filterPoli')?.value||'';
+  const list=pasienDB.filter(p=>{
+    if(q&&!p.nama.toLowerCase().includes(q)&&!p.nik.includes(q)&&!p.rm.toLowerCase().includes(q))return false;
+    if(fj&&p.jenis!==fj)return false;
+    if(fp&&p.poli!==fp)return false;
+    return true;
+  });
+  document.getElementById('pasienTableBody').innerHTML=list.map(p=>`
+  <tr>
+    <td style="font-family:'Cormorant Garamond',serif;color:var(--text2)">${p.rm}</td>
+    <td><div style="font-weight:500">${p.nama}</div><div style="font-size:11px;color:var(--text3)">${p.telp||'—'}</div></td>
+    <td style="font-size:12px;color:var(--text2)">${p.nik}</td>
+    <td>${fmtDate(p.tgl)}</td>
+    <td>${jenisBadge(p.jenis)}${p.jenis==='bpjs'?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${p.bpjs}</div>`:''}</td>
+    <td>${p.poli}</td>
+    <td>${statusBadge(p.status)}</td>
+    <td><div style="display:flex;gap:5px">
+      <button class="btn btn-xs" onclick="kirimUlangPasien(${p.id})">Kirim ke Dokter</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function renderAntrianAdmin(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Antrian Pasien</div><div class="page-sub">Pantau status pasien yang masih aktif</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>No. Antrian</th><th>Pasien</th><th>Poli</th><th>Jenis</th><th>Status</th><th>Dokter</th></tr></thead>
+    <tbody>${pasienDB.filter(p=>p.status!=='selesai_bayar').map((p,i)=>`
+    <tr>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--text2)">${String(i+1).padStart(3,'0')}</td>
+      <td><div style="font-weight:500">${p.nama}</div><div style="font-size:11px;color:var(--text3)">${p.rm}</div></td>
+      <td>${p.poli}</td>
+      <td>${jenisBadge(p.jenis)}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td style="font-size:12px;color:var(--text2)">${p.dokterTarget}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>
+</div>`);
+}
+
+function renderInvoiceAdmin(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Invoice Masuk</div><div class="page-sub">Invoice dari apoteker siap diproses</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>No. Invoice</th><th>Pasien</th><th>No. Resep</th><th>Tgl</th><th>Subtotal</th><th>Admin Fee</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>${invoiceDB.length?invoiceDB.map(i=>`
+    <tr>
+      <td style="font-family:'Cormorant Garamond',serif;color:var(--text2)">${i.id}</td>
+      <td><div style="font-weight:500">${i.pasien}</div></td>
+      <td>${i.resepId}</td>
+      <td>${fmtDate(i.tanggal)}</td>
+      <td>${fmtRp(i.subtotal)}</td>
+      <td>${fmtRp(i.adminFee)}</td>
+      <td style="font-weight:600">${fmtRp(i.total)}</td>
+      <td>${statusBadge(i.status)}</td>
+      <td>${i.status==='belum_lunas'?`<button class="btn btn-xs btn-teal" onclick="openBayar('${i.id}')">Proses Bayar</button>`:'<span style="color:var(--green);font-size:12px">✓ Lunas</span>'}</td>
+    </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3)">Belum ada invoice masuk</td></tr>`}</tbody>
+  </table></div>
+</div>`);
+  updateNotifBadge();
+}
+
+function renderPembayaranAdmin(){
+  const lunas=invoiceDB.filter(i=>i.status==='lunas');
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Riwayat Pembayaran</div><div class="page-sub">Semua transaksi yang sudah selesai</div></div>
+  </div>
+  <div class="metrics3" style="margin-bottom:4px">
+    <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-val">${lunas.length}</div></div>
+    <div class="metric"><div class="metric-label">Total Pemasukan</div><div class="metric-val" style="font-size:20px;color:var(--green)">${fmtRp(lunas.reduce((s,i)=>s+i.total,0))}</div></div>
+    <div class="metric"><div class="metric-label">Pending</div><div class="metric-val" style="color:var(--amber)">${invoiceDB.filter(i=>i.status==='belum_lunas').length}</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Invoice</th><th>Pasien</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>${invoiceDB.map(i=>`
+    <tr>
+      <td style="font-family:'Cormorant Garamond',serif">${i.id}</td>
+      <td>${i.pasien}</td>
+      <td>${fmtDate(i.tanggal)}</td>
+      <td style="font-weight:600">${fmtRp(i.total)}</td>
+      <td>${statusBadge(i.status)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>
+</div>`);
+}
+
+function renderLaporan(){
+  const bulan=new Date().toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  const totalPasien=pasienDB.length;
+  const bpjsPasien=pasienDB.filter(p=>p.jenis==='bpjs').length;
+  const mandiriPasien=pasienDB.filter(p=>p.jenis==='mandiri').length;
+  const poli={};pasienDB.forEach(p=>{poli[p.poli]=(poli[p.poli]||0)+1});
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Laporan Bulanan</div><div class="page-sub">${bulan}</div></div>
+    <button class="btn btn-primary" onclick="cetakLaporan()">📄 Cetak / Export</button>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total Pasien</div><div class="metric-val">${totalPasien}</div></div>
+    <div class="metric"><div class="metric-label">Pasien BPJS</div><div class="metric-val" style="color:var(--blue)">${bpjsPasien}</div></div>
+    <div class="metric"><div class="metric-label">Pasien Mandiri</div><div class="metric-val" style="color:var(--green)">${mandiriPasien}</div></div>
+    <div class="metric"><div class="metric-label">Total Pemasukan</div><div class="metric-val" style="font-size:18px;color:var(--teal)">${fmtRp(invoiceDB.filter(i=>i.status==='lunas').reduce((s,i)=>s+i.total,0))}</div></div>
+  </div>
+  <div class="grid22">
+    <div class="card">
+      <div class="card-title">Kunjungan per Poli</div>
+      ${Object.entries(poli).map(([p,n])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--cream3);font-size:13px">
+        <span>${p}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:80px;height:6px;border-radius:3px;background:var(--cream3);overflow:hidden"><div style="height:100%;width:${(n/totalPasien*100)}%;background:var(--purple);border-radius:3px"></div></div>
+          <span style="font-weight:600;color:var(--text)">${n}</span>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">Ringkasan Transaksi</div>
+      ${invoiceDB.map(i=>`
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid var(--cream3)">
+        <div><div style="font-weight:500">${i.pasien}</div><div style="font-size:11px;color:var(--text3)">${i.id}</div></div>
+        <div style="text-align:right"><div style="font-weight:600">${fmtRp(i.total)}</div>${statusBadge(i.status)}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`);
+}
+
+// Admin: Pasien modal
+function toggleBPJS(){
+  const jenis=document.getElementById('mpJenisPasien').value;
+  document.getElementById('bpjsField').style.display=jenis==='bpjs'?'block':'none';
+}
+
+function savePasien(){
+  const nama=document.getElementById('mpNama').value.trim();
+  const nik=document.getElementById('mpNIK').value.trim();
+  const tgl=document.getElementById('mpTgl').value;
+  const jenis=document.getElementById('mpJenisPasien').value;
+  const bpjs=document.getElementById('mpBPJS').value.trim();
+  const poli=document.getElementById('mpPoli').value;
+  if(!nama||!nik||!tgl){toast('Nama, NIK, dan tanggal lahir wajib diisi.','danger');return;}
+  if(jenis==='bpjs'&&!bpjs){toast('No. BPJS wajib diisi untuk pasien BPJS.','danger');return;}
+  const rm=`RM-2026-${String(pasienDB.length+100).padStart(4,'0')}`;
+  const newP={
+    id:nextPasienId++,rm,nama,nik,tgl,
+    jk:document.getElementById('mpJK').value,
+    alamat:document.getElementById('mpAlamat').value,
+    jenis,bpjs:jenis==='bpjs'?bpjs:null,
+    telp:document.getElementById('mpTelp').value,
+    poli,dokterTarget:'dr. Hendra Wijaya',
+    status:'dikirim',tanggal:'2026-04-24'
+  };
+  pasienDB.push(newP);
+  closeModal('modalPasien');
+  ['mpNama','mpNIK','mpTgl','mpAlamat','mpBPJS','mpTelp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast(`Pasien ${nama} berhasil didaftarkan & dikirim ke Poli ${poli}!`,'success');
+  updateNotifBadge();
+  renderAdminDashboard();
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+
+function openBayar(invId){
+  const inv=invoiceDB.find(i=>i.id===invId);
+  if(!inv)return;
+  selectedBayarInvId=invId;
+  document.getElementById('bayarContent').innerHTML=`
+    <div class="invoice-section">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Invoice ${inv.id}</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:4px">${inv.pasien}</div>
+      <div style="font-size:12px;color:var(--text2)">Resep: ${inv.resepId} · ${fmtDate(inv.tanggal)}</div>
+    </div>
+    <div class="invoice-section">
+      ${inv.items.map(it=>`<div class="invoice-row"><span>${it.nama} x${it.jml} ${it.satuan}</span><span>${fmtRp(it.harga*it.jml)}</span></div>`).join('')}
+      <div class="invoice-row" style="color:var(--text3)"><span>Biaya Admin/Jasa</span><span>${fmtRp(inv.adminFee)}</span></div>
+      <div class="invoice-total"><span>Total Pembayaran</span><span style="color:var(--teal)">${fmtRp(inv.total)}</span></div>
+    </div>
+    <div class="fg"><label>Metode Pembayaran</label>
+      <select id="metodeBayar"><option>Tunai</option><option>QRIS</option><option>Transfer Bank</option><option>Kartu Debit</option></select>
+    </div>`;
+  openModal('modalBayar');
+}
+
+function prosesLunas(){
+  const inv=invoiceDB.find(i=>i.id===selectedBayarInvId);
+  if(!inv)return;
+  inv.status='lunas';
+  const pasien=pasienDB.find(p=>p.id===inv.pasienId);
+  if(pasien)pasien.status='selesai_bayar';
+  closeModal('modalBayar');
+  toast(`Pembayaran ${inv.id} berhasil! Pasien ${inv.pasien} lunas.`,'success');
+  updateNotifBadge();
+  renderInvoiceAdmin();
+}
+
+function kirimUlangPasien(id){
+  const p=pasienDB.find(x=>x.id===id);
+  if(p){p.status='dikirim';toast(`Data ${p.nama} dikirim ulang ke Poli ${p.poli}.`,'info');updateNotifBadge();}
+}
+
+function cetakLaporan(){toast('Laporan siap dicetak. Fitur print akan terbuka...','info');}
+
+// ══════════════════════════════════════════
+//  🩺 DOKTER PAGES
+// ══════════════════════════════════════════
+
+function renderDokterDashboard(){
+  const myResep=resepDB.filter(r=>r.dokter==='dr. Hendra Wijaya');
+  const pending=myResep.filter(r=>r.status==='baru'||r.status==='diproses').length;
+  const selesai=myResep.filter(r=>r.status==='selesai').length;
+  const pasienHariIni=pasienDB.filter(p=>p.status==='dikirim'&&p.dokterTarget==='dr. Hendra Wijaya').length;
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Selamat datang, dr. Hendra 👋</div><div class="page-sub">Ringkasan aktivitas resep kamu hari ini</div></div>
+    <button class="btn btn-primary" onclick="showPage('tulis-resep',document.getElementById('nav-tulis-resep'))">+ Tulis Resep Baru</button>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Pasien Menunggu</div><div class="metric-val" style="color:var(--amber)">${pasienHariIni}</div><div class="metric-sub">Perlu ditangani</div></div>
+    <div class="metric"><div class="metric-label">Resep Ditulis</div><div class="metric-val">${myResep.length}</div><div class="metric-sub">Total keseluruhan</div></div>
+    <div class="metric"><div class="metric-label">Diproses Apoteker</div><div class="metric-val" style="color:var(--purple2)">${pending}</div><div class="metric-sub">Sedang disiapkan</div></div>
+    <div class="metric"><div class="metric-label">Selesai</div><div class="metric-val" style="color:var(--green)">${selesai}</div><div class="metric-sub">Obat sudah diambil</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Pasien Hari Ini</div>
+      ${pasienDB.filter(p=>p.dokterTarget==='dr. Hendra Wijaya'&&p.status==='dikirim').map(p=>`
+      <div class="activity-item">
+        <div class="act-dot" style="background:var(--teal)"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${p.nama} ${jenisBadge(p.jenis)}</div>
+          <div style="font-size:11px;color:var(--text3)">${p.poli} · ${p.rm}</div>
+        </div>
+        <button class="btn btn-xs btn-primary" onclick="goTulisResepPasien(${p.id})">Resepkan</button>
+      </div>`).join('') || '<div style="padding:1rem;text-align:center;color:var(--text3);font-size:13px">Tidak ada pasien menunggu</div>'}
+    </div>
+    <div class="card">
+      <div class="card-title">Status Resep Terbaru</div>
+      ${myResep.slice(0,5).map(r=>`
+      <div class="activity-item">
+        <div class="act-dot" style="background:${r.status==='siap'?'var(--teal)':r.status==='selesai'?'var(--green)':'var(--purple)'}"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${r.id}</div>
+          <div style="font-size:11px;color:var(--text3)">${r.pasien}</div>
+        </div>
+        ${statusBadge(r.status)}
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`);
+}
+
+function renderPasienDokter(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Data Pasien Masuk</div><div class="page-sub">Pasien yang dikirim admin ke poli Anda</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>RM</th><th>Nama</th><th>Tgl Lahir</th><th>Poli</th><th>Jenis</th><th>Diagnosa Sementara</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>${pasienDB.map(p=>`
+    <tr>
+      <td style="font-family:'Cormorant Garamond',serif;color:var(--text2)">${p.rm}</td>
+      <td><div style="font-weight:500">${p.nama}</div><div style="font-size:11px;color:var(--text3)">${p.alamat||''}</div></td>
+      <td>${fmtDate(p.tgl)}</td>
+      <td>${p.poli}</td>
+      <td>${jenisBadge(p.jenis)}${p.jenis==='bpjs'?`<div style="font-size:10px;color:var(--text3);margin-top:2px">${p.bpjs}</div>`:''}</td>
+      <td style="color:var(--text3);font-size:12px">—</td>
+      <td>${statusBadge(p.status)}</td>
+      <td><button class="btn btn-xs btn-primary" onclick="goTulisResepPasien(${p.id})">Tulis Resep</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>
+</div>`);
+}
+
+// Tulis Resep
+let tulisStep=1;let buatObatList=[];let tulisSelectedPasien=null;
+
+function goTulisResepPasien(pid){
+  tulisSelectedPasien=pasienDB.find(p=>p.id===pid)||null;
+  showPage('tulis-resep',document.getElementById('nav-tulis-resep'));
+}
+
+function renderTulisResep(preselected){
+  if(preselected)tulisSelectedPasien=preselected;
+  tulisStep=1;buatObatList=[];
+  const today=new Date().toISOString().split('T')[0];
+  const obatStandar=obatDB.filter(o=>o.kategori==='standar'&&o.jumlah>0);
+  const obatSemua=obatDB.filter(o=>o.jumlah>0);
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Tulis Resep</div><div class="page-sub">Buat resep digital untuk pasien</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,1.6fr) 280px;gap:16px;align-items:start">
+    <div class="card">
+      <div id="rxStepBar"></div>
+      <div id="rxStepContent"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card" id="infoCard">
+        <div class="card-title" style="font-size:15px;margin-bottom:10px">Info Pasien</div>
+        <div id="infoPasienContent"><div style="font-size:13px;color:var(--text3)">Pilih pasien terlebih dahulu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="font-size:15px;margin-bottom:10px">Panduan Resep</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.8">
+          <strong style="color:var(--blue)">BPJS:</strong> Hanya obat standar yang dapat diberikan.<br><br>
+          <strong style="color:var(--green)">Mandiri:</strong> Boleh memilih obat standar maupun premium.<br><br>
+          Stok dikelola sistem FEFO otomatis.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`);
+  renderStepBar();renderStepContent();
+  if(tulisSelectedPasien)updatePasienInfo();
+}
+
+function renderStepBar(){
+  const steps=[{n:1,l:'Info Pasien'},{n:2,l:'Pilih Obat'},{n:3,l:'Konfirmasi'}];
+  const el=document.getElementById('rxStepBar');
+  if(!el)return;
+  el.className='step-bar';
+  el.innerHTML=steps.map((s,i)=>`
+    ${i>0?`<div class="step-line ${tulisStep>s.n?'done':''}"></div>`:''}
+    <div class="step-item ${tulisStep===s.n?'active':tulisStep>s.n?'done':''}">
+      <div class="step-dot ${tulisStep===s.n?'active':tulisStep>s.n?'done':''}">${tulisStep>s.n?'✓':s.n}</div>${s.l}
+    </div>`).join('');
+}
+
+function renderStepContent(){
+  const el=document.getElementById('rxStepContent');if(!el)return;
+  if(tulisStep===1){
+    const today=new Date().toISOString().split('T')[0];
+    el.innerHTML=`
+      <div class="fr">
+        <div class="fg"><label>Pilih Pasien</label>
+          <select id="rxPasienSel" onchange="onSelectPasien()">
+            <option value="">-- Pilih pasien --</option>
+            ${pasienDB.map(p=>`<option value="${p.id}">${p.nama} — ${p.rm}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label>No. Rekam Medis</label><input id="rxRM" type="text" readonly placeholder="Otomatis terisi"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Nama Lengkap</label><input id="rxNama" type="text" readonly></div>
+        <div class="fg"><label>Tanggal Lahir</label><input id="rxTglLahir" type="text" readonly></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Poli / Klinik</label><input id="rxPoli" type="text" readonly></div>
+        <div class="fg"><label>Tanggal Resep</label><input id="rxTanggal" type="date" value="${today}"></div>
+      </div>
+      <div class="fg"><label>Diagnosis / Keluhan Utama *</label>
+        <textarea id="rxDiagnosis" placeholder="cth. ISPA, batuk berdahak, demam 3 hari..."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary btn-sm" onclick="rxNext1()">Lanjut → Pilih Obat</button>
+      </div>`;
+    if(tulisSelectedPasien){
+      setTimeout(()=>{
+        document.getElementById('rxPasienSel').value=tulisSelectedPasien.id;
+        onSelectPasien();
+      },50);
+    }
+  } else if(tulisStep===2){
+    const isBPJS=tulisSelectedPasien?.jenis==='bpjs';
+    const availObat=obatDB.filter(o=>o.jumlah>0&&(isBPJS?o.kategori==='standar':true));
+    el.innerHTML=`
+      <div style="background:var(--cream2);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px">
+        <strong>${tulisSelectedPasien?.nama||''}</strong> · ${jenisBadge(tulisSelectedPasien?.jenis||'mandiri')}
+        ${isBPJS?'<span style="color:var(--blue);margin-left:6px">Hanya obat standar tersedia</span>':'<span style="color:var(--green);margin-left:6px">Obat standar & premium tersedia</span>'}
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <select id="rxObatSel" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--cream3);background:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+          <option value="">-- Pilih obat --</option>
+          ${availObat.map(o=>`<option value="${o.id}">${o.nama} (${o.tipe}) — Stok: ${o.jumlah} ${o.satuan} ${o.kategori==='premium'?'⭐':''}</option>`).join('')}
+        </select>
+        <button class="btn btn-sm" style="border-color:var(--purple);color:var(--purple2)" onclick="rxAddObat()">+ Tambah</button>
+      </div>
+      <div id="rxObatListRender" style="margin-bottom:14px"></div>
+      <div class="fg"><label>Catatan untuk Apoteker</label>
+        <textarea id="rxCatatan" placeholder="cth. Harap konfirmasi jika ada kontraindikasi..."></textarea>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <button class="btn btn-sm" onclick="rxBack()">← Kembali</button>
+        <button class="btn btn-primary btn-sm" onclick="rxNext2()">Lanjut → Konfirmasi</button>
+      </div>`;
+    renderBuatObatList();
+  } else if(tulisStep===3){
+    const total=buatObatList.reduce((s,o)=>s+(o.harga*o.jml),0);
+    el.innerHTML=`
+      <div style="background:var(--cream2);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-weight:500;margin-bottom:4px">${tulisSelectedPasien?.nama||'—'}</div>
+        <div style="font-size:12px;color:var(--text2)">${tulisSelectedPasien?.rm||''} · ${tulisSelectedPasien?.poli||''}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">${document.getElementById('rxDiagnosis')?.value||''}</div>
+      </div>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px">Daftar Obat</div>
+      ${buatObatList.map(o=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--cream3);font-size:13px">
+        <div><div style="font-weight:500">${o.nama} ${tipeBadge(o.tipe)}</div><div style="font-size:11px;color:var(--text3)">${o.aturan||'—'}</div></div>
+        <div style="text-align:right;white-space:nowrap"><div>${o.jml} ${o.satuan}</div><div style="font-size:11px;color:var(--text3)">${fmtRp(o.harga*o.jml)}</div></div>
+      </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-weight:600;font-size:14px;padding:10px 0">
+        <span>Estimasi Total</span><span style="color:var(--teal)">${fmtRp(total)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <button class="btn btn-sm" onclick="rxBack()">← Kembali</button>
+        <button class="btn btn-teal btn-sm" onclick="rxSubmit()">Kirim ke Apoteker</button>
+      </div>`;
+  }
+}
+
+function onSelectPasien(){
+  const v=document.getElementById('rxPasienSel')?.value;
+  tulisSelectedPasien=v?pasienDB.find(p=>p.id==v):null;
+  updatePasienInfo();
+  if(tulisSelectedPasien){
+    document.getElementById('rxRM').value=tulisSelectedPasien.rm;
+    document.getElementById('rxNama').value=tulisSelectedPasien.nama;
+    document.getElementById('rxTglLahir').value=fmtDate(tulisSelectedPasien.tgl);
+    document.getElementById('rxPoli').value=tulisSelectedPasien.poli;
+  }
+}
+
+function updatePasienInfo(){
+  const el=document.getElementById('infoPasienContent');if(!el)return;
+  if(!tulisSelectedPasien){el.innerHTML='<div style="font-size:13px;color:var(--text3)">Pilih pasien terlebih dahulu</div>';return;}
+  const p=tulisSelectedPasien;
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--purple2)">${p.nama.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div><div style="font-weight:500;font-size:13px">${p.nama}</div><div style="font-size:11px;color:var(--text2)">${p.rm}</div></div>
+    </div>
+    <div style="font-size:12px;line-height:1.85;color:var(--text2)">
+      Lahir: ${fmtDate(p.tgl)}<br>
+      Jenis: ${jenisBadge(p.jenis)}${p.jenis==='bpjs'?`<div style="font-size:10px;margin-top:2px">${p.bpjs}</div>`:''}<br>
+      Poli: ${p.poli}
+    </div>`;
+}
+
+function rxNext1(){
+  if(!tulisSelectedPasien){toast('Pilih pasien terlebih dahulu.','danger');return;}
+  if(!document.getElementById('rxDiagnosis')?.value.trim()){toast('Diagnosis wajib diisi.','danger');return;}
+  tulisStep=2;renderStepBar();renderStepContent();
+}
+function rxBack(){tulisStep=Math.max(1,tulisStep-1);renderStepBar();renderStepContent();}
+
+function rxAddObat(){
+  const sel=document.getElementById('rxObatSel');
+  if(!sel||!sel.value)return;
+  const obat=obatDB.find(o=>o.id==sel.value);
+  if(!obat)return;
+  if(buatObatList.find(o=>o.id==obat.id)){toast('Obat sudah ditambahkan.','warn');return;}
+  buatObatList.push({...obat,jml:1,aturan:'',diganti:false});
+  renderBuatObatList();
+}
+
+function renderBuatObatList(){
+  const el=document.getElementById('rxObatListRender');if(!el)return;
+  if(!buatObatList.length){el.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px">Belum ada obat ditambahkan</div>';return;}
+  el.innerHTML=buatObatList.map((o,i)=>`
+  <div class="rx-obat-item">
+    <div class="rx-obat-top">
+      <div class="rx-obat-nama">${o.nama} ${tipeBadge(o.tipe)} ${o.kategori==='premium'?'<span style="font-size:10px;color:var(--amber)">⭐ Premium</span>':''}</div>
+      <button class="btn-remove" onclick="rxRemoveObat(${i})">Hapus</button>
+    </div>
+    <div class="fr3">
+      <div class="fg" style="margin-bottom:0"><label>Jumlah</label><input type="number" min="1" max="${o.jumlah}" value="${o.jml}" onchange="rxUpdateObat(${i},'jml',this.value)"></div>
+      <div class="fg" style="margin-bottom:0"><label>Satuan</label><input type="text" value="${o.satuan}" readonly></div>
+      <div class="fg" style="margin-bottom:0"><label>Aturan Pakai</label><input type="text" placeholder="3x1 setelah makan" value="${o.aturan}" onchange="rxUpdateObat(${i},'aturan',this.value)"></div>
+    </div>
+  </div>`).join('');
+}
+
+function rxRemoveObat(i){buatObatList.splice(i,1);renderBuatObatList();}
+function rxUpdateObat(i,key,val){if(buatObatList[i])buatObatList[i][key]=key==='jml'?parseInt(val)||1:val;}
+
+function rxNext2(){
+  if(!buatObatList.length){toast('Tambahkan minimal 1 obat.','danger');return;}
+  tulisStep=3;renderStepBar();renderStepContent();
+}
+
+function rxSubmit(){
+  if(!tulisSelectedPasien)return;
+  const diagnosis=document.getElementById('rxDiagnosis')?.value||'';
+  const catatan=document.getElementById('rxCatatan')?.value||'';
+  const total=buatObatList.reduce((s,o)=>s+(o.harga*o.jml),0);
+  const newId=`RX-2026-${String(nextResepId).padStart(4,'0')}`;
+  nextResepId++;
+  resepDB.unshift({
+    id:newId,pasienId:tulisSelectedPasien.id,pasien:tulisSelectedPasien.nama,rm:tulisSelectedPasien.rm,
+    poli:tulisSelectedPasien.poli,jenisPasien:tulisSelectedPasien.jenis,diagnosis,catatan,
+    tanggal:new Date().toISOString().split('T')[0],dokter:'dr. Hendra Wijaya',
+    obat:buatObatList.map(o=>({...o})),status:'baru',total
+  });
+  tulisSelectedPasien.status='dikirim';
+  tulisSelectedPasien=null;buatObatList=[];tulisStep=1;
+  updateNotifBadge();
+  toast(`Resep ${newId} berhasil dikirim ke apoteker!`,'success');
+  setTimeout(()=>showPage('riwayat-resep',document.getElementById('nav-riwayat-resep')),800);
+}
+
+function renderRiwayatDokter(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Riwayat Resep</div><div class="page-sub">Semua resep yang pernah ditulis</div></div>
+  </div>
+  <div class="search-row">
+    <input class="search-input" type="text" placeholder="Cari pasien / no. resep..." id="cariResep" oninput="filterResepDokter()">
+    <select class="filter-sel" id="filterStatus" onchange="filterResepDokter()">
+      <option value="">Semua status</option><option value="baru">Baru</option><option value="diproses">Diproses</option>
+      <option value="siap">Siap Diambil</option><option value="selesai">Selesai</option><option value="invoice_terkirim">Invoice Terkirim</option>
+    </select>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,1.3fr) 300px;gap:14px;align-items:start">
+    <div class="card" style="padding:14px"><div id="resepListDokter"></div></div>
+    <div id="resepDetailDokter"><div class="card"><div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">Pilih resep untuk melihat detail</div></div></div>
+  </div>
+</div>`);
+  filterResepDokter();
+}
+
+let selResep=null;
+function filterResepDokter(){
+  const q=(document.getElementById('cariResep')?.value||'').toLowerCase();
+  const fs=document.getElementById('filterStatus')?.value||'';
+  const list=resepDB.filter(r=>{
+    if(q&&!r.pasien.toLowerCase().includes(q)&&!r.id.toLowerCase().includes(q))return false;
+    if(fs&&r.status!==fs)return false;
+    return true;
+  });
+  document.getElementById('resepListDokter').innerHTML=list.length?list.map(r=>`
+    <div class="resep-list-item${selResep&&selResep.id===r.id?' selected':''}" onclick="selResepDokter('${r.id}')">
+      <div class="rli-top"><div><div class="rli-no">${r.id}</div><div class="rli-meta">${r.pasien} · ${r.poli}</div></div>${statusBadge(r.status)}</div>
+      <div class="rli-bottom">${r.obat.length} obat · ${fmtDate(r.tanggal)} · ${fmtRp(r.total)}</div>
+    </div>`).join(''):`<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">Tidak ada resep ditemukan</div>`;
+}
+
+function selResepDokter(id){
+  selResep=resepDB.find(r=>r.id===id);
+  filterResepDokter();
+  const r=selResep;
+  document.getElementById('resepDetailDokter').innerHTML=`
+    <div class="card">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;margin-bottom:3px">${r.id}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">${r.pasien} · ${r.rm}</div>
+      <div style="margin-bottom:12px">${statusBadge(r.status)} ${jenisBadge(r.jenisPasien)}</div>
+      <div style="background:var(--cream2);border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:12px">
+        <span style="color:var(--text3)">Poli:</span> ${r.poli}<br>
+        <span style="color:var(--text3)">Diagnosis:</span> ${r.diagnosis}
+        ${r.catatan?`<br><span style="color:var(--text3)">Catatan:</span> ${r.catatan}`:''}
+      </div>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px">Daftar Obat</div>
+      ${r.obat.map(o=>`
+      <div class="detail-row">
+        <div><div class="detail-obat-nama">${o.nama} ${tipeBadge(o.tipe)}${o.diganti?'<span style="font-size:10px;color:var(--orange);margin-left:4px">↳ Diganti</span>':''}</div>
+        <div class="detail-obat-info">${o.aturan||'—'}</div></div>
+        <div style="font-weight:500;white-space:nowrap">${o.jml} ${o.satuan}</div>
+      </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid var(--cream3)">
+        <span>Total Estimasi</span><span>${fmtRp(r.total)}</span>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+//  💊 APOTEKER PAGES
+// ══════════════════════════════════════════
+
+function renderApotekerDashboard(){
+  const alerts=getAlertObat();
+  const antrian=resepDB.filter(r=>r.status==='baru'||r.status==='diproses').length;
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Dashboard Apoteker 💊</div><div class="page-sub">Kelola stok dan validasi resep hari ini</div></div>
+    <button class="btn btn-primary" onclick="openModal('modalObat')">+ Input Stok Baru</button>
+  </div>
+  <div class="metrics3">
+    <div class="metric"><div class="metric-label">Antrian Resep</div><div class="metric-val" style="color:var(--purple2)">${antrian}</div><div class="metric-sub">Perlu divalidasi</div></div>
+    <div class="metric"><div class="metric-label">Total Obat</div><div class="metric-val">${obatDB.length}</div><div class="metric-sub">Jenis obat terdaftar</div></div>
+    <div class="metric"><div class="metric-label">Alert Stok</div><div class="metric-val" style="color:var(--red)">${alerts.length}</div><div class="metric-sub">Perlu perhatian</div></div>
+  </div>
+  ${alerts.length?`
+  <div class="card">
+    <div class="card-title">⚠️ Alert Stok Obat</div>
+    ${alerts.slice(0,4).map(o=>{
+      const exp=new Date(o.exp);const today=new Date();const soon=new Date();soon.setDate(soon.getDate()+30);
+      const isExp=exp<today;const isNear=exp<soon&&!isExp;const isLow=o.jumlah<10;
+      let cls=isExp?'exp':isNear?'near-exp':'low';
+      let msg=isExp?`KADALUARSA ${fmtDate(o.exp)}`:isNear?`Mendekati exp ${fmtDate(o.exp)}`:isLow?`Stok rendah: ${o.jumlah} ${o.satuan}`:'';
+      return`<div class="stok-alert-item ${cls}"><span style="font-weight:500">${o.nama}</span><span style="font-size:12px">${msg}</span></div>`;
+    }).join('')}
+    ${alerts.length>4?`<div style="text-align:center;margin-top:8px"><button class="btn btn-sm" onclick="showPage('alert-stok',document.getElementById('nav-alert-stok'))">Lihat Semua (${alerts.length})</button></div>`:''}
+  </div>`:''}
+  <div class="card">
+    <div class="card-title">Antrian Resep Masuk</div>
+    ${resepDB.filter(r=>r.status==='baru'||r.status==='diproses').map(r=>`
+    <div class="activity-item">
+      <div class="act-dot" style="background:var(--purple)"></div>
+      <div style="flex:1">
+        <div style="font-weight:500">${r.id} — ${r.pasien} ${jenisBadge(r.jenisPasien)}</div>
+        <div style="font-size:11px;color:var(--text3)">${r.poli} · ${r.obat.length} obat</div>
+      </div>
+      <button class="btn btn-xs btn-primary" onclick="openValidasi('${r.id}')">Validasi</button>
+    </div>`).join('') || '<div style="padding:1rem;text-align:center;color:var(--text3);font-size:13px">Tidak ada antrian</div>'}
+  </div>
+</div>`);
+}
+
+function renderStok(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Stok Obat</div><div class="page-sub">Kelola stok obat per batch</div></div>
+    <button class="btn btn-primary" onclick="openModal('modalObat')">+ Input Batch Baru</button>
+  </div>
+  <div class="search-row">
+    <input class="search-input" type="text" placeholder="Cari nama obat..." id="cariObat" oninput="filterStok()">
+    <select class="filter-sel" id="filterKat" onchange="filterStok()">
+      <option value="">Semua Kategori</option><option value="standar">Standar</option><option value="premium">Premium</option>
+    </select>
+    <select class="filter-sel" id="filterTipe" onchange="filterStok()">
+      <option value="">Semua Tipe</option><option>Tablet</option><option>Kapsul</option><option>Sirup</option><option>Injeksi</option><option>Salep</option>
+    </select>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Nama Obat</th><th>Tipe</th><th>Batch</th><th>Stok</th><th>Harga Satuan</th><th>Tgl Exp</th><th>Kategori</th><th>Status</th></tr></thead>
+    <tbody id="stokTableBody"></tbody>
+  </table></div>
+</div>`);
+  filterStok();
+}
+
+function filterStok(){
+  const q=(document.getElementById('cariObat')?.value||'').toLowerCase();
+  const fk=document.getElementById('filterKat')?.value||'';
+  const ft=document.getElementById('filterTipe')?.value||'';
+  const list=obatDB.filter(o=>{
+    if(q&&!o.nama.toLowerCase().includes(q))return false;
+    if(fk&&o.kategori!==fk)return false;
+    if(ft&&o.tipe!==ft)return false;
+    return true;
+  });
+  const today=new Date();const soon=new Date();soon.setDate(soon.getDate()+30);
+  document.getElementById('stokTableBody').innerHTML=list.map(o=>{
+    const exp=new Date(o.exp);
+    const isExp=exp<today;const isNear=exp<soon&&!isExp;const isLow=o.jumlah<10;
+    let statusHtml=isExp?`<span class="badge" style="background:var(--red-light);color:var(--red)">Kadaluarsa</span>`:
+      isNear?`<span class="badge" style="background:var(--amber-light);color:#7A4A0A">Mendekati Exp</span>`:
+      isLow?`<span class="badge" style="background:var(--blue-light);color:#185FA5">Stok Rendah</span>`:
+      `<span class="badge" style="background:var(--green-light);color:#1F6B43">OK</span>`;
+    return`<tr>
+      <td style="font-weight:500">${o.nama}</td>
+      <td>${tipeBadge(o.tipe)}</td>
+      <td style="font-size:12px;color:var(--text2)">${o.batch}</td>
+      <td><span style="font-weight:600;${isLow?'color:var(--red)':''}">${o.jumlah}</span> ${o.satuan}</td>
+      <td>${fmtRp(o.harga)}</td>
+      <td style="${isExp?'color:var(--red);font-weight:500':isNear?'color:var(--amber)':''}">${fmtDate(o.exp)}</td>
+      <td><span class="badge ${o.kategori==='premium'?'b-injeksi':'b-siap'}">${o.kategori==='premium'?'Premium':'Standar'}</span></td>
+      <td>${statusHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAlertStok(){
+  const today=new Date();const soon=new Date();soon.setDate(soon.getDate()+30);
+  const alerts=obatDB.filter(o=>{
+    const exp=new Date(o.exp);return exp<today||exp<soon||o.jumlah<10;
+  });
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Alert Stok ⚠️</div><div class="page-sub">Obat yang memerlukan perhatian segera</div></div>
+  </div>
+  ${alerts.length===0?`<div class="card"><div style="text-align:center;padding:2rem;color:var(--green);font-size:15px">✓ Semua stok dalam kondisi baik!</div></div>`:
+  `<div style="display:flex;flex-direction:column;gap:10px">${alerts.map(o=>{
+    const exp=new Date(o.exp);
+    const isExp=exp<today;const isNear=exp<soon&&!isExp;const isLow=o.jumlah<10&&!isExp&&!isNear;
+    const cls=isExp?'alert-danger':isNear?'alert-warn':'alert-info';
+    const icon=isExp?'🔴':isNear?'🟡':'🔵';
+    const msg=isExp?`Sudah KADALUARSA sejak ${fmtDate(o.exp)}`:
+      isNear?`Mendekati kadaluarsa pada ${fmtDate(o.exp)} (dalam 30 hari)`:
+      `Stok sangat rendah: hanya ${o.jumlah} ${o.satuan} tersisa`;
+    return`<div class="alert ${cls}">
+      <span style="font-size:16px">${icon}</span>
+      <div style="flex:1"><div style="font-weight:600">${o.nama}</div><div style="font-size:12px;margin-top:2px">${msg}</div><div style="font-size:11px;margin-top:2px;opacity:.7">Batch: ${o.batch}</div></div>
+      <button class="btn btn-xs" onclick="openModal('modalObat')">Restock</button>
+    </div>`;
+  }).join('')}</div>`}
+</div>`);
+}
+
+function renderAntrianResep(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Antrian Resep</div><div class="page-sub">Validasi dan siapkan obat</div></div>
+  </div>
+  <div class="search-row">
+    <input class="search-input" type="text" placeholder="Cari pasien / no. resep..." id="cariAntrResep" oninput="filterAntrianResep()">
+    <select class="filter-sel" id="filterAntrStatus" onchange="filterAntrianResep()">
+      <option value="">Semua</option><option value="baru">Baru</option><option value="diproses">Diproses</option>
+    </select>
+  </div>
+  <div id="antrianResepList"></div>
+</div>`);
+  filterAntrianResep();
+}
+
+function filterAntrianResep(){
+  const q=(document.getElementById('cariAntrResep')?.value||'').toLowerCase();
+  const fs=document.getElementById('filterAntrStatus')?.value||'';
+  const list=resepDB.filter(r=>{
+    if(!['baru','diproses'].includes(r.status))return false;
+    if(q&&!r.pasien.toLowerCase().includes(q)&&!r.id.toLowerCase().includes(q))return false;
+    if(fs&&r.status!==fs)return false;
+    return true;
+  });
+  document.getElementById('antrianResepList').innerHTML=list.length?list.map(r=>`
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600">${r.id}</div>
+        <div style="font-size:12px;color:var(--text2)">${r.pasien} · ${r.poli} · ${fmtDate(r.tanggal)}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">${statusBadge(r.status)} ${jenisBadge(r.jenisPasien)}</div>
+    </div>
+    <div style="background:var(--cream2);border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px;color:var(--text2)">
+      <strong>Diagnosis:</strong> ${r.diagnosis}${r.catatan?`<br><strong>Catatan dokter:</strong> ${r.catatan}`:''}
+    </div>
+    <div style="display:flex;gap:6px">
+      ${r.obat.map(o=>`<span class="badge ${obatDB.find(x=>x.id===o.id)?.jumlah>0?'b-siap':'b-batal'}">${o.nama}</span>`).join('')}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="openValidasi('${r.id}')">Validasi & Siapkan</button>
+      <button class="btn btn-sm" onclick="tandaiDiproses('${r.id}')">Tandai Diproses</button>
+    </div>
+  </div>`).join(''):`<div class="card"><div style="text-align:center;padding:2rem;color:var(--green);font-size:13px">✓ Tidak ada antrian resep!</div></div>`;
+}
+
+function tandaiDiproses(id){
+  const r=resepDB.find(x=>x.id===id);
+  if(r&&r.status==='baru'){r.status='diproses';toast(`Resep ${id} ditandai sedang diproses.`,'info');filterAntrianResep();updateNotifBadge();}
+}
+
+// Validasi resep
+let validasiResep=null;let validasiObatEdit=[];
+function openValidasi(id){
+  validasiResep=resepDB.find(r=>r.id===id);
+  if(!validasiResep)return;
+  validasiObatEdit=validasiResep.obat.map(o=>({
+    ...o,
+    available:obatDB.find(x=>x.id===o.id)?.jumlah||0,
+    penggantiId:null,namaPengganti:null
+  }));
+  renderValidasiContent();
+  openModal('modalValidasi');
+}
+
+function renderValidasiContent(){
+  const r=validasiResep;
+  document.getElementById('validasiContent').innerHTML=`
+    <div style="background:var(--cream2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px">
+      <strong>${r.pasien}</strong> · ${r.rm} · ${jenisBadge(r.jenisPasien)}<br>
+      Diagnosis: ${r.diagnosis}
+    </div>
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:10px">Verifikasi Obat</div>
+    ${validasiObatEdit.map((o,i)=>{
+      const stokCukup=o.available>=o.jml;
+      return`<div style="border:1px solid ${stokCukup?'var(--cream3)':'var(--red)'};border-radius:8px;padding:12px;margin-bottom:8px;background:${stokCukup?'var(--white)':'var(--red-light)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:500">${o.namaPengganti||o.nama} ${tipeBadge(o.tipe)}</div>
+          <span style="font-size:12px;${stokCukup?'color:var(--green)':'color:var(--red)'}">${stokCukup?`✓ Stok: ${o.available}`:`⚠ Stok: ${o.available} / butuh ${o.jml}`}</span>
+        </div>
+        ${!stokCukup&&!o.namaPengganti?`
+        <div class="alert alert-warn" style="margin-bottom:8px;padding:8px 10px">Stok tidak cukup. Pilih obat pengganti:</div>
+        <div style="display:flex;gap:8px">
+          <select id="gantiSel${i}" style="flex:1;padding:7px 10px;border-radius:6px;border:1px solid var(--cream3);background:var(--cream);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+            <option value="">-- Pilih pengganti --</option>
+            ${obatDB.filter(x=>x.id!==o.id&&x.jumlah>=o.jml&&(r.jenisPasien==='bpjs'?x.kategori==='standar':true)).map(x=>`<option value="${x.id}">${x.nama} (${x.tipe}) — Stok: ${x.jumlah}</option>`).join('')}
+          </select>
+          <button class="btn btn-xs btn-amber" onclick="applyGanti(${i})">Ganti</button>
+        </div>`:''}
+        ${o.namaPengganti?`<div style="font-size:12px;color:var(--amber);margin-top:6px">↳ Diganti dengan: <strong>${o.namaPengganti}</strong></div>`:''}
+      </div>`;
+    }).join('')}`;
+}
+
+function applyGanti(i){
+  const selEl=document.getElementById(`gantiSel${i}`);
+  if(!selEl||!selEl.value)return;
+  const pengganti=obatDB.find(o=>o.id==selEl.value);
+  if(!pengganti)return;
+  validasiObatEdit[i].penggantiId=pengganti.id;
+  validasiObatEdit[i].namaPengganti=pengganti.nama;
+  validasiObatEdit[i].available=pengganti.jumlah;
+  validasiObatEdit[i].diganti=true;
+  renderValidasiContent();
+}
+
+function kirimInvoice(){
+  // check all obat ok
+  const allOk=validasiObatEdit.every(o=>o.available>=o.jml);
+  if(!allOk){toast('Ada obat yang stoknya tidak cukup atau belum diganti.','danger');return;}
+  // apply pengganti & kurangi stok
+  validasiObatEdit.forEach(o=>{
+    const id=o.penggantiId||o.id;
+    const stokObat=obatDB.find(x=>x.id==id);
+    if(stokObat){stokObat.jumlah-=o.jml;}
+    o.id=id;
+    if(o.namaPengganti)o.nama=o.namaPengganti;
+  });
+  validasiResep.obat=validasiObatEdit;
+  // create invoice
+  const adminFee=5000;
+  const subtotal=validasiObatEdit.reduce((s,o)=>{
+    const ob=obatDB.find(x=>x.id==o.id);return s+((ob?.harga||o.harga)*o.jml);
+  },0);
+  const invId=`INV-2026-${String(nextInvId).padStart(4,'0')}`;nextInvId++;
+  invoiceDB.push({
+    id:invId,resepId:validasiResep.id,pasienId:validasiResep.pasienId,
+    pasien:validasiResep.pasien,tanggal:new Date().toISOString().split('T')[0],
+    items:validasiObatEdit.map(o=>({nama:o.namaPengganti||o.nama,jml:o.jml,satuan:o.satuan,harga:obatDB.find(x=>x.id==o.id)?.harga||o.harga})),
+    subtotal,adminFee,total:subtotal+adminFee,status:'belum_lunas'
+  });
+  validasiResep.status='invoice_terkirim';
+  validasiResep.invoiceId=invId;
+  const pasien=pasienDB.find(p=>p.id===validasiResep.pasienId);
+  if(pasien){pasien.status='invoice_masuk';pasien.invoiceId=invId;}
+  closeModal('modalValidasi');
+  toast(`Invoice ${invId} berhasil dikirim ke admin!`,'success');
+  updateNotifBadge();
+  renderAntrianResep();
+}
+
+function renderRiwayatApoteker(){
+  setContent(`
+<div class="page active">
+  <div class="page-header">
+    <div><div class="page-title">Riwayat Resep</div><div class="page-sub">Resep yang sudah diproses apoteker</div></div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>No. Resep</th><th>Pasien</th><th>Jenis</th><th>Obat</th><th>Status</th><th>Invoice</th><th>Tanggal</th></tr></thead>
+    <tbody>${resepDB.filter(r=>!['baru','diproses'].includes(r.status)).map(r=>`
+    <tr>
+      <td style="font-family:'Cormorant Garamond',serif;color:var(--text2)">${r.id}</td>
+      <td><div style="font-weight:500">${r.pasien}</div><div style="font-size:11px;color:var(--text3)">${r.rm}</div></td>
+      <td>${jenisBadge(r.jenisPasien)}</td>
+      <td>${r.obat.map(o=>`<span style="font-size:12px;color:var(--text2)">${o.nama}</span>`).join(', ')}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.invoiceId||'—'}</td>
+      <td>${fmtDate(r.tanggal)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>
+</div>`);
+}
+
+// ══════════════════════════════════════════
+//  STOK OBAT INPUT
+// ══════════════════════════════════════════
+function saveObat(){
+  const nama=document.getElementById('moNama').value.trim();
+  const jumlah=parseInt(document.getElementById('moJumlah').value);
+  const harga=parseInt(document.getElementById('moHarga').value);
+  const exp=document.getElementById('moExp').value;
+  if(!nama||!jumlah||!harga||!exp){toast('Semua field wajib diisi.','danger');return;}
+  if(exp<new Date().toISOString().split('T')[0]){toast('Tanggal kadaluarsa tidak boleh di masa lalu.','danger');return;}
+  obatDB.push({
+    id:nextObatId++,nama,
+    tipe:document.getElementById('moTipe').value,
+    jumlah,satuan:document.getElementById('moSatuan').value,harga,
+    batch:document.getElementById('moBatch').value||`BATCH-2026-${String(nextObatId).padStart(3,'0')}`,
+    exp,kategori:document.getElementById('moKategori').value
+  });
+  closeModal('modalObat');
+  ['moNama','moJumlah','moHarga','moBatch','moExp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  toast(`Obat ${nama} berhasil ditambahkan ke stok.`,'success');
+  updateNotifBadge();
+  if(currentRole==='apoteker')renderStok();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+updateNotifBadge();
+</script>
+</body>
+</html>
