@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return view('login');
@@ -70,9 +71,7 @@ Route::prefix('admin')->group(function () {
         return view('admin.queue');
     });
 
-    Route::get('/invoice', function () {
-        return view('admin.invoice');
-    });
+    Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
 
     Route::get('/payment', function () {
         return view('admin.payment');
@@ -82,3 +81,4 @@ Route::prefix('admin')->group(function () {
         return view('admin.report');
     });
 });
+
