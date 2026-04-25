@@ -2,39 +2,56 @@
 
 @section('content')
 
-<!-- ════ PEMBAYARAN ════ -->
-<div class="page" id="pg-pembayaran">
+<div class="page-section" id="sec-pembayaran">
   <div class="page-header">
     <div>
-      <div class="page-title">Proses Pembayaran</div>
-      <div class="page-sub">Pilih resep yang sudah divalidasi apoteker</div>
+      <div class="page-title">Transaksi Pembayaran</div>
+      <div class="page-sub">Proses pembayaran pasien & riwayat transaksi</div>
     </div>
   </div>
-  <div class="page-body">
-    <div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start">
-      <!-- LEFT: Resep List -->
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="search-row">
-          <input class="search-input" type="text" placeholder="Cari nama pasien / no. resep..." id="paySearch" oninput="renderPayList()">
-          <select class="filter-sel" id="payFilter" onchange="renderPayList()">
-            <option value="siap">Siap Bayar</option>
-            <option value="">Semua</option>
+
+  <div class="grid2" style="align-items:start">
+    <!-- Form Bayar -->
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-title">Proses Pembayaran</div>
+        <div class="fg">
+          <label>Pilih Invoice / No. RM</label>
+          <select id="bayarInvoiceSel" onchange="loadInvoiceUntukBayar()">
+            <option value="">— Pilih invoice —</option>
           </select>
         </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Antrian Pembayaran</div><span class="badge b-siap" id="payQueueCount">0</span></div>
-          <div class="card-body"><div id="payRxList"></div></div>
+        <div id="bayarSummary" style="display:none">
+          <div id="bayarInfoBox" style="background:var(--cream);border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px"></div>
+          <div class="fg"><label>Metode Pembayaran</label>
+            <div id="metodeBayarOpts"></div>
+          </div>
+          <div id="bpjsNote" style="display:none;background:var(--teal-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#0F6E56">
+            🏥 Pasien BPJS: biaya ditanggung sesuai ketentuan. Pasien hanya membayar komponen non-tanggungan (jika ada).
+          </div>
+          <div id="mandiriNote" style="display:none;background:var(--purple-light);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#534AB7">
+            💳 Pasien Mandiri: total tagihan dibayar penuh oleh pasien.
+          </div>
+          <div id="detailTagihan" style="border:1px solid var(--cream3);border-radius:10px;overflow:hidden;margin-bottom:14px"></div>
+          <div class="fg"><label>Nominal Bayar (Rp)</label>
+            <input type="number" id="nominalBayar" placeholder="Masukkan jumlah pembayaran">
+          </div>
+          <div class="fg"><label>Catatan</label>
+            <input type="text" id="catatanBayar" placeholder="Opsional...">
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="prosesBayar()">💳 Proses Pembayaran</button>
         </div>
       </div>
-      <!-- RIGHT: Payment Form -->
-      <div id="payFormWrap">
-        <div style="background:var(--white);border:1.5px solid var(--paper3);border-radius:14px;overflow:hidden">
-          <div style="padding:20px;text-align:center;color:var(--ink3)">
-            <div style="font-size:32px;margin-bottom:10px;opacity:.3">💳</div>
-            <div style="font-size:14px;font-weight:500">Pilih resep di sebelah kiri</div>
-            <div style="font-size:12px;margin-top:4px;color:var(--ink4)">untuk memulai proses pembayaran</div>
-          </div>
-        </div>
+    </div>
+
+    <!-- Riwayat Transaksi -->
+    <div class="card">
+      <div class="card-title">Riwayat Transaksi</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>No.</th><th>Pasien</th><th>Total</th><th>Metode</th><th>Status</th><th>Tgl</th></tr></thead>
+          <tbody id="tblTransaksi"></tbody>
+        </table>
       </div>
     </div>
   </div>
