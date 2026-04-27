@@ -1,15 +1,27 @@
 <?php
 
+use App\Http\Controllers\BatchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PasienController;
 
+/*
+|--------------------------------------------------------------------------
+| LOGIN
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return view('login');
 });
 
 Route::post('/login', [AuthController::class, 'login']);
 
+/*
+|--------------------------------------------------------------------------
+| APOTEKER
+|--------------------------------------------------------------------------
+*/
 Route::prefix('apoteker')->group(function () {
     Route::get('/dashboard', function () {
         return view('apoteker.dashboard');
@@ -36,6 +48,11 @@ Route::prefix('apoteker')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| DOKTER
+|--------------------------------------------------------------------------
+*/
 Route::prefix('dokter')->group(function () {
     Route::get('/dashboard', function () {
         return view('dokter.dashboard');
@@ -58,20 +75,36 @@ Route::prefix('dokter')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
 Route::prefix('admin')->group(function () {
+
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     });
 
-    Route::get('/data', function () {
-        return view('admin.data');
-    });
+    // ✅ DATA PASIEN — pakai controller supaya $pasiens terkirim ke view
+    Route::get('/data', [PasienController::class, 'index'])
+        ->name('pasien.index');
+
+    // ✅ CREATE PASIEN (FORM)
+    Route::get('/pasien/create', [PasienController::class, 'create'])
+        ->name('pasien.create');
+
+    // ✅ STORE PASIEN (SAVE KE DB)
+    Route::post('/pasien', [PasienController::class, 'store'])
+        ->name('pasien.store');
 
     Route::get('/queue', function () {
         return view('admin.queue');
     });
 
-    Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
+    // invoice pakai controller
+    Route::get('/invoice', [InvoiceController::class, 'index'])
+        ->name('invoice.index');
 
     Route::get('/payment', function () {
         return view('admin.payment');
@@ -79,6 +112,8 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/report', function () {
         return view('admin.report');
+
+    Route::get('/batch', [BatchController::class, 'index']);
+    Route::post('/batch/store', [BatchController::class, 'store']);
     });
 });
-

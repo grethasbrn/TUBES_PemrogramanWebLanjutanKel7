@@ -134,5 +134,32 @@
 document.addEventListener('DOMContentLoaded', function() {
   renderStockTable();
 });
+
+<script>
+function renderStockTable() {
+  fetch('/batch')
+    .then(res => res.json())
+    .then(data => {
+      let html = '';
+
+      data.forEach(item => {
+        html += `
+          <tr>
+            <td>${item.nama_obat}</td>
+            <td>${item.tipe}</td>
+            <td>${item.no_batch}</td>
+            <td>${item.jumlah}</td>
+            <td>Rp ${item.harga}</td>
+            <td>${item.tgl_expired}</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('stockTableBody').innerHTML = html;
+    });
+}
+</script>
 </script>
 @endsection
