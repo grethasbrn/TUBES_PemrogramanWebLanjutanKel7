@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BatchController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
@@ -111,5 +112,8 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/report', function () {
         return view('admin.report');
+
+    Route::get('/batch', [BatchController::class, 'index']);
+    Route::post('/batch/store', [BatchController::class, 'store']);
     });
 });
