@@ -238,13 +238,13 @@ function renderInvoiceDetail() {
   `;
 }
 
-// Fungsi untuk menampilkan badge pembayaran
+// menampilkan badge pembayaran
 function badgeBayar(metode) {
     const cls = metode === 'BPJS' ? 'b-bpjs' : 'b-mandiri';
     return `<span class="badge ${cls}">${metode}</span>`;
 }
 
-// Fungsi untuk memproses pembayaran (Tombol Merah)
+// memproses pembayaran (Tombol Merah)
 function prosesInvoice(id) {
     const inv = invoiceData.find(i => i.id === id);
     if (inv) {
@@ -275,8 +275,6 @@ function bayar(){
   renderInvoiceDetail();
 }
 
-</script>
-<script>
 document.addEventListener("DOMContentLoaded", function(){
   renderInvoiceList();
 });

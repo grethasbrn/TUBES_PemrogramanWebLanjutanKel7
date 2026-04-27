@@ -13,13 +13,13 @@
     
     @include('components.sidebarAd')
 
-    <div class="main">
-      
-      <div class="content">
-        @yield('content')
-      </div>
+      <div class="main">
+        
+        <div class="content">
+          @yield('content')
+        </div>
 
-    </div>
+      </div>
 
     </div>
 

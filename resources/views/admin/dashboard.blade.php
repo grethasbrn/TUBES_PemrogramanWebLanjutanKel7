@@ -8,7 +8,7 @@
       <div class="page-title">Dashboard</div>
       <div class="page-sub">Ringkasan operasional rumah sakit hari ini</div>
     </div>
-    <button class="btn btn-primary" onclick="showSection('pasien');setTimeout(()=>openModal('modalTambahPasien'),100)">+ Daftar Pasien Baru</button>
+    <button class="btn btn-primary">+ Daftar Pasien Baru</button>
   </div>
 
   <div class="metrics">

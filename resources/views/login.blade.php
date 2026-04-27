@@ -124,32 +124,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .fsa-gold:hover{color:var(--gold2)}
 
 /* click hint */
-.click-hint{
-  position:absolute;
-  bottom:14px;
-  right:18px;
-  font-size:12px;
-  color:var(--text3);
-  display:flex;
-  align-items:center;
-  gap:6px;
-  opacity:.75;
-  pointer-events:none;
-  transition:all .25s ease;
-}
+.click-hint{position:absolute;bottom:14px;right:18px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px;opacity:.75;pointer-events:none;transition:all .25s ease;}
 
-/* hover efek halus */
-.role-card:hover .click-hint{
-  opacity:1;
-  transform:translateX(4px);
-}
+/* hover */
+.role-card:hover .click-hint{opacity:1;transform:translateX(4px);}
 
-/* hilang saat active */
-.role-card.active .click-hint{
-  opacity:0;
-  transform:translateX(8px);
-}
-
+/* hilang pas active */
+.role-card.active .click-hint{opacity:0;transform:translateX(8px);}
 .hint-arrow{font-size:10px}
 
 /* ── FEATURES ── */
@@ -175,16 +156,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .toast-success{background:var(--green)}
 .toast-danger{background:var(--red)}
 
-@media(max-width:800px){
-  .hero-title{font-size:44px}
-  .cards-wrap{flex-direction:column}
-  .role-card.other{flex:1;opacity:1}
-  .topnav{padding:0 24px}
-  .nav-links{display:none}
-  .hero{padding:80px 24px 48px}
-  .features{padding:60px 24px}
-  .feat-grid{grid-template-columns:1fr 1fr}
-}
+@media(max-width:800px){.hero-title{font-size:44px}.cards-wrap{flex-direction:column}.role-card.other{flex:1;opacity:1}.topnav{padding:0 24px}
+  .nav-links{display:none}.hero{padding:80px 24px 48px}.features{padding:60px 24px}.feat-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>

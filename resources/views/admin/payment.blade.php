@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="page-section" id="sec-pembayaran">
+<div class="page-section active" id="sec-pembayaran">
   <div class="page-header">
     <div>
       <div class="page-title">Transaksi Pembayaran</div>
@@ -17,7 +17,7 @@
         <div class="card-title">Proses Pembayaran</div>
         <div class="fg">
           <label>Pilih Invoice / No. RM</label>
-          <select id="bayarInvoiceSel" onchange="loadInvoiceUntukBayar()">
+          <select>
             <option value="">— Pilih invoice —</option>
           </select>
         </div>
@@ -39,7 +39,7 @@
           <div class="fg"><label>Catatan</label>
             <input type="text" id="catatanBayar" placeholder="Opsional...">
           </div>
-          <button class="btn btn-primary" style="width:100%" onclick="prosesBayar()">💳 Proses Pembayaran</button>
+          <button class="btn btn-primary" style="width:100%">💳 Proses Pembayaran</button>
         </div>
       </div>
     </div>

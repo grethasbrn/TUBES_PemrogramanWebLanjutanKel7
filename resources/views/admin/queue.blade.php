@@ -8,7 +8,7 @@
       <div class="page-title">Antrian & Poli</div>
       <div class="page-sub">Kirim pasien ke dokter sesuai poli tujuan</div>
     </div>
-    <button class="btn btn-primary" onclick="kirimSemuaPoli()">📤 Kirim Semua ke Dokter</button>
+    <button class="btn btn-primary">📤 Kirim Semua ke Dokter</button>
   </div>
 
   <div id="kanbanBoard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px"></div>
