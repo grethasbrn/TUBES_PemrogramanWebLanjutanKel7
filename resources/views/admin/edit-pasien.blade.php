@@ -180,6 +180,50 @@
 
       </div>
 
+      {{-- ===== DATA MEDIS UNTUK DOKTER ===== --}}
+      <div class="form-section-title">Data Medis (untuk Dokter)</div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Berat Badan (kg)</label>
+          <input type="number" name="berat_badan"
+            class="form-input @error('berat_badan') is-error @enderror"
+            placeholder="Contoh: 65" step="0.1" min="1" max="300"
+            value="{{ old('berat_badan', $pasien->berat_badan) }}">
+          @error('berat_badan')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label>Tinggi Badan (cm)</label>
+          <input type="number" name="tinggi_badan"
+            class="form-input @error('tinggi_badan') is-error @enderror"
+            placeholder="Contoh: 165" step="0.1" min="1" max="300"
+            value="{{ old('tinggi_badan', $pasien->tinggi_badan) }}">
+          @error('tinggi_badan')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label>Tekanan Darah</label>
+          <input type="text" name="tekanan_darah"
+            class="form-input @error('tekanan_darah') is-error @enderror"
+            placeholder="Contoh: 120/80"
+            value="{{ old('tekanan_darah', $pasien->tekanan_darah) }}">
+          @error('tekanan_darah')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label>Alergi Obat</label>
+          <input type="text" name="alergi"
+            class="form-input @error('alergi') is-error @enderror"
+            placeholder="Contoh: Penisilin (kosongkan jika tidak ada)"
+            value="{{ old('alergi', $pasien->alergi) }}">
+          @error('alergi')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
       <div class="form-actions">
         <a href="{{ route('pasien.index') }}" class="btn btn-secondary">Batal</a>
         <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>

@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DokterController;
+use App\Http\Controllers\ResepController;
 
 Route::get('/', function () {
     return view('login');
@@ -20,14 +22,23 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/prescription', function () { return view('apoteker.prescription'); });
     Route::get('/invoice', function () { return view('apoteker.invoice'); });
     Route::get('/report', function () { return view('apoteker.report'); });
+    Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
+    Route::get('/api/resep', [ResepController::class, 'index']);
 });
 
 Route::prefix('dokter')->group(function () {
-    Route::get('/dashboard', function () { return view('dokter.dashboard'); });
-    Route::get('/data', function () { return view('dokter.data'); });
-    Route::get('/prescription', function () { return view('dokter.prescription'); });
+    // Halaman utama dokter — sekarang pakai controller
+    Route::get('/dashboard', [DokterController::class, 'dashboard']);
+    Route::get('/data', [DokterController::class, 'data']);
+    Route::get('/prescription', [DokterController::class, 'prescription']);
     Route::get('/status', function () { return view('dokter.status'); });
     Route::get('/history', function () { return view('dokter.history'); });
+
+    // API endpoints untuk JavaScript
+    Route::get('/api/pasien', [DokterController::class, 'apiPasien']);
+    Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
+    Route::get('/api/resep', [ResepController::class, 'index']);
+    Route::post('/api/resep/store', [ResepController::class, 'store']);
 });
 
 Route::prefix('admin')->group(function () {

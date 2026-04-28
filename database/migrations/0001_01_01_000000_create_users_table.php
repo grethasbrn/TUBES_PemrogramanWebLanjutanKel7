@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('role', ['dokter', 'apoteker']); // tambah ini
+            $table->timestamp('email_verified_at')->nullable(); // add
             $table->timestamps();
         });
 

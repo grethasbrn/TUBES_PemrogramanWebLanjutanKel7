@@ -171,11 +171,53 @@
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label for="riwayat_penyakit">Riwayat Penyakit / Alergi</label>
+          <label for="riwayat_penyakit">Riwayat Penyakit</label>
           <textarea id="riwayat_penyakit" name="riwayat_penyakit" rows="2"
             class="form-input @error('riwayat_penyakit') is-error @enderror"
-            placeholder="Contoh: Hipertensi, Alergi Penisilin...">{{ old('riwayat_penyakit') }}</textarea>
+            placeholder="Contoh: Hipertensi sejak 2020, Diabetes Mellitus...">{{ old('riwayat_penyakit') }}</textarea>
           @error('riwayat_penyakit')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+      </div>
+
+      {{-- ===== DATA MEDIS UNTUK DOKTER ===== --}}
+      <div class="form-section-title">Data Medis <span style="font-weight:400;color:#C4B5A5">(untuk Dokter)</span></div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="berat_badan">Berat Badan (kg)</label>
+          <input type="number" id="berat_badan" name="berat_badan"
+            class="form-input @error('berat_badan') is-error @enderror"
+            placeholder="Contoh: 65" step="0.1" min="1" max="300"
+            value="{{ old('berat_badan') }}">
+          @error('berat_badan')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label for="tinggi_badan">Tinggi Badan (cm)</label>
+          <input type="number" id="tinggi_badan" name="tinggi_badan"
+            class="form-input @error('tinggi_badan') is-error @enderror"
+            placeholder="Contoh: 165" step="0.1" min="1" max="300"
+            value="{{ old('tinggi_badan') }}">
+          @error('tinggi_badan')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label for="tekanan_darah">Tekanan Darah</label>
+          <input type="text" id="tekanan_darah" name="tekanan_darah"
+            class="form-input @error('tekanan_darah') is-error @enderror"
+            placeholder="Contoh: 120/80"
+            value="{{ old('tekanan_darah') }}">
+          @error('tekanan_darah')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="form-group">
+          <label for="alergi">Alergi Obat</label>
+          <input type="text" id="alergi" name="alergi"
+            class="form-input @error('alergi') is-error @enderror"
+            placeholder="Contoh: Penisilin (kosongkan jika tidak ada)"
+            value="{{ old('alergi') }}">
+          @error('alergi')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
       </div>

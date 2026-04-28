@@ -50,43 +50,53 @@ class PasienController extends Controller
     */
     public function store(Request $request)
     {
-        $request->validate([
-            'no_rm'          => 'required',
-            'nama'           => 'required',
-            'nik'            => 'required|digits:16',
-            'tgl_lahir'      => 'required|date',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'jenis'          => 'required|in:BPJS,Mandiri',
-            'poli_tujuan'    => 'required',
-            'status'         => 'required',
-            'alamat'         => 'nullable|string',
-            'no_telepon'     => 'nullable|string|max:20',
-            'pekerjaan'      => 'nullable|string|max:100',
-            'jenis_kunjungan'=> 'nullable|string',
-            'keluhan'        => 'nullable|string',
-            'riwayat_penyakit' => 'nullable|string',
-        ]);
+    // ✅ BENAR: validate() hanya boleh berisi RULES validasi
+    $request->validate([
+        'no_rm'           => 'required',
+        'nama'            => 'required',
+        'nik'             => 'required|digits:16',
+        'tgl_lahir'       => 'required|date',
+        'jenis_kelamin'   => 'required|in:L,P',
+        'jenis'           => 'required|in:BPJS,Mandiri',
+        'poli_tujuan'     => 'required',
+        'status'          => 'required',
+        'alamat'          => 'nullable|string',
+        'no_telepon'      => 'nullable|string|max:20',
+        'pekerjaan'       => 'nullable|string|max:100',
+        'jenis_kunjungan' => 'nullable|string',
+        'keluhan'         => 'nullable|string',
+        'riwayat_penyakit'=> 'nullable|string',
+        'berat_badan'     => 'nullable|numeric|min:1|max:300',
+        'tinggi_badan'    => 'nullable|numeric|min:1|max:300',
+        'tekanan_darah'   => 'nullable|string|max:10',
+        'alergi'          => 'nullable|string|max:255',
+    ]);
 
-        Pasien::create([
-            'no_rm'           => $request->no_rm,
-            'nama'            => $request->nama,
-            'nik'             => $request->nik,
-            'tgl_lahir'       => $request->tgl_lahir,
-            'jenis_kelamin'   => $request->jenis_kelamin,
-            'jenis'           => $request->jenis,
-            'poli_tujuan'     => $request->poli_tujuan,
-            'status'          => $request->status,
-            'validasi'        => 'Menunggu',
-            'alamat'          => $request->alamat,
-            'no_telepon'      => $request->no_telepon,
-            'pekerjaan'       => $request->pekerjaan,
-            'jenis_kunjungan' => $request->jenis_kunjungan ?? 'Rawat Jalan',
-            'keluhan'         => $request->keluhan,
-            'riwayat_penyakit'=> $request->riwayat_penyakit,
-        ]);
+    // ✅ BENAR: data yang disimpan ada di create(), terpisah dari validate()
+    Pasien::create([
+        'no_rm'           => $request->no_rm,
+        'nama'            => $request->nama,
+        'nik'             => $request->nik,
+        'tgl_lahir'       => $request->tgl_lahir,
+        'jenis_kelamin'   => $request->jenis_kelamin,
+        'jenis'           => $request->jenis,
+        'poli_tujuan'     => $request->poli_tujuan,
+        'status'          => $request->status,
+        'validasi'        => 'Menunggu',
+        'alamat'          => $request->alamat,
+        'no_telepon'      => $request->no_telepon,
+        'pekerjaan'       => $request->pekerjaan,
+        'jenis_kunjungan' => $request->jenis_kunjungan ?? 'Rawat Jalan',
+        'keluhan'         => $request->keluhan,
+        'riwayat_penyakit'=> $request->riwayat_penyakit,
+        'berat_badan'     => $request->berat_badan,
+        'tinggi_badan'    => $request->tinggi_badan,
+        'tekanan_darah'   => $request->tekanan_darah,
+        'alergi'          => $request->alergi ?? '-',
+    ]);
 
-        return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil ditambahkan');
+    return redirect()->route('pasien.index')
+        ->with('success', 'Pasien berhasil ditambahkan');
     }
 
     /*
@@ -107,43 +117,51 @@ class PasienController extends Controller
     */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'no_rm'          => 'required',
-            'nama'           => 'required',
-            'nik'            => 'required|digits:16',
-            'tgl_lahir'      => 'required|date',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'jenis'          => 'required|in:BPJS,Mandiri',
-            'poli_tujuan'    => 'required',
-            'status'         => 'required',
-            'alamat'         => 'nullable|string',
-            'no_telepon'     => 'nullable|string|max:20',
-            'pekerjaan'      => 'nullable|string|max:100',
-            'jenis_kunjungan'=> 'nullable|string',
-            'keluhan'        => 'nullable|string',
-            'riwayat_penyakit' => 'nullable|string',
-        ]);
+    $request->validate([
+        'no_rm'           => 'required',
+        'nama'            => 'required',
+        'nik'             => 'required|digits:16',
+        'tgl_lahir'       => 'required|date',
+        'jenis_kelamin'   => 'required|in:L,P',
+        'jenis'           => 'required|in:BPJS,Mandiri',
+        'poli_tujuan'     => 'required',
+        'status'          => 'required',
+        'alamat'          => 'nullable|string',
+        'no_telepon'      => 'nullable|string|max:20',
+        'pekerjaan'       => 'nullable|string|max:100',
+        'jenis_kunjungan' => 'nullable|string',
+        'keluhan'         => 'nullable|string',
+        'riwayat_penyakit'=> 'nullable|string',
+        'berat_badan'     => 'nullable|numeric',
+        'tinggi_badan'    => 'nullable|numeric',
+        'tekanan_darah'   => 'nullable|string|max:20',
+        'alergi'          => 'nullable|string|max:255',
+    ]);
 
-        $pasien = Pasien::findOrFail($id);
-        $pasien->update([
-            'no_rm'           => $request->no_rm,
-            'nama'            => $request->nama,
-            'nik'             => $request->nik,
-            'tgl_lahir'       => $request->tgl_lahir,
-            'jenis_kelamin'   => $request->jenis_kelamin,
-            'jenis'           => $request->jenis,
-            'poli_tujuan'     => $request->poli_tujuan,
-            'status'          => $request->status,
-            'alamat'          => $request->alamat,
-            'no_telepon'      => $request->no_telepon,
-            'pekerjaan'       => $request->pekerjaan,
-            'jenis_kunjungan' => $request->jenis_kunjungan ?? 'Rawat Jalan',
-            'keluhan'         => $request->keluhan,
-            'riwayat_penyakit'=> $request->riwayat_penyakit,
-        ]);
+    $pasien = Pasien::findOrFail($id);
+    $pasien->update([
+        'no_rm'           => $request->no_rm,
+        'nama'            => $request->nama,
+        'nik'             => $request->nik,
+        'tgl_lahir'       => $request->tgl_lahir,
+        'jenis_kelamin'   => $request->jenis_kelamin,
+        'jenis'           => $request->jenis,
+        'poli_tujuan'     => $request->poli_tujuan,
+        'status'          => $request->status,
+        'alamat'          => $request->alamat,
+        'no_telepon'      => $request->no_telepon,
+        'pekerjaan'       => $request->pekerjaan,
+        'jenis_kunjungan' => $request->jenis_kunjungan ?? 'Rawat Jalan',
+        'keluhan'         => $request->keluhan,
+        'riwayat_penyakit'=> $request->riwayat_penyakit,
+        'berat_badan'     => $request->berat_badan,
+        'tinggi_badan'    => $request->tinggi_badan,
+        'tekanan_darah'   => $request->tekanan_darah,
+        'alergi'          => $request->alergi ?? '-',
+    ]);
 
-        return redirect()->route('pasien.index')
-            ->with('success', 'Data pasien berhasil diupdate');
+    return redirect()->route('pasien.index')
+        ->with('success', 'Data pasien berhasil diupdate');
     }
 
     /*

@@ -1,12 +1,11 @@
 @extends('layouts.dokter')
 
 @section('content')
-
 <div class="page-section active" id="sec-pasien">
   <div class="page-header">
     <div>
       <div class="page-title">Data Pasien</div>
-      <div class="page-sub">Daftar pasien yang dikirim oleh admin</div>
+      <div class="page-sub">Daftar pasien yang dikirim oleh admin hari ini</div>
     </div>
   </div>
 
@@ -14,7 +13,8 @@
     <!-- List -->
     <div>
       <div class="search-row">
-        <input type="text" class="search-input" placeholder="Cari nama atau No. RM..." id="pasienSearch" oninput="renderPasienList()">
+        <input type="text" class="search-input" placeholder="Cari nama atau No. RM..."
+               id="pasienSearch" oninput="renderPasienList()">
         <select class="filter-sel" id="pasienFilterBayar" onchange="renderPasienList()">
           <option value="">Semua</option>
           <option value="BPJS">BPJS</option>
@@ -34,5 +34,11 @@
   </div>
 </div>
 
+<script>
+// Data dari database — semua fungsi sudah ada di dokter-global.js
+let pasienData = @json($pasienJson);
+let resepData = [];
 
+fetch('/dokter/api/resep').then(r => r.json()).then(d => { resepData = d; });
+</script>
 @endsection

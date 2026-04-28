@@ -138,3 +138,15 @@
   </div>
 </div>
 @endsection
+@section('scripts')
+<script>
+// Data pasien dari controller
+let pasienData = @json($pasienJson ?? []);
+let resepData = [];
+
+// Inisialisasi saat halaman load
+document.addEventListener('DOMContentLoaded', function () {
+    renderResepPasienList();
+});
+</script>
+@endsection

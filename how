@@ -1,0 +1,54 @@
+[33mcommit 07287b83083d309c45a2dea63aa2acf07efa3273[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/dokter1[m[33m)[m
+Merge: 72c45c9 19d2240
+Author: grethasbrn <siburiangrethas@gmail.com>
+Date:   Mon Apr 27 18:00:40 2026 +0700
+
+    fix: resolve conflict data.blade.php
+
+[33mcommit 19d2240ea12a74d044ba623b6aafa92898e5d121[m
+Author: sesilia-hash <sesiliasihombing3@gmail.com>
+Date:   Mon Apr 27 17:42:11 2026 +0700
+
+    feat: tambah fitur batch
+
+[33mcommit a1e77944f98b5c384a1f2ddd5704b332d77cc296[m
+Author: Naomielysta <naomielysta32@gmail.com>
+Date:   Mon Apr 27 17:27:33 2026 +0700
+
+    data pasien
+
+[33mcommit 4219f55054f69b0fdeaee5d383ebb02d85b6535d[m
+Author: Naomielysta <naomielysta32@gmail.com>
+Date:   Mon Apr 27 14:48:00 2026 +0700
+
+    data pasien
+
+[33mcommit 72c45c9be60769abcf9452679bd45082aefc0ae7[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: sirnnn <shereenshasmeen@gmail.com>
+Date:   Mon Apr 27 08:25:26 2026 +0700
+
+    ngecek
+
+[33mcommit f0e817b4c27afe829532e4c9b56b830d7bd89f76[m
+Author: sirnnn <shereenshasmeen@gmail.com>
+Date:   Sat Apr 25 11:07:50 2026 +0700
+
+    invoice ges
+
+[33mcommit 344272c3b4946a5023eef746461512803fb0b01a[m
+Author: sirnnn <shereenshasmeen@gmail.com>
+Date:   Sat Apr 25 09:17:18 2026 +0700
+
+    admin
+
+[33mcommit c3d571816b8be7ddf2dfcdcf0027bbd435a860a2[m[33m ([m[1;32mmain[m[33m)[m
+Author: sirnnn <shereenshasmeen@gmail.com>
+Date:   Fri Apr 24 20:53:33 2026 +0700
+
+    routeAdminnya
+
+[33mcommit c1edb7c626c7b8d9da2bac3b80d5618e8369860f[m
+Author: grethasbrn <siburiangrethas@gmail.com>
+Date:   Fri Apr 24 20:40:27 2026 +0700
+
+    project tubes
