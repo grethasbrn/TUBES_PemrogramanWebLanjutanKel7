@@ -13,8 +13,8 @@
         <option value="4">April 2026</option><option value="3">Maret 2026</option>
         <option value="2">Februari 2026</option><option value="1">Januari 2026</option>
       </select>
-      <button class="btn btn-teal" onclick="window.print()">🖨 Cetak</button>
-      <button class="btn btn-primary" onclick="exportLaporan()">⬇ Export</button>
+      <button class="btn btn-teal">Cetak</button>
+      <button class="btn btn-primary">Export</button>
     </div>
   </div>
 
