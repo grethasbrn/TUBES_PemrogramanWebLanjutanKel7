@@ -81,7 +81,16 @@
               </span>
             </td>
             <td>
-              <button class="btn btn-sm">Detail</button>
+              <div style="display:flex;gap:6px;align-items:center">
+                <a href="{{ route('pasien.edit', $p->id) }}"
+                   class="btn-aksi btn-edit" title="Edit">✏️</a>
+                <form action="{{ route('pasien.destroy', $p->id) }}" method="POST"
+                      onsubmit="return confirm('Yakin hapus pasien ini?')">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn-aksi btn-hapus" title="Hapus">🗑️</button>
+                </form>
+              </div>
             </td>
           </tr>
         @empty
@@ -127,6 +136,19 @@
 
 @push('scripts')
 <style>
+/* ===== TOMBOL AKSI ===== */
+.btn-aksi {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; text-decoration: none;
+  transition: opacity .15s;
+}
+.btn-aksi:hover { opacity: .75; }
+.btn-edit  { background: #fff3e0; }
+.btn-hapus { background: #ffebee; }
+
 /* ===== LAYOUT VALIDASI ===== */
 .validasi-wrap {
   display: grid;
@@ -398,7 +420,6 @@ function selectValidasi(id){
   const p = pasienData.find(x=>x.id===id);
   if(!p) return;
 
-  // highlight row
   document.querySelectorAll('.validasi-row').forEach(r=>r.classList.remove('selected'));
   const row = document.getElementById('vrow-'+id);
   if(row) row.classList.add('selected');
@@ -504,7 +525,7 @@ function ubahJenisBayar(id){
   .catch(()=>showToast('Gagal menyimpan','danger'));
 }
 
-/* ===== SHOW SECTION (dipanggil dari sidebar) ===== */
+/* ===== SHOW SECTION ===== */
 function showSection(id){
   document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -513,11 +534,9 @@ function showSection(id){
 document.addEventListener('DOMContentLoaded', () => {
     renderValidasiList('semua');
 
-    // Hash navigation
     const hash = window.location.hash.replace('#', '');
     if (hash) showSection(hash);
 
-    // ===== FILTER & SEARCH =====
     const searchInput = document.querySelector('.search-input');
     const filterSels  = document.querySelectorAll('.filter-sel');
     const rows        = document.querySelectorAll('tbody tr');
@@ -529,9 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const poli       = filterSels[2].value.toLowerCase();
 
         rows.forEach(row => {
-            // Ambil teks per kolom (sesuai urutan kolom tabel)
             const cells   = row.querySelectorAll('td');
-            if (!cells.length) return; // skip baris kosong
+            if (!cells.length) return;
 
             const nama    = (cells[1]?.innerText || '').toLowerCase();
             const nik     = (cells[2]?.innerText || '').toLowerCase();

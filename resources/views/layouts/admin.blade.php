@@ -29,6 +29,6 @@
 
 {{-- PENTING: BIAR JS DI PAGE JALAN --}}
 @stack('scripts')
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
