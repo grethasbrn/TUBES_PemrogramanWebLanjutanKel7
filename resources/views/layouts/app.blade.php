@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmbee</title>
 
-    <!-- WAJIB UNTUK FETCH -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond&family=DM+Sans&display=swap" rel="stylesheet">
@@ -15,20 +14,23 @@
 </head>
 <body>
 
-<div class="app">
-    
-    @include('components.sidebarAd')
+    {{-- Topbar di LUAR .app --}}
+    @include('components.topbar')
 
-    <div class="main">
-        <div class="content">
-            @yield('content')
+    <div class="app">
+
+        {{-- Hanya sidebar --}}
+        @include('components.sidebar')
+
+        <div class="main">
+            <div class="content">
+                @yield('content')
+            </div>
         </div>
+
     </div>
 
-</div>
+    @yield('scripts')
 
-{{-- PENTING: BIAR JS DI PAGE JALAN --}}
-@stack('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

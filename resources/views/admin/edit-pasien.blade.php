@@ -1,12 +1,11 @@
 @extends('layouts.admin')
 
 @section('content')
-
-<div class="page-section active" id="sec-create-pasien">
+<div class="page-section active">
   <div class="page-header">
     <div>
-      <div class="page-title">Daftar Pasien Baru</div>
-      <div class="page-sub">Isi formulir data pasien yang akan mendaftar</div>
+      <div class="page-title">Edit Data Pasien</div>
+      <div class="page-sub">Ubah data pasien yang sudah terdaftar</div>
     </div>
     <a href="{{ route('pasien.index') }}" class="btn btn-secondary">← Kembali</a>
   </div>
@@ -23,82 +22,83 @@
   @endif
 
   <div class="form-card">
-    <form action="{{ route('pasien.store') }}" method="POST">
+    <form action="{{ route('pasien.update', $pasien->id) }}" method="POST">
       @csrf
+      @method('PUT')
 
       {{-- ===== DATA PRIBADI ===== --}}
       <div class="form-section-title">Data Pribadi</div>
       <div class="form-grid">
 
         <div class="form-group">
-          <label for="no_rm">No. Rekam Medis <span class="required">*</span></label>
-          <input type="text" id="no_rm" name="no_rm"
+          <label>No. Rekam Medis <span class="required">*</span></label>
+          <input type="text" name="no_rm"
             class="form-input @error('no_rm') is-error @enderror"
             placeholder="Contoh: RM-2024-001"
-            value="{{ old('no_rm') }}">
+            value="{{ old('no_rm', $pasien->no_rm) }}">
           @error('no_rm')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="nama">Nama Lengkap <span class="required">*</span></label>
-          <input type="text" id="nama" name="nama"
+          <label>Nama Lengkap <span class="required">*</span></label>
+          <input type="text" name="nama"
             class="form-input @error('nama') is-error @enderror"
             placeholder="Nama sesuai KTP"
-            value="{{ old('nama') }}">
+            value="{{ old('nama', $pasien->nama) }}">
           @error('nama')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="nik">NIK <span class="required">*</span></label>
-          <input type="text" id="nik" name="nik"
+          <label>NIK <span class="required">*</span></label>
+          <input type="text" name="nik"
             class="form-input @error('nik') is-error @enderror"
             placeholder="16 digit NIK" maxlength="16"
-            value="{{ old('nik') }}">
+            value="{{ old('nik', $pasien->nik) }}">
           @error('nik')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="tgl_lahir">Tanggal Lahir <span class="required">*</span></label>
-          <input type="date" id="tgl_lahir" name="tgl_lahir"
+          <label>Tanggal Lahir <span class="required">*</span></label>
+          <input type="date" name="tgl_lahir"
             class="form-input @error('tgl_lahir') is-error @enderror"
-            value="{{ old('tgl_lahir') }}">
+            value="{{ old('tgl_lahir', $pasien->tgl_lahir) }}">
           @error('tgl_lahir')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="jenis_kelamin">Jenis Kelamin <span class="required">*</span></label>
-          <select id="jenis_kelamin" name="jenis_kelamin"
+          <label>Jenis Kelamin <span class="required">*</span></label>
+          <select name="jenis_kelamin"
             class="form-input @error('jenis_kelamin') is-error @enderror">
-            <option value="" disabled {{ old('jenis_kelamin') ? '' : 'selected' }}>— Pilih —</option>
-            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
-            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+            <option value="" disabled>— Pilih —</option>
+            <option value="L" {{ old('jenis_kelamin', $pasien->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
+            <option value="P" {{ old('jenis_kelamin', $pasien->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
           </select>
           @error('jenis_kelamin')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label for="alamat">Alamat Lengkap</label>
-          <textarea id="alamat" name="alamat" rows="2"
+          <label>Alamat Lengkap</label>
+          <textarea name="alamat" rows="2"
             class="form-input @error('alamat') is-error @enderror"
-            placeholder="Jl. ..., Kelurahan, Kecamatan, Kota, Provinsi">{{ old('alamat') }}</textarea>
+            placeholder="Jl. ..., Kelurahan, Kecamatan, Kota, Provinsi">{{ old('alamat', $pasien->alamat) }}</textarea>
           @error('alamat')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="no_telepon">No. Telepon</label>
-          <input type="text" id="no_telepon" name="no_telepon"
+          <label>No. Telepon</label>
+          <input type="text" name="no_telepon"
             class="form-input @error('no_telepon') is-error @enderror"
             placeholder="08xx-xxxx-xxxx"
-            value="{{ old('no_telepon') }}">
+            value="{{ old('no_telepon', $pasien->no_telepon) }}">
           @error('no_telepon')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="pekerjaan">Pekerjaan</label>
-          <input type="text" id="pekerjaan" name="pekerjaan"
+          <label>Pekerjaan</label>
+          <input type="text" name="pekerjaan"
             class="form-input @error('pekerjaan') is-error @enderror"
             placeholder="Pekerjaan pasien"
-            value="{{ old('pekerjaan') }}">
+            value="{{ old('pekerjaan', $pasien->pekerjaan) }}">
           @error('pekerjaan')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
@@ -109,12 +109,12 @@
       <div class="form-grid">
 
         <div class="form-group">
-          <label for="jenis">Jenis Pasien <span class="required">*</span></label>
-          <select id="jenis" name="jenis"
+          <label>Jenis Pasien <span class="required">*</span></label>
+          <select name="jenis"
             class="form-input @error('jenis') is-error @enderror">
-            <option value="" disabled {{ old('jenis') ? '' : 'selected' }}>— Pilih —</option>
-            <option value="BPJS"    {{ old('jenis') == 'BPJS'    ? 'selected' : '' }}>BPJS</option>
-            <option value="Mandiri" {{ old('jenis') == 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
+            <option value="" disabled>— Pilih —</option>
+            <option value="BPJS"    {{ old('jenis', $pasien->jenis) == 'BPJS'    ? 'selected' : '' }}>BPJS</option>
+            <option value="Mandiri" {{ old('jenis', $pasien->jenis) == 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
           </select>
           @error('jenis')<span class="form-error">{{ $message }}</span>@enderror
         </div>
@@ -126,12 +126,12 @@
       <div class="form-grid">
 
         <div class="form-group">
-          <label for="poli_tujuan">Poli Tujuan <span class="required">*</span></label>
-          <select id="poli_tujuan" name="poli_tujuan"
+          <label>Poli Tujuan <span class="required">*</span></label>
+          <select name="poli_tujuan"
             class="form-input @error('poli_tujuan') is-error @enderror">
-            <option value="" disabled {{ old('poli_tujuan') ? '' : 'selected' }}>— Pilih Poli —</option>
+            <option value="" disabled>— Pilih Poli —</option>
             @foreach(['Umum','Anak','Penyakit Dalam','Bedah','Gigi','Kebidanan','Mata','UGD'] as $poli)
-              <option value="{{ $poli }}" {{ old('poli_tujuan') == $poli ? 'selected' : '' }}>
+              <option value="{{ $poli }}" {{ old('poli_tujuan', $pasien->poli_tujuan) == $poli ? 'selected' : '' }}>
                 {{ $poli }}
               </option>
             @endforeach
@@ -140,41 +140,41 @@
         </div>
 
         <div class="form-group">
-          <label for="jenis_kunjungan">Jenis Kunjungan</label>
-          <select id="jenis_kunjungan" name="jenis_kunjungan"
+          <label>Jenis Kunjungan</label>
+          <select name="jenis_kunjungan"
             class="form-input @error('jenis_kunjungan') is-error @enderror">
-            <option value="Rawat Jalan" {{ old('jenis_kunjungan') == 'Rawat Jalan' ? 'selected' : '' }}>Rawat Jalan</option>
-            <option value="Rawat Inap"  {{ old('jenis_kunjungan') == 'Rawat Inap'  ? 'selected' : '' }}>Rawat Inap</option>
-            <option value="UGD"         {{ old('jenis_kunjungan') == 'UGD'         ? 'selected' : '' }}>UGD</option>
+            <option value="Rawat Jalan" {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'Rawat Jalan' ? 'selected' : '' }}>Rawat Jalan</option>
+            <option value="Rawat Inap"  {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'Rawat Inap'  ? 'selected' : '' }}>Rawat Inap</option>
+            <option value="UGD"         {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'UGD'         ? 'selected' : '' }}>UGD</option>
           </select>
           @error('jenis_kunjungan')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group">
-          <label for="status">Status <span class="required">*</span></label>
-          <select id="status" name="status"
+          <label>Status <span class="required">*</span></label>
+          <select name="status"
             class="form-input @error('status') is-error @enderror">
-            <option value="" disabled {{ old('status') ? '' : 'selected' }}>— Pilih Status —</option>
-            <option value="Menunggu"  {{ old('status') == 'Menunggu'  ? 'selected' : '' }}>Menunggu</option>
-            <option value="Diperiksa" {{ old('status') == 'Diperiksa' ? 'selected' : '' }}>Diperiksa</option>
-            <option value="Selesai"   {{ old('status') == 'Selesai'   ? 'selected' : '' }}>Selesai</option>
+            <option value="" disabled>— Pilih Status —</option>
+            <option value="Menunggu"  {{ old('status', $pasien->status) == 'Menunggu'  ? 'selected' : '' }}>Menunggu</option>
+            <option value="Diperiksa" {{ old('status', $pasien->status) == 'Diperiksa' ? 'selected' : '' }}>Diperiksa</option>
+            <option value="Selesai"   {{ old('status', $pasien->status) == 'Selesai'   ? 'selected' : '' }}>Selesai</option>
           </select>
           @error('status')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label for="keluhan">Keluhan Utama</label>
-          <textarea id="keluhan" name="keluhan" rows="2"
+          <label>Keluhan Utama</label>
+          <textarea name="keluhan" rows="2"
             class="form-input @error('keluhan') is-error @enderror"
-            placeholder="Keluhan yang dirasakan pasien...">{{ old('keluhan') }}</textarea>
+            placeholder="Keluhan yang dirasakan pasien...">{{ old('keluhan', $pasien->keluhan) }}</textarea>
           @error('keluhan')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label for="riwayat_penyakit">Riwayat Penyakit / Alergi</label>
-          <textarea id="riwayat_penyakit" name="riwayat_penyakit" rows="2"
+          <label>Riwayat Penyakit / Alergi</label>
+          <textarea name="riwayat_penyakit" rows="2"
             class="form-input @error('riwayat_penyakit') is-error @enderror"
-            placeholder="Contoh: Hipertensi, Alergi Penisilin...">{{ old('riwayat_penyakit') }}</textarea>
+            placeholder="Contoh: Hipertensi, Alergi Penisilin...">{{ old('riwayat_penyakit', $pasien->riwayat_penyakit) }}</textarea>
           @error('riwayat_penyakit')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
@@ -182,7 +182,7 @@
 
       <div class="form-actions">
         <a href="{{ route('pasien.index') }}" class="btn btn-secondary">Batal</a>
-        <button type="submit" class="btn btn-primary">✔ Daftarkan Pasien</button>
+        <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
       </div>
 
     </form>

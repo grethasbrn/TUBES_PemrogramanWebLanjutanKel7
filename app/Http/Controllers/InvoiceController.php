@@ -2,25 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
+use App\Models\Pasien;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
     public function index()
     {
-        $invoiceData = [
-            [
-                'id'=>'INV-001',
-                'pasien'=>'Budi',
-                'rm'=>'RM001',
-                'status'=>'Masuk',
-                'bayar'=>'Mandiri',
-                'items'=>[
-                    ['nama'=>'Paracetamol','qty'=>2,'harga'=>5000]
-                ]
-            ]
-        ];
+        $invoices = Invoice::with('pasien')->get();
+        return view('admin.invoice', compact('invoices'));
+    }
 
-        return view('admin.invoice', compact('invoiceData'));
+    public function store(Request $request)
+    {
+        Invoice::create([
+            'kode_invoice' => 'INV-' . time(),
+            'pasien_id' => $request->pasien_id,
+            'tanggal' => now(),
+            'status' => 'Masuk',
+            'bayar' => $request->bayar,
+            'total' => $request->total,
+        ]);
+
+        return back()->with('success','Invoice berhasil dibuat');
+    }
+
+    public function bayar($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $invoice->status = 'Lunas';
+        $invoice->save();
+
+        return back()->with('success','Invoice dibayar');
     }
 }
