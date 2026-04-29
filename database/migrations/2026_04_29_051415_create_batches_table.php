@@ -13,14 +13,6 @@ return new class extends Migration
     {
         Schema::create('batches', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_obat');
-            $table->string('tipe');
-            $table->string('no_batch');
-            $table->integer('jumlah');
-            $table->integer('harga');
-            $table->date('tgl_expired');
-            $table->date('tgl_masuk');
-            $table->string('supplier')->nullable();
             $table->timestamps();
         });
     }

@@ -9,8 +9,7 @@
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Ringkasan aktivitas farmasi hari ini</div>
       </div>
-      <button class="btn btn-primary" onclick="showSection('stock'); openModal('modalTambahBatch')">+ Input Batch Obat</button>
-    </div>
+      <a href="{{ route('batch.index') }}" class="btn-primary">+ Input Batch Obat</a>
 
     <!-- info stok -->
     <div class="metrics">

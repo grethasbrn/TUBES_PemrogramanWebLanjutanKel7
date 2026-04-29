@@ -24,7 +24,10 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/report', function () { return view('apoteker.report'); });
     Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
     Route::get('/api/resep', [ResepController::class, 'index']);
-});
+    Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
+    Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
+    Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
+    });
 
 Route::prefix('dokter')->group(function () {
     // Halaman utama dokter — sekarang pakai controller
@@ -64,9 +67,6 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/payment', function () { return view('admin.payment'); });
     Route::get('/report', function () { return view('admin.report'); });
-
-    Route::get('/batch', [BatchController::class, 'index']);
-    Route::post('/batch/store', [BatchController::class, 'store']);
 
     // API untuk dashboard stats
     Route::get('/api/stats', [DashboardController::class, 'stats']);

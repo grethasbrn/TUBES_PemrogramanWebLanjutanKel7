@@ -35,17 +35,16 @@ return new class extends Migration
     }
 
     public function down(): void
-    {
-        Schema::table('pasiens', function (Blueprint $table) {
-            $table->dropColumn([
-                'jenis_kelamin',
-                'alamat',
-                'no_telepon',
-                'pekerjaan',
-                'jenis_kunjungan',
-                'keluhan',
-                'riwayat_penyakit',
-            ]);
-        });
-    }
+{
+    Schema::table('pasiens', function (Blueprint $table) {
+        $columns = ['jenis_kelamin', 'alamat', 'no_telepon', 'pekerjaan', 
+                    'jenis_kunjungan', 'keluhan', 'riwayat_penyakit'];
+        
+        foreach ($columns as $column) {
+            if (Schema::hasColumn('pasiens', $column)) {
+                $table->dropColumn($column);
+            }
+        }
+    });
+}
 };
