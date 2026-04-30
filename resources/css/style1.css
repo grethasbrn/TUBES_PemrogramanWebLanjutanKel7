@@ -264,3 +264,136 @@ tr:hover td{background:var(--cream)}
   .main{margin-left:0!important}
   .content{margin-top:0!important}
 }
+/* ===== SIDEBAR UPGRADE PREMIUM ===== */
+
+.sidebar {
+  background: linear-gradient(180deg, #eaf4fb 0%, #dbeaf5 50%, #cfe2ee 100%) !important;
+  border-right: 1px solid rgba(124, 90, 199, 0.15);
+  box-shadow: 10px 0 30px rgba(92, 74, 58, 0.08);
+}
+
+.nav-section {
+  font-size: 11px;
+  color: #9b8f86;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  margin-top: 18px;
+}
+
+.nav-item {
+  margin: 6px 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  transition: all 0.25s ease;
+  animation: fadeInMenu 0.4s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--purple2);
+  transform: translateX(5px);
+  box-shadow: 0 10px 22px rgba(92, 74, 58, 0.08);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, #ffffff, #f3eeff);
+  color: var(--purple2);
+  font-weight: 700;
+  border-right: 4px solid var(--purple);
+  box-shadow: 0 12px 26px rgba(124, 90, 199, 0.18);
+}
+
+.nav-icon {
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+.nav-item.active .nav-icon {
+  transform: scale(1.2);
+}
+
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== SIDEBAR FINAL UPGRADE ===== */
+
+.sidebar {
+  background: linear-gradient(180deg, #edf6fb 0%, #dbeaf5 55%, #cfe2ee 100%) !important;
+  border-right: 1px solid rgba(124, 90, 199, 0.12);
+  box-shadow: 12px 0 32px rgba(92, 74, 58, 0.08);
+}
+
+/* Section title */
+.nav-section {
+  font-size: 11px;
+  color: #a0958c;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin: 22px 22px 8px;
+}
+
+/* Menu item */
+.nav-item {
+  margin: 6px 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+/* Hover */
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--purple2);
+  transform: translateX(6px);
+  box-shadow: 0 10px 24px rgba(92, 74, 58, 0.08);
+}
+
+/* ACTIVE (ini yang bikin cakep) */
+.nav-item.active {
+  background: linear-gradient(135deg, #ffffff, #ede9ff);
+  color: var(--purple2);
+  font-weight: 700;
+  box-shadow: 0 14px 30px rgba(124, 90, 199, 0.2);
+  border-right: 5px solid var(--purple);
+  transform: translateX(4px);
+}
+
+/* Icon */
+.nav-icon {
+  font-size: 17px;
+  transition: all 0.25s ease;
+}
+
+/* Icon aktif */
+.nav-item.active .nav-icon {
+  transform: scale(1.25);
+  color: var(--purple2);
+}
+
+/* Animasi masuk */
+.nav-item {
+  animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
