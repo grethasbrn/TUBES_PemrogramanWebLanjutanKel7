@@ -9,7 +9,8 @@
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Ringkasan aktivitas farmasi hari ini</div>
       </div>
-      <a href="{{ route('batch.index') }}" class="btn-primary">+ Input Batch Obat</a>
+      <a href="{{ route('apoteker.stock', ['add' => 'true']) }}" class="btn btn-primary">+ Input Batch Obat</a>
+    </div>
 
     <!-- info stok -->
     <div class="metrics">

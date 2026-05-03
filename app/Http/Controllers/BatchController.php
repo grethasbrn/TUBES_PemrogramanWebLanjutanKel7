@@ -9,8 +9,8 @@ class BatchController extends Controller
 {
     public function index()
     {
-        $batches = Batch::latest()->paginate(10);
-        return view('apoteker.batch.index', compact('batches'));
+        $batches = Batch::all(); 
+        return view('apoteker.stock', compact('batches'));
     }
 
     public function store(Request $request)
