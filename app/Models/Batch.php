@@ -15,6 +15,7 @@ class Batch extends Model
         'no_batch',
         'jumlah',
         'harga',
+        'harga_bpjs',
         'tgl_expired',
         'tgl_masuk',
         'supplier',
@@ -26,9 +27,11 @@ class Batch extends Model
     ];
 
     // Format harga ke Rupiah
-    public function getHargaFormattedAttribute(): string
+    public function getHargaBpjsFormattedAttribute(): string
     {
-        return 'Rp ' . number_format($this->harga, 0, ',', '.');
+        return $this->harga_bpjs > 0
+            ? 'Rp ' . number_format($this->harga_bpjs, 0, ',', '.')
+            : 'Gratis';
     }
 
     // Cek apakah mendekati expired (dalam 90 hari)

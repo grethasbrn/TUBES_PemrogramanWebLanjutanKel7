@@ -16,22 +16,26 @@
     <div class="metrics">
       <div class="metric">
         <div class="metric-label">Total Jenis Obat</div>
-        <div class="metric-val" id="m-total">248</div>
-        <div class="metric-sub up">+4 bulan ini</div>
+        <div class="metric-val" id="m-total">{{ $totalJenisObat }}</div>
+        <div class="metric-sub {{ $tambahBulanIni >= 0 ? 'up' : 'dn' }}">
+          {{ $tambahBulanIni >= 0 ? '+' : '' }}{{ $tambahBulanIni }} bulan ini
+        </div>
       </div>
       <div class="metric">
         <div class="metric-label">Resep Hari Ini</div>
-        <div class="metric-val" id="m-resep">37</div>
-        <div class="metric-sub up">+12 vs kemarin</div>
+        <div class="metric-val" id="m-resep">{{ $resepHariIni }}</div>
+        <div class="metric-sub {{ $selisihKemarin >= 0 ? 'up' : 'dn' }}">
+        {{ $selisihKemarin >= 0 ? '+' : '' }}{{ $selisihKemarin }} vs kemarin
+        </div>
       </div>
       <div class="metric">
         <div class="metric-label">Stok Kritis</div>
-        <div class="metric-val dn" id="m-kritis">—</div>
+        <div class="metric-val dn" id="m-kritis">{{ $stokKritis > 0 ? $stokKritis : '—' }}</div>
         <div class="metric-sub dn" id="m-kritis-sub">Perlu restock</div>
       </div>
       <div class="metric">
         <div class="metric-label">Mendekati Expired</div>
-        <div class="metric-val warn" id="m-exp">—</div>
+        <div class="metric-val warn" id="m-exp">{{ $mendekatiExpired > 0 ? $mendekatiExpired : '—' }}</div>
         <div class="metric-sub warn" id="m-exp-sub">Dalam 90 hari</div>
       </div>
     </div>

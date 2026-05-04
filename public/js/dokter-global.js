@@ -1,6 +1,6 @@
 // ===================== KATALOG OBAT =====================
 const obatBPJS = [
-  {nama:'Paracetamol 500mg',kategori:'Analgetik',tipe:'Tablet',keterangan:'Analgetik-antipiretik standar'},
+  {nama:'Paracetamol 500mg',kategori:'Analgetik',tipe:'Tablet',keterangan:'Analgetik-antipiretik standar', harga:'10.000'},
   {nama:'Amoxicillin 500mg',kategori:'Antibiotik',tipe:'Kapsul',keterangan:'Antibiotik broad-spectrum lini pertama'},
   {nama:'Metformin 500mg',kategori:'Antidiabetik',tipe:'Tablet',keterangan:'Antidiabetik oral lini pertama'},
   {nama:'Captopril 25mg',kategori:'Antihipertensi',tipe:'Tablet',keterangan:'ACE inhibitor lini pertama'},

@@ -16,7 +16,7 @@ Route::get('/', function () {
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::prefix('apoteker')->group(function () {
-    Route::get('/dashboard', function () { return view('apoteker.dashboard'); });
+    Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
     Route::get('/alerts', function () { return view('apoteker.alerts'); });
     Route::get('/prescription', function () { return view('apoteker.prescription'); });

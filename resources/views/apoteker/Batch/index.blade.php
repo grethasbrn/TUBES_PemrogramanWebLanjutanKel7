@@ -56,10 +56,15 @@
             <input type="number" name="jumlah" placeholder="0" required>
           </div>
           <div class="fg">
-            <label>Harga Satuan (Rp)</label>
-            <input type="number" name="harga" placeholder="0" required>
+            <label>Harga Mandiri (Rp)</label>
+            <input type="number" name="harga" placeholder="Harga pasien umum" required>
           </div>
         </div>
+
+          <div class="fg">
+            <label>Harga BPJS (Rp)</label>
+            <input type="number" name="harga_bpjs" placeholder="0 jika gratis / ditanggung BPJS" required>
+          </div>
 
         <div class="fr">
           <div class="fg">
