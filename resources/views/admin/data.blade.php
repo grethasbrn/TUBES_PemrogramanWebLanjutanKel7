@@ -9,37 +9,89 @@
       <div class="page-title">Data Pasien</div>
       <div class="page-sub">Input dan kelola data pasien yang mendaftar</div>
     </div>
-    <a href="{{ route('pasien.create') }}" class="btn btn-primary">+ Daftar Pasien Baru</a>
+    <a href="{{ route('pasien.create') }}" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Daftar Pasien Baru
+    </a>
   </div>
 
-  <div class="search-row">
-    <input type="text" class="search-input" placeholder="Cari nama, NIK, atau No. RM...">
-    <select class="filter-sel">
-      <option value="">Semua Jenis</option>
-      <option value="BPJS">BPJS</option>
-      <option value="Mandiri">Mandiri</option>
-    </select>
-    <select class="filter-sel">
-      <option value="">Semua Status</option>
-      <option value="Menunggu">Menunggu</option>
-      <option value="Diperiksa">Diperiksa</option>
-      <option value="Selesai">Selesai</option>
-    </select>
-    <select class="filter-sel">
-      <option value="">Semua Poli</option>
-      <option value="Umum">Umum</option>
-      <option value="Anak">Anak</option>
-      <option value="Penyakit Dalam">Penyakit Dalam</option>
-      <option value="Bedah">Bedah</option>
-      <option value="Gigi">Gigi</option>
-      <option value="Kebidanan">Kebidanan</option>
-      <option value="Mata">Mata</option>
-      <option value="UGD">UGD</option>
-    </select>
+  {{-- SUMMARY STATS --}}
+  <div class="pasien-stats-row">
+    <div class="pstat-card">
+      <div class="pstat-icon" style="background:#fde8d8;color:#c0825a">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="pstat-num">{{ $pasiens->count() }}</div>
+        <div class="pstat-label">Total Pasien</div>
+      </div>
+    </div>
+    <div class="pstat-card">
+      <div class="pstat-icon" style="background:#fff8e1;color:#e65100">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div class="pstat-num" style="color:#e65100">{{ $pasiens->where('status','Menunggu')->count() }}</div>
+        <div class="pstat-label">Menunggu</div>
+      </div>
+    </div>
+    <div class="pstat-card">
+      <div class="pstat-icon" style="background:#e3f2fd;color:#1565c0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <div class="pstat-num" style="color:#1565c0">{{ $pasiens->where('status','Diperiksa')->count() }}</div>
+        <div class="pstat-label">Diperiksa</div>
+      </div>
+    </div>
+    <div class="pstat-card">
+      <div class="pstat-icon" style="background:#e8f5e9;color:#2e7d32">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <div class="pstat-num" style="color:#2e7d32">{{ $pasiens->where('status','Selesai')->count() }}</div>
+        <div class="pstat-label">Selesai</div>
+      </div>
+    </div>
+  </div>
+
+  {{-- SEARCH & FILTER --}}
+  <div class="filter-card">
+    <div class="filter-search-wrap">
+      <svg class="filter-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" placeholder="Cari nama, NIK, atau No. RM...">
+    </div>
+    <div class="filter-selects">
+      <select class="filter-sel">
+        <option value="">Semua Jenis</option>
+        <option value="BPJS">BPJS</option>
+        <option value="Mandiri">Mandiri</option>
+      </select>
+      <select class="filter-sel">
+        <option value="">Semua Status</option>
+        <option value="Menunggu">Menunggu</option>
+        <option value="Diperiksa">Diperiksa</option>
+        <option value="Selesai">Selesai</option>
+      </select>
+      <select class="filter-sel">
+        <option value="">Semua Poli</option>
+        <option value="Umum">Umum</option>
+        <option value="Anak">Anak</option>
+        <option value="Penyakit Dalam">Penyakit Dalam</option>
+        <option value="Bedah">Bedah</option>
+        <option value="Gigi">Gigi</option>
+        <option value="Kebidanan">Kebidanan</option>
+        <option value="Mata">Mata</option>
+        <option value="UGD">UGD</option>
+      </select>
+    </div>
   </div>
 
   @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      {{ session('success') }}
+    </div>
   @endif
 
   <div class="tbl-wrap">
@@ -54,24 +106,35 @@
           <th>Poli Tujuan</th>
           <th>Status</th>
           <th>Validasi</th>
-          <th>Aksi</th>
+          <th style="text-align:center">Aksi</th>
         </tr>
       </thead>
       <tbody>
         @forelse($pasiens as $p)
-          <tr>
-            <td>{{ $p->no_rm }}</td>
-            <td>{{ $p->nama }}</td>
-            <td>{{ $p->nik }}</td>
-            <td>{{ \Carbon\Carbon::parse($p->tgl_lahir)->format('d/m/Y') }}</td>
+          <tr class="tbl-row">
+            <td><span class="rm-code">{{ $p->no_rm }}</span></td>
+            <td>
+              <div class="pasien-nama-cell">
+                <div class="pasien-avatar">{{ mb_strtoupper(mb_substr($p->nama, 0, 1)) }}</div>
+                <span class="pasien-nama-text">{{ $p->nama }}</span>
+              </div>
+            </td>
+            <td><span style="font-family:monospace;font-size:12px;color:#6b5e52">{{ $p->nik }}</span></td>
+            <td style="font-size:13px;color:#5c4f45">{{ \Carbon\Carbon::parse($p->tgl_lahir)->format('d/m/Y') }}</td>
             <td>
               <span class="badge {{ $p->jenis == 'BPJS' ? 'b-bpjs' : 'b-mandiri' }}">
                 {{ $p->jenis }}
               </span>
             </td>
-            <td>{{ $p->poli_tujuan }}</td>
             <td>
-              <span class="badge {{ $p->status == 'Selesai' ? 'b-selesai' : ($p->status == 'Diperiksa' ? 'b-siap' : 'b-warn') }}">
+              <span class="poli-chip">{{ $p->poli_tujuan }}</span>
+            </td>
+            <td>
+              <span class="badge status-badge {{ $p->status == 'Selesai' ? 'b-selesai' : ($p->status == 'Diperiksa' ? 'b-siap' : 'b-warn') }}">
+                @if($p->status == 'Menunggu') ⏳
+                @elseif($p->status == 'Diperiksa') 🔵
+                @else ✅
+                @endif
                 {{ $p->status }}
               </span>
             </td>
@@ -81,22 +144,33 @@
               </span>
             </td>
             <td>
-              <div style="display:flex;gap:6px;align-items:center">
-                <a href="{{ route('pasien.edit', $p->id) }}"
-                   class="btn-aksi btn-edit" title="Edit">✏️</a>
+              <div class="aksi-group">
+                <a href="{{ route('pasien.edit', $p->id) }}" class="btn-aksi btn-edit" title="Edit">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit
+                </a>
                 <form action="{{ route('pasien.destroy', $p->id) }}" method="POST"
-                      onsubmit="return confirm('Yakin hapus pasien ini?')">
+                      onsubmit="return confirm('Yakin hapus pasien ini?')" style="display:inline">
                   @csrf
                   @method('DELETE')
-                  <button type="submit" class="btn-aksi btn-hapus" title="Hapus">🗑️</button>
+                  <button type="submit" class="btn-aksi btn-hapus" title="Hapus">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    Hapus
+                  </button>
                 </form>
               </div>
             </td>
           </tr>
         @empty
           <tr>
-            <td colspan="9" style="text-align:center; color:#A8998A; padding:2rem;">
-              Belum ada data pasien.
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C4B5A5" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div class="empty-text">Belum ada data pasien</div>
+                <div class="empty-sub">Mulai dengan mendaftarkan pasien baru</div>
+              </div>
             </td>
           </tr>
         @endforelse
@@ -136,18 +210,155 @@
 
 @push('scripts')
 <style>
-/* ===== TOMBOL AKSI ===== */
-.btn-aksi {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; text-decoration: none;
-  transition: opacity .15s;
+/* ===== SUMMARY STATS ===== */
+.pasien-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
 }
-.btn-aksi:hover { opacity: .75; }
-.btn-edit  { background: #fff3e0; }
-.btn-hapus { background: #ffebee; }
+@media(max-width:768px){ .pasien-stats-row { grid-template-columns: repeat(2, 1fr); } }
+.pstat-card {
+  background: #fff;
+  border: 1px solid #f0ebe6;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow .15s;
+}
+.pstat-card:hover { box-shadow: 0 2px 12px rgba(192,130,90,.1); }
+.pstat-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.pstat-num  { font-size: 22px; font-weight: 700; color: #c0825a; line-height: 1; }
+.pstat-label{ font-size: 12px; color: #A8998A; margin-top: 3px; }
+
+/* ===== FILTER CARD ===== */
+.filter-card {
+  background: #fff;
+  border: 1px solid #f0ebe6;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.filter-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.filter-search-icon {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: #A8998A;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1px solid #ece6e0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2d2016;
+  background: #fdfaf8;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.search-input:focus { outline: none; border-color: #c0825a; background: #fff; }
+.filter-selects { display: flex; gap: 10px; flex-wrap: wrap; }
+.filter-sel {
+  padding: 9px 12px;
+  border: 1px solid #ece6e0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2d2016;
+  background: #fdfaf8;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.filter-sel:focus { outline: none; border-color: #c0825a; }
+
+/* ===== TABLE ENHANCEMENTS ===== */
+.tbl-row { transition: background .12s; }
+.tbl-row:hover { background: #fdf9f7; }
+.rm-code {
+  font-family: monospace;
+  font-size: 12px;
+  background: #f5f0ec;
+  color: #7a5c46;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+.pasien-nama-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pasien-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #fde8d8;
+  color: #c0825a;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.pasien-nama-text { font-size: 13px; font-weight: 600; color: #2d2016; }
+.poli-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f5f0ec;
+  font-size: 12px;
+  color: #6b5248;
+  font-weight: 500;
+}
+.status-badge { gap: 4px; }
+
+/* ===== TOMBOL AKSI ===== */
+.aksi-group { display: flex; gap: 6px; align-items: center; justify-content: center; }
+.btn-aksi {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 12px; font-weight: 500; text-decoration: none;
+  transition: all .15s;
+}
+.btn-aksi:hover { opacity: .82; transform: translateY(-1px); }
+.btn-edit  { background: #fff3e0; color: #c0825a; }
+.btn-hapus { background: #ffebee; color: #c62828; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 20px; text-align: center;
+}
+.empty-icon { margin-bottom: 12px; opacity: .6; }
+.empty-text { font-size: 15px; font-weight: 600; color: #A8998A; }
+.empty-sub  { font-size: 12px; color: #C4B5A5; margin-top: 4px; }
+
+/* ===== ALERT ===== */
+.alert-success {
+  display: flex; align-items: center;
+  padding: 12px 16px; border-radius: 10px;
+  background: #e8f5e9; border: 1px solid #c8e6c9;
+  color: #2e7d32; font-size: 13px; font-weight: 500;
+  margin-bottom: 16px;
+}
 
 /* ===== LAYOUT VALIDASI ===== */
 .validasi-wrap {
