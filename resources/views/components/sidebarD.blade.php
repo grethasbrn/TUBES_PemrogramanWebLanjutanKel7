@@ -53,4 +53,14 @@
     <i class="bi bi-clock-history nav-icon"></i>
     <span>Riwayat</span>
   </div>
+
+  {{-- LOGOUT --}}
+  <div class="nav-section">Akun</div>
+  <form method="POST" action="/logout">
+    @csrf
+    <button type="submit" class="nav-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:inherit;">
+      <i class="bi bi-box-arrow-left nav-icon"></i>
+      <span>Logout</span>
+    </button>
+  </form>
 </div>

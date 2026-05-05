@@ -9,11 +9,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\ResepController;
 
-Route::get('/', function () {
-    return view('login');
-});
-
+Route::get('/', function () { return view('login'); });
+Route::get('/login', function () { return view('login'); });
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthController::class, 'logout']);
 
 Route::prefix('apoteker')->group(function () {
     Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
@@ -27,17 +27,14 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
-    });
+});
 
 Route::prefix('dokter')->group(function () {
-    // Halaman utama dokter — sekarang pakai controller
     Route::get('/dashboard', [DokterController::class, 'dashboard']);
     Route::get('/data', [DokterController::class, 'data']);
     Route::get('/prescription', [DokterController::class, 'prescription']);
     Route::get('/status', function () { return view('dokter.status'); });
     Route::get('/history', function () { return view('dokter.history'); });
-
-    // API endpoints untuk JavaScript
     Route::get('/api/pasien', [DokterController::class, 'apiPasien']);
     Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
     Route::get('/api/resep', [ResepController::class, 'index']);
@@ -46,28 +43,19 @@ Route::prefix('dokter')->group(function () {
 
 Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
     Route::get('/data', [PasienController::class, 'index'])->name('pasien.index');
     Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
     Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
     Route::post('/pasien/{id}/validasi', [PasienController::class, 'updateValidasi']);
-
-    // Edit, Update, Delete pasien
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
-
     Route::get('/queue', function () { return view('admin.queue'); });
-
-    // invoice
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
-
     Route::get('/payment', function () { return view('admin.payment'); });
     Route::get('/report', function () { return view('admin.report'); });
-
-    // API untuk dashboard stats
     Route::get('/api/stats', [DashboardController::class, 'stats']);
 });
