@@ -45,10 +45,38 @@ class BatchController extends Controller
     }
 
     public function index()
-    {
-        $batches = Batch::all(); 
-        return view('apoteker.stock', compact('batches'));
-    }
+{
+    $batches = Batch::all();
+
+    $stockData = $batches->map(function($b) {
+        $tglExpired = $b->tgl_expired?->format('Y-m-d');
+        
+        if (!$b->tgl_expired) {
+            $status = 'aman';
+        } elseif ($b->tgl_expired->isPast()) {
+            $status = 'expired';
+        } elseif (now()->diffInDays($b->tgl_expired) <= 90) {
+            $status = 'exp-soon';
+        } elseif ($b->jumlah <= 10) {
+            $status = 'kritis';
+        } else {
+            $status = 'aman';
+        }
+
+        return [
+            'id'          => $b->id,
+            'nama_obat'   => $b->nama_obat,
+            'tipe'        => $b->tipe,
+            'no_batch'    => $b->no_batch,
+            'jumlah'      => $b->jumlah,
+            'harga'       => $b->harga,
+            'tgl_expired' => $tglExpired,
+            'status'      => $status,
+        ];
+    });
+
+    return view('apoteker.stock', compact('batches', 'stockData'));
+}
 
     public function store(Request $request)
     {

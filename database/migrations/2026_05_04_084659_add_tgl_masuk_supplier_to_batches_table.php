@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -7,15 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-    Schema::table('batches', function (Blueprint $table) {
-        $table->integer('harga_bpjs')->default(0)->after('id'); 
-    });
+        Schema::table('batches', function (Blueprint $table) {
+            $table->date('tgl_masuk')->nullable()->after('tgl_expired');
+            $table->string('supplier')->nullable()->after('tgl_masuk');
+        });
     }
 
     public function down(): void
     {
         Schema::table('batches', function (Blueprint $table) {
-            $table->dropColumn('harga_bpjs');
+            $table->dropColumn(['tgl_masuk', 'supplier']);
         });
     }
 };

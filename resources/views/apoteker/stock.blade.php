@@ -49,35 +49,80 @@
   </div>
 </div>
 
-
 @include('apoteker.Batch.index')
 
 <script>
-    // Fungsi untuk membuka modal apapun berdasarkan ID
-    function openModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.add('open');
-        }
+    const stockData = @json($stockData);
+
+    function getStatusLabel(status) {
+        const map = {
+            'aman'    : '<span class="badge badge-success">Aman</span>',
+            'kritis'  : '<span class="badge badge-warning">Kritis</span>',
+            'expired' : '<span class="badge badge-danger">Expired</span>',
+            'exp-soon': '<span class="badge badge-warning">Exp &lt; 90 hari</span>',
+        };
+        return map[status] || status;
     }
 
-    // Fungsi untuk menutup modal
-    function closeModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.remove('open');
+    function renderStockTable() {
+        const search       = document.getElementById('stockSearch').value.toLowerCase();
+        const filterTipe   = document.getElementById('stockFilterTipe').value;
+        const filterStatus = document.getElementById('stockFilterStatus').value;
+
+        const filtered = stockData.filter(b => {
+            const matchSearch = b.nama_obat.toLowerCase().includes(search) ||
+                                b.no_batch.toLowerCase().includes(search);
+            const matchTipe   = filterTipe   ? b.tipe   === filterTipe   : true;
+            const matchStatus = filterStatus ? b.status === filterStatus : true;
+            return matchSearch && matchTipe && matchStatus;
+        });
+
+        const tbody = document.getElementById('stockTableBody');
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:#aaa;">Belum ada data batch.</td></tr>`;
+            return;
         }
+
+        tbody.innerHTML = filtered.map(b => `
+            <tr>
+                <td>${b.nama_obat}</td>
+                <td>${b.tipe}</td>
+                <td>${b.no_batch}</td>
+                <td>${b.jumlah}</td>
+                <td>Rp ${Number(b.harga).toLocaleString('id-ID')}</td>
+                <td>${b.tgl_expired ?? '-'}</td>
+                <td>${getStatusLabel(b.status)}</td>
+                <td>
+                    <form action="/apoteker/batch/${b.id}" method="POST"
+                          onsubmit="return confirm('Hapus batch ini?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" style="color:red;background:none;border:none;cursor:pointer;">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    // LOGIC AUTO-OPEN (Jika klik dari Dashboard)
     document.addEventListener('DOMContentLoaded', function() {
+        renderStockTable();
+
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('add') === 'true') {
             openModal('modalTambahBatch');
-            
-            // Bersihkan URL agar rapi kembali
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     });
+
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.add('open');
+    }
+
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove('open');
+    }
 </script>
 @endsection
