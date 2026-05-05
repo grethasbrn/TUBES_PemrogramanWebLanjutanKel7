@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Resep;
+use App\Models\Batch;
 use App\Models\Pasien;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -34,8 +35,10 @@ class ResepController extends Controller
         // Update status pasien jika resep dikirim (bukan draft)
         if ($request->status === 'baru') {
             $pasien = Pasien::find($request->pasien_id);
-            $pasien->status = 'Selesai';
-            $pasien->save();
+            if ($pasien) {
+                $pasien->status = 'Selesai';
+                $pasien->save();
+            }
         }
 
         return response()->json([
@@ -46,31 +49,53 @@ class ResepController extends Controller
     }
 
     /**
-     * API: Ambil semua resep hari ini
+     * API: Ambil semua resep (tidak dibatasi hari ini)
      */
     public function index()
     {
         $reseps = Resep::with('pasien')
-            ->whereDate('created_at', Carbon::today())
             ->latest()
             ->get()
             ->map(function ($r) {
+                // Cek stok dan harga untuk setiap obat
+                $obatList = collect($r->obat_list ?? [])->map(function ($obat) {
+                    $namaObat = $obat['nama'] ?? '';
+
+                    $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%' . strtolower($namaObat) . '%'])
+                        ->where('jumlah', '>', 0)
+                        ->where(function ($q) {
+                            $q->whereNull('tgl_expired')
+                              ->orWhere('tgl_expired', '>', now());
+                        })
+                        ->first();
+
+                    $obat['stok']  = $batch ? $batch->jumlah : 0;
+                    $obat['harga'] = $batch ? (float) $batch->harga : 0;
+
+                    return $obat;
+                })->toArray();
+
                 return [
                     'id'       => (string) $r->id,
                     'pasienId' => (string) $r->pasien_id,
+                    'no_resep' => $r->no_resep ?? '-',
                     'pasien'   => $r->pasien->nama ?? '-',
                     'rm'       => $r->pasien->no_rm ?? '-',
-                    'bayar'    => $r->pasien->jenis ?? '-',
-                    'diagnosa' => $r->diagnosa,
+                    'dokter'   => $r->pasien->dokter ?? '-',
+                    'bayar'    => $r->pasien->jenis ?? 'Mandiri',
+                    'diagnosa' => $r->diagnosa ?? '-',
                     'tanggal'  => $r->created_at->toDateString(),
-                    'status'   => $r->status,
-                    'obat'     => $r->obat_list,
+                    'status'   => $r->status ?? 'baru',
+                    'obat'     => $obatList,
                 ];
             });
 
         return response()->json($reseps);
     }
 
+    /**
+     * Update status resep
+     */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -82,8 +107,8 @@ class ResepController extends Controller
         $resep->save();
 
         return response()->json([
-            'success' => true,
-            'status'  => $resep->status,
+            'success'  => true,
+            'status'   => $resep->status,
             'no_resep' => $resep->no_resep,
         ]);
     }

@@ -54,30 +54,50 @@ async function loadInvoices() {
         const res = await fetch('/apoteker/api/resep');
         const reseps = await res.json();
 
-        // Konversi resep → invoice (simulasi)
+        // Fetch harga dari stok untuk setiap obat yang harganya 0
+        const stockRes = await fetch('/apoteker/api/stok');
+        const stockData = stockRes.ok ? await stockRes.json() : [];
+
         allInvoices = reseps.map((r, i) => {
-            const obat = r.obat || [];
-            const subtotal = obat.reduce((sum, o) => sum + ((o.harga || 0) * (o.qty || 1)), 0);
-            const ppn = Math.round(subtotal * 0.11);
+            const obat = (r.obat || []).map(o => {
+                // Jika harga sudah ada dari API, pakai itu
+                // Jika tidak, cari dari stockData berdasarkan nama obat
+                let harga = parseFloat(o.harga) || 0;
+                if (harga === 0 && stockData.length > 0) {
+                    const match = stockData.find(s =>
+                        s.nama_obat.toLowerCase().includes(o.nama.toLowerCase()) ||
+                        o.nama.toLowerCase().includes(s.nama_obat.toLowerCase())
+                    );
+                    if (match) harga = parseFloat(match.harga) || 0;
+                }
+                return { ...o, harga };
+            });
+
+            const subtotal = obat.reduce((sum, o) => sum + (o.harga * (parseInt(o.qty) || 1)), 0);
+            const ppn      = r.bayar === 'BPJS' ? 0 : Math.round(subtotal * 0.11);
+
             return {
-                id: r.id,
-                no_invoice: `INV-2026-${String(i+1).padStart(3,'0')}`,
-                pasien: r.pasien || '-',
-                rm: r.rm || '-',
-                resep: r.no_resep || '-',
-                bayar: r.bayar || 'Mandiri',
-                status: r.status === 'selesai' ? 'lunas' : (r.status === 'validasi' ? 'diproses' : 'masuk'),
-                tanggal: r.tanggal || '-',
-                obat: obat,
-                subtotal: subtotal,
-                ppn: ppn,
-                total: subtotal + ppn,
-                diagnosa: r.diagnosa || '-',
+                id:         r.id,
+                no_invoice: `INV-${r.tanggal?.slice(0,4) || '2026'}-${String(i+1).padStart(3,'0')}`,
+                no_resep:   r.no_resep || '-',
+                pasien:     r.pasien || '-',
+                rm:         r.rm || '-',
+                bayar:      r.bayar || 'Mandiri',
+                status:     r.status === 'selesai' ? 'lunas'
+                          : r.status === 'siap'    ? 'diproses'
+                          : r.status === 'validasi' ? 'diproses' : 'masuk',
+                tanggal:    r.tanggal || '-',
+                obat:       obat,
+                subtotal:   subtotal,
+                ppn:        ppn,
+                total:      subtotal + ppn,
+                diagnosa:   r.diagnosa || '-',
             };
         });
 
         renderInvoiceList();
     } catch (err) {
+        console.error(err);
         document.getElementById('invoiceList').innerHTML = `
             <div class="card" style="text-align:center;padding:30px;color:var(--text3)">
                 Gagal memuat data invoice
@@ -86,8 +106,8 @@ async function loadInvoices() {
 }
 
 function renderInvoiceList() {
-    const q      = document.getElementById('invSearch').value.toLowerCase();
-    const status = document.getElementById('invFilterStatus').value;
+    const q         = document.getElementById('invSearch').value.toLowerCase();
+    const status    = document.getElementById('invFilterStatus').value;
     const container = document.getElementById('invoiceList');
 
     let list = allInvoices;
@@ -102,8 +122,8 @@ function renderInvoiceList() {
         return;
     }
 
-    const badgeMap  = { masuk: 'b-baru', diproses: 'b-validasi', lunas: 'b-selesai' };
-    const labelMap  = { masuk: 'Masuk', diproses: 'Diproses', lunas: 'Lunas' };
+    const badgeMap = { masuk: 'b-baru', diproses: 'b-validasi', lunas: 'b-selesai' };
+    const labelMap = { masuk: 'Masuk', diproses: 'Diproses', lunas: 'Lunas' };
 
     container.innerHTML = list.map(inv => `
         <div class="rx-item inv-item" id="inv-${inv.id}" onclick="showInvoice('${inv.id}')">
@@ -140,22 +160,34 @@ function showInvoice(id) {
                 <div>
                     <div style="font-weight:500;color:var(--text)">${o.nama}</div>
                     <div style="font-size:11px;color:var(--text3);margin-top:2px">
-                        ${o.qty || 1} × ${formatRp(o.harga || 0)}
+                        ${parseInt(o.qty) || 1} × ${formatRp(o.harga || 0)}
                     </div>
                 </div>
-                <div style="font-weight:500;color:var(--text)">${formatRp((o.harga||0)*(o.qty||1))}</div>
+                <div style="font-weight:500;color:var(--text)">
+                    ${formatRp((o.harga || 0) * (parseInt(o.qty) || 1))}
+                </div>
             </div>
         `).join('');
 
     const bayarInfo = inv.bayar === 'BPJS'
         ? `<div style="background:var(--teal-light);border:1px solid #a0d9d2;border-radius:8px;
-                       padding:9px 13px;font-size:12px;color:var(--teal);display:flex;align-items:center;gap:8px;margin-bottom:16px">
-                <span>🏥</span> Pasien BPJS — biaya ditanggung BPJS
+                       padding:9px 13px;font-size:12px;color:var(--teal);
+                       display:flex;align-items:center;gap:8px;margin-bottom:16px">
+               <span>🏥</span> Pasien BPJS — biaya ditanggung BPJS
            </div>`
         : `<div style="background:var(--purple-light);border:1px solid #c5bef0;border-radius:8px;
-                       padding:9px 13px;font-size:12px;color:var(--purple2);display:flex;align-items:center;gap:8px;margin-bottom:16px">
-                <span>💳</span> Pasien Mandiri — biaya dibayar penuh
+                       padding:9px 13px;font-size:12px;color:var(--purple2);
+                       display:flex;align-items:center;gap:8px;margin-bottom:16px">
+               <span>💳</span> Pasien Mandiri — biaya dibayar penuh
            </div>`;
+
+    const ppnRow = inv.bayar !== 'BPJS'
+        ? `<div style="display:flex;justify-content:space-between;font-size:13px;
+                       color:var(--text2);padding:6px 0;border-bottom:1px solid var(--cream3)">
+               <span>PPN 11%</span>
+               <span>${formatRp(inv.ppn)}</span>
+           </div>`
+        : '';
 
     const btnKirim = inv.status === 'masuk'
         ? `<button class="btn btn-danger" style="flex:1" onclick="kirimInvoice('${inv.id}')">
@@ -174,9 +206,8 @@ function showInvoice(id) {
 
     document.getElementById('invoicePreview').innerHTML = `
         <div class="card" style="padding:0;overflow:hidden">
-
-            {{-- Header --}}
-            <div style="background:var(--orange);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="background:var(--orange);padding:16px 18px;
+                        display:flex;justify-content:space-between;align-items:flex-start">
                 <div>
                     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white">
                         ${inv.no_invoice}
@@ -193,24 +224,19 @@ function showInvoice(id) {
             <div style="padding:16px 18px">
                 ${bayarInfo}
 
-                {{-- Rincian Obat --}}
-                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;
+                            letter-spacing:.06em;margin-bottom:4px">
                     Rincian Obat
                 </div>
                 ${obatHtml}
 
-                {{-- Total --}}
                 <div style="margin-top:12px;padding-top:4px">
                     <div style="display:flex;justify-content:space-between;font-size:13px;
                                 color:var(--text2);padding:6px 0;border-bottom:1px solid var(--cream3)">
                         <span>Subtotal</span>
                         <span>${formatRp(inv.subtotal)}</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;
-                                color:var(--text2);padding:6px 0;border-bottom:1px solid var(--cream3)">
-                        <span>PPN 11%</span>
-                        <span>${formatRp(inv.ppn)}</span>
-                    </div>
+                    ${ppnRow}
                     <div style="display:flex;justify-content:space-between;font-size:16px;
                                 font-family:'Cormorant Garamond',serif;font-weight:600;
                                 padding:10px 0;color:var(--orange)">
@@ -219,7 +245,6 @@ function showInvoice(id) {
                     </div>
                 </div>
 
-                {{-- Action buttons --}}
                 <div style="display:flex;gap:8px;margin-top:4px">
                     ${btnKirim}
                 </div>
