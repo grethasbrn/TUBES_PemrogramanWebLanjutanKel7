@@ -57,10 +57,12 @@ Route::prefix('admin')->group(function () {
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
     Route::get('/queue', function () { return view('admin.queue'); });
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
+    Route::get('/invoice/{id}', [InvoiceController::class, 'show'])->name('invoice.show'); 
+    Route::get('/invoice/{id}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
-    Route::get('/payment', function () { return view('admin.payment'); });
+
     Route::get('/report', function () { return view('admin.report'); });
     Route::get('/api/stats', [DashboardController::class, 'stats']);
 });

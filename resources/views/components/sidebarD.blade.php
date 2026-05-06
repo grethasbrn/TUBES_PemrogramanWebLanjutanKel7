@@ -58,7 +58,7 @@
   <div class="nav-section">Akun</div>
   <form method="POST" action="/logout">
     @csrf
-    <button type="submit" class="nav-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:inherit;">
+    <button type="submit" class="nav-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:inherit; padding-bottom:50px">
       <i class="bi bi-box-arrow-left nav-icon"></i>
       <span>Logout</span>
     </button>
