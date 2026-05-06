@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
@@ -21,9 +22,13 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/alerts', function () { return view('apoteker.alerts'); });
     Route::get('/prescription', function () { return view('apoteker.prescription'); });
     Route::get('/invoice', function () { return view('apoteker.invoice'); });
-    Route::get('/report', function () { return view('apoteker.report'); });
-    Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
+    Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
+    Route::get('/api/report', [ReportController::class, 'apiStats']);
     Route::get('/api/resep', [ResepController::class, 'index']);
+    Route::get('/api/stok', function () {
+        return response()->json(\App\Models\Batch::select('nama_obat', 'harga', 'harga_bpjs', 'jumlah')->get());
+    });
+    Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
