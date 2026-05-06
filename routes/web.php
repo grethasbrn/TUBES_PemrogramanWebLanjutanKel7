@@ -55,7 +55,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
-    Route::get('/queue', function () { return view('admin.queue'); });
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
@@ -63,4 +62,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/payment', function () { return view('admin.payment'); });
     Route::get('/report', function () { return view('admin.report'); });
     Route::get('/api/stats', [DashboardController::class, 'stats']);
+    Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
+    Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');
+    Route::post('/pasien/{id}/kirim-dokter', [PasienController::class, 'kirimKeDokter'])->name('pasien.kirimDokter');
 });
