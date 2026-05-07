@@ -12,6 +12,7 @@ class Batch extends Model
     protected $fillable = [
         'nama_obat',
         'tipe',
+        'kategori',
         'no_batch',
         'jumlah',
         'harga',
@@ -45,4 +46,5 @@ class Batch extends Model
     {
         return $this->tgl_expired->isPast();
     }
+    
 }

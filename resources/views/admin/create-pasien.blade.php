@@ -119,6 +119,16 @@
           @error('jenis')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
+        {{-- Field No. BPJS: muncul hanya jika jenis = BPJS --}}
+        <div class="form-group" id="field-bpjs" style="display: {{ old('jenis') == 'BPJS' ? 'flex' : 'none' }};">
+          <label for="no_bpjs">No. BPJS <span class="required">*</span></label>
+          <input type="text" id="no_bpjs" name="no_bpjs"
+            class="form-input @error('no_bpjs') is-error @enderror"
+            placeholder="Contoh: 0001234567890"
+            value="{{ old('no_bpjs') }}">
+          @error('no_bpjs')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
       </div>
 
       {{-- ===== TUJUAN & KELUHAN ===== --}}
@@ -230,6 +240,15 @@
     </form>
   </div>
 </div>
+
+<script>
+  const jenisSelect = document.getElementById('jenis');
+  const bpjsField = document.getElementById('field-bpjs');
+
+  jenisSelect.addEventListener('change', function () {
+    bpjsField.style.display = this.value === 'BPJS' ? 'flex' : 'none';
+  });
+</script>
 
 <style>
   .form-card {

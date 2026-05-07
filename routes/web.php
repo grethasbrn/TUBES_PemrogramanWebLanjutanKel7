@@ -19,7 +19,7 @@ Route::get('/logout', [AuthController::class, 'logout']);
 Route::prefix('apoteker')->group(function () {
     Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
-    Route::get('/alerts', function () { return view('apoteker.alerts'); });
+    Route::get('/alerts', [BatchController::class, 'alerts'])->name('apoteker.alerts'); // ✅ FIXED
     Route::get('/prescription', function () { return view('apoteker.prescription'); });
     Route::get('/invoice', function () { return view('apoteker.invoice'); });
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
@@ -32,6 +32,7 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
+    // ✅ HAPUS baris duplikat /apoteker/alerts yang salah
 });
 
 Route::prefix('dokter')->group(function () {
@@ -44,6 +45,16 @@ Route::prefix('dokter')->group(function () {
     Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
     Route::get('/api/resep', [ResepController::class, 'index']);
     Route::post('/api/resep/store', [ResepController::class, 'store']);
+    Route::get('/api/obat', function () {
+        return response()->json(
+            \App\Models\Batch::where('jumlah', '>', 0)
+                ->whereNull('tgl_expired')
+                ->orWhere('tgl_expired', '>', now())
+                ->select('id', 'nama_obat', 'jumlah', 'satuan')
+                ->orderBy('nama_obat')
+                ->get()
+            );
+        });
 });
 
 Route::prefix('admin')->group(function () {
@@ -55,7 +66,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
-    Route::get('/queue', function () { return view('admin.queue'); });
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::get('/invoice/{id}', [InvoiceController::class, 'show'])->name('invoice.show'); 
     Route::get('/invoice/{id}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');
@@ -65,4 +75,7 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/report', function () { return view('admin.report'); });
     Route::get('/api/stats', [DashboardController::class, 'stats']);
+    Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
+    Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');
+    Route::post('/pasien/{id}/kirim-dokter', [PasienController::class, 'kirimKeDokter'])->name('pasien.kirimDokter');
 });
