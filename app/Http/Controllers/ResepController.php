@@ -69,8 +69,12 @@ class ResepController extends Controller
                         })
                         ->first();
 
+                    $jenisPasien = $r->pasien->jenis ?? 'Mandiri'; // ambil dari data pasien
+
                     $obat['stok']  = $batch ? $batch->jumlah : 0;
-                    $obat['harga'] = $batch ? (float) $batch->harga : 0;
+                    $obat['harga'] = $batch
+                        ? ($jenisPasien === 'BPJS' ? 0 : (float) $batch->harga)
+                        : 0;
 
                     return $obat;
                 })->toArray();
@@ -111,5 +115,10 @@ class ResepController extends Controller
             'status'   => $resep->status,
             'no_resep' => $resep->no_resep,
         ]);
+    }
+
+    public function prescription()
+    {
+        return view('dokter.prescription');
     }
 }

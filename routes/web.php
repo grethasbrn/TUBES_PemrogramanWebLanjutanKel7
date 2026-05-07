@@ -19,7 +19,7 @@ Route::get('/logout', [AuthController::class, 'logout']);
 Route::prefix('apoteker')->group(function () {
     Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
-    Route::get('/alerts', function () { return view('apoteker.alerts'); });
+    Route::get('/alerts', [BatchController::class, 'alerts'])->name('apoteker.alerts'); // ✅ FIXED
     Route::get('/prescription', function () { return view('apoteker.prescription'); });
     Route::get('/invoice', function () { return view('apoteker.invoice'); });
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
@@ -32,6 +32,7 @@ Route::prefix('apoteker')->group(function () {
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
+    // ✅ HAPUS baris duplikat /apoteker/alerts yang salah
 });
 
 Route::prefix('dokter')->group(function () {
@@ -44,6 +45,16 @@ Route::prefix('dokter')->group(function () {
     Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
     Route::get('/api/resep', [ResepController::class, 'index']);
     Route::post('/api/resep/store', [ResepController::class, 'store']);
+    Route::get('/api/obat', function () {
+        return response()->json(
+            \App\Models\Batch::where('jumlah', '>', 0)
+                ->whereNull('tgl_expired')
+                ->orWhere('tgl_expired', '>', now())
+                ->select('id', 'nama_obat', 'jumlah', 'satuan')
+                ->orderBy('nama_obat')
+                ->get()
+            );
+        });
 });
 
 Route::prefix('admin')->group(function () {
