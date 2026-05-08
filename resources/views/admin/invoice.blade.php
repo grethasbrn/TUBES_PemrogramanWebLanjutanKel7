@@ -93,10 +93,17 @@
                             @foreach($inv->resep->obat_list as $item)
                             <div class="inv-row" style="padding: 10px 12px; background: var(--white); display:flex; justify-content:space-between; border-bottom: 1px solid var(--cream3)">
                                 <div>
-                                    <div style="font-weight: 500; color: var(--text);">{{ $item['nama'] }}</div>
-                                    <div style="font-size: 11px; color: var(--text3);">{{ $item['qty'] }} × Rp {{ number_format($item['harga'], 0, ',', '.') }}</div>
+                                    <div style="font-weight: 500; color: var(--text);">{{ $item['nama'] ?? 'Obat' }}</div>
+                                    <div style="font-size: 11px; color: var(--text3);">
+                                        {{ $item['jumlah'] ?? 0 }} × 
+                                        
+                                        Rp {{ number_format($item['harga'] ?? 0, 0, ',', '.') }}
+                                    </div>
                                 </div>
-                                <div style="font-weight: 600;">Rp {{ number_format($item['qty'] * $item['harga'], 0, ',', '.') }}</div>
+                                <div style="font-weight: 600;">
+                                    {{-- Kalkulasi otomatis: Jumlah x Harga --}}
+                                    Rp {{ number_format(($item['jumlah'] ?? 0) * ($item['harga'] ?? 0), 0, ',', '.') }}
+                                </div>
                             </div>
                             @endforeach
 
@@ -128,12 +135,23 @@
                             <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
                                 @csrf
                                 <div style="display: flex; gap: 8px; margin-top: 20px;">
-                                    <button type="submit" class="btn btn-danger" style="flex: 1; padding: 12px; font-weight: 600;">💳 Proses Pembayaran</button>
+                                    <button type="submit" class="btn btn-danger" style="flex: 1; padding: 12px; font-weight: 600; cursor: pointer;">
+                                        💳 Proses Pembayaran
+                                    </button>
                                 </div>
                             </form>
                         @else
-                            <div class="alert-banner info" style="background: var(--green-light); color: #1F6B43; border: 1px solid var(--green); text-align:center; padding:10px">
-                                <span style="font-weight: 600;">✅ Invoice ini sudah lunas</span>
+                            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                                <div class="alert-banner" style="background: #e6f4ea; color: #1e7e34; border: 1px solid #c3e6cb; text-align:center; padding:12px; border-radius: 8px; margin-bottom: 0;">
+                                    <span style="font-weight: 600;">✅ Pembayaran Lunas</span>
+                                </div>
+                
+                                <a href="{{ route('invoice.download', $inv->id) }}" 
+                                target="_blank" 
+                                class="btn" 
+                                style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    📥 Download Kwitansi (PDF)
+                                </a>
                             </div>
                         @endif
                     </div>

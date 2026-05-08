@@ -121,4 +121,5 @@ class ResepController extends Controller
     {
         return view('dokter.prescription');
     }
+
 }

@@ -59,7 +59,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 .btn-amber:hover{background:#e0863e;color:white}
 
 /* CARDS */
-.card{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:18px}
+.card{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:18px; margin-bottom:15px;}
 .card-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:14px}
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
 .metric{background:var(--white);border:1px solid var(--cream3);border-radius:12px;padding:16px}

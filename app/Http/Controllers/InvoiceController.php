@@ -22,23 +22,18 @@ class InvoiceController extends Controller
     
     public function show($id)
     {
-        $invoice = Invoice::with('reseps')->findOrFail($id);
+        $invoice = Invoice::with('resep')->findOrFail($id);
         
         return view('invoice.show', compact('invoice'));
     }
 
     public function downloadPdf($id)
     {
-        $invoice = Invoice::with('reseps')->findOrFail($id);
+        $inv = Invoice::with('resep')->findOrFail($id);
 
-        $data = [
-            'invoice' => $invoice,
-            'obat_list' => $invoice->reseps->obat_list, 
-        ];
-
-        $pdf = Pdf::loadView('invoices.pdf_template', $data);
-
-        return $pdf->download('Invoice-' . $invoice->no_invoice . '.pdf');
+        $pdf = Pdf::loadView('admin.invoice_pdf', compact('inv'));
+        
+        return $pdf->stream('Invoice-'.$inv->no_invoice.'.pdf');
     }
 
 
