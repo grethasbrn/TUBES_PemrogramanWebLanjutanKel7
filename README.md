@@ -3,7 +3,7 @@
 # 💊 PharmBee
 ### Sistem Informasi Manajemen Apotek
 
-> 📚 Tugas Akhir — Mata Kuliah Pemrograman Web
+> 📚 Tugas Akhir — Mata Kuliah Pemrograman Web Lanjutan
 
 </div>
 
