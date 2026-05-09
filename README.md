@@ -1,7 +1,7 @@
 <div align="center">
 
 # 💊 PharmBee
-### Sistem Informasi Manajemen Apotek
+### Sistem Informasi Manajemen Rumah Sakit
 
 > 📚 Tugas Akhir — Mata Kuliah Pemrograman Web Lanjutan
 
@@ -109,8 +109,6 @@ php artisan serve
 ## 🙏 Penutup
 
 Demikian dokumentasi proyek **PharmBee** yang kami kembangkan sebagai tugas akhir mata kuliah Pemrograman Web. Kami menyadari sistem ini masih memiliki ruang untuk dikembangkan lebih lanjut, dan kami terbuka terhadap kritik serta saran yang membangun.
-
-Terima kasih kepada dosen pengampu atas bimbingan yang diberikan selama perkuliahan berlangsung.
 
 ---
 
