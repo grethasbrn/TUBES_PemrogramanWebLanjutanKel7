@@ -9,6 +9,7 @@ use App\Http\Controllers\PasienController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\ResepController;
+use App\Http\Controllers\AdminDokterController;
 
 Route::get('/', function () { return view('login'); });
 Route::get('/login', function () { return view('login'); })->name('login');
@@ -79,4 +80,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
     Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');
     Route::post('/pasien/{id}/kirim-dokter', [PasienController::class, 'kirimKeDokter'])->name('pasien.kirimDokter');
+
+    // ===== MANAJEMEN AKUN DOKTER =====
+    Route::get('/dokter', [AdminDokterController::class, 'index'])->name('admin.dokter.index');
+    Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');
+    Route::put('/dokter/{id}', [AdminDokterController::class, 'update'])->name('admin.dokter.update');
+    Route::delete('/dokter/{id}', [AdminDokterController::class, 'destroy'])->name('admin.dokter.destroy');
 });

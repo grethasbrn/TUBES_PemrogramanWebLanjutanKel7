@@ -7,7 +7,14 @@
       <div class="hero-badge">💊 Pharmbee Dashboard</div>
       <div class="page-title">Dashboard</div>
       <div class="page-sub">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</div>
-      <p class="hero-text">Selamat datang kembali, kelola pasien dan resep hari ini dengan mudah.</p>
+      <p class="hero-text">
+        Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>.
+        @if(auth()->user()->poli)
+          Anda mengelola pasien <strong>Poli {{ auth()->user()->poli }}</strong>.
+        @else
+          Kelola pasien dan resep hari ini dengan mudah.
+        @endif
+      </p>
     </div>
 
     <button class="btn btn-primary btn-resep" onclick="showSection('buat-resep')">

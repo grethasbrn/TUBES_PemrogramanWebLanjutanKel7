@@ -6,16 +6,45 @@ use App\Models\Pasien;
 use App\Models\Resep;
 use App\Models\Batch;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DokterController extends Controller
 {
+    /**
+     * Ambil poli dokter yang sedang login.
+     * Jika kolom poli null/kosong, fallback ke null (tampilkan semua — untuk backward compat).
+     */
+    private function getPoliDokter(): ?string
+    {
+        return Auth::user()->poli ?: null;
+    }
+
+    /**
+     * Scope query Pasien berdasarkan poli dokter yang login.
+     */
+    private function queryPasienPoli()
+    {
+        $poli = $this->getPoliDokter();
+
+        $query = Pasien::query();
+
+        if ($poli) {
+            $query->where('poli_tujuan', $poli);
+        }
+
+        return $query;
+    }
+
     public function dashboard()
     {
         $today = Carbon::today();
 
-        $pasienHariIni = Pasien::whereIn('status', ['Menunggu', 'Diperiksa'])->count();
+        $pasienHariIni = $this->queryPasienPoli()
+            ->whereIn('status', ['Menunggu', 'Diperiksa'])
+            ->count();
 
-        $antrian = Pasien::whereIn('status', ['Menunggu', 'Diperiksa'])
+        $antrian = $this->queryPasienPoli()
+            ->whereIn('status', ['Menunggu', 'Diperiksa'])
             ->orderBy('created_at')
             ->take(8)
             ->get(['id', 'nama', 'no_rm', 'jenis', 'poli_tujuan', 'status', 'keluhan']);
@@ -59,7 +88,8 @@ class DokterController extends Controller
 
     public function data()
     {
-        $pasiens = Pasien::whereIn('status', ['Menunggu', 'Diperiksa'])
+        $pasiens = $this->queryPasienPoli()
+            ->whereIn('status', ['Menunggu', 'Diperiksa'])
             ->orderBy('created_at')
             ->get();
 
@@ -89,7 +119,8 @@ class DokterController extends Controller
 
     public function apiPasien()
     {
-        $pasiens = Pasien::whereNotIn('status', ['Selesai'])
+        $pasiens = $this->queryPasienPoli()
+            ->whereNotIn('status', ['Selesai'])
             ->orderBy('created_at')
             ->get()
             ->map(function ($p) {
@@ -126,7 +157,8 @@ class DokterController extends Controller
 
     public function prescription()
     {
-        $pasiens = Pasien::whereNotIn('status', ['Selesai'])
+        $pasiens = $this->queryPasienPoli()
+            ->whereNotIn('status', ['Selesai'])
             ->orderBy('created_at')
             ->get();
 
