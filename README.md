@@ -19,19 +19,19 @@ Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu *
 
 ## 👥 Anggota Kelompok
 
-| 1 | [GRETHA JOYCE SIBURIAN]  [251402089] 
+1. GRETHA JOYCE SIBURIAN [251402089] 
 
-| 2 | [NADHIRA AMEERA SHEREEN NASUTION]  [251402039] 
+2. NADHIRA AMEERA SHEREEN NASUTION [251402039] 
 
-| 3 | [RATU SABRINA TURNIP]  [251402018] 
+3. RATU SABRINA TURNIP [251402018] 
 
-| 4 | [ELYSTA NAOMI NADAPDAP]  [251402124] 
+4. ELYSTA NAOMI NADAPDAP 251402124 
 
-| 5 | [SESILIA MARIA GORETTY SIHOMBING]  [2514020932] 
+5. SESILIA MARIA GORETTY SIHOMBING [2514020932] 
 
-| 6 | [EPHIVANI SIMANULLANG]  [251402086] 
+6. EPHIVANI SIMANULLANG [251402086] 
 
-| 7 | [KEYSAHRANI AMELIA]  [251402012]
+7. KEYSAHRANI AMELIA [251402012]
 
 ---
 
@@ -116,6 +116,6 @@ Terima kasih kepada dosen pengampu atas bimbingan yang diberikan selama perkulia
 
 <div align="center">
 
-*© 2026 PharmBee — Kelompok [Nomor Kelompok]*
+*© 2026 PharmBee — Kelompok 7*
 
 </div>
