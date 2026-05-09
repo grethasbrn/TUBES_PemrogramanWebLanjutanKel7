@@ -19,15 +19,13 @@ Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu *
 
 ## 👥 Anggota Kelompok
 
-| No | Nama | NIM |
-|:--:|------|:---:|
-| 1 | [Nama Anggota 1] | [NIM] |
-| 2 | [Nama Anggota 2] | [NIM] |
-| 3 | [Nama Anggota 3] | [NIM] |
-| 4 | [Nama Anggota 4] | [NIM] |
-| 5 | [Nama Anggota 5] | [NIM] |
-| 6 | [Nama Anggota 6] | [NIM] |
-| 7 | [Nama Anggota 7] | [NIM] |
+| 1 | [GRETHA JOYCE SIBURIAN]  [251402089] 
+| 2 | [NADHIRA AMEERA SHEREEN NASUTION]  [251402039] 
+| 3 | [RATU SABRINA TURNIP]  [251402018] 
+| 4 | [ELYSTA NAOMI NADAPDAP]  [251402124] 
+| 5 | [SESILIA MARIA GORETTY SIHOMBING]  [2514020932] 
+| 6 | [EPHIVANI SIMANULLANG]  [251402086] 
+| 7 | [KEYSAHRANI AMELIA]  [251402012]
 
 ---
 
