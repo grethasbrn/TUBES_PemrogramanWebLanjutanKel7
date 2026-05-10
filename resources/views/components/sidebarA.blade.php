@@ -1,25 +1,50 @@
 <!-- TOPBAR -->
 <div class="topbar">
+
   <div class="logo">
     <div class="logo-icon">💊</div>
+
     <div class="logo-text">
       <div class="l1">Pharmbee</div>
     </div>
   </div>
+
   <div class="topbar-right">
-    <div class="date-chip" id="dateChip"></div>
+
+    <!-- DATE & TIME -->
+    <div class="date-chip">
+      <div id="dateTag"></div>
+    </div>
+
+    <!-- NOTIFICATION -->
     <a class="notif-btn" href="{{ url('apoteker/alerts') }}">
       <span>🔔</span>
       <span class="notif-badge" id="notifBadge"></span>
     </a>
+
+    <!-- USER -->
     <div class="avatar-wrap">
-      <div class="avatar">AP</div>
-      <div class="avatar-info">
-        <div class="avatar-name">Apt. Putri</div>
-        <div class="avatar-role">Apoteker</div>
+
+      <div class="avatar">
+        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
       </div>
+
+      <div class="avatar-info">
+
+        <div class="avatar-name">
+          {{ Auth::user()->name ?? 'Apoteker' }}
+        </div>
+
+        <div class="avatar-role">
+          {{ Auth::user()->role ?? 'Apoteker' }}
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>
 
 <!-- SIDEBAR -->
@@ -62,3 +87,30 @@
     </button>
   </form>
 </div>
+
+<script>
+function updateDateTime() {
+
+    const now = new Date();
+
+    const tanggal = now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
+    const jam = now.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+
+    document.getElementById('dateTag').innerHTML =
+        `${tanggal} • ${jam}`;
+}
+
+updateDateTime();
+
+setInterval(updateDateTime, 1000);
+</script>
