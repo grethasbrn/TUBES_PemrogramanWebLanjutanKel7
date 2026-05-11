@@ -5,7 +5,7 @@
 <div class="page-section active" id="sec-antrian">
   <div class="page-header">
     <div>
-      <div class="page-title">Antrian & Poli</div>
+      <div class="page-title">Antrian & Poli haloo</div>
       <div class="page-sub">Kirim pasien ke dokter sesuai poli tujuan</div>
     </div>
     <button class="btn btn-primary">

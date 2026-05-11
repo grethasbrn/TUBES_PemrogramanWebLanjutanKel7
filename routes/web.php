@@ -59,7 +59,7 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
     });
 });
 
-// ===================== ADMIN =====================
+// ===================== ADMIN ======================
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/data', [PasienController::class, 'index'])->name('pasien.index');
