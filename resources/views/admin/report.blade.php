@@ -19,7 +19,19 @@
   </div>
 
   <!-- Stats row -->
-  <div class="grid3" id="laporanStats"></div>
+  <div class="grid3">
+
+      <div class="card">
+          <div>Total Pasien</div>
+          <h2>{{ $totalPasien }}</h2>
+      </div>
+
+      <div class="card">
+          <div>Total Pendapatan</div>
+          <h2>Rp {{ number_format($totalPendapatan,0,',','.') }}</h2>
+      </div>
+
+  </div>
 
   <div class="grid2">
     <div class="card">
@@ -49,7 +61,26 @@
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>No. Transaksi</th><th>Pasien</th><th>Poli</th><th>Jenis</th><th>Total</th><th>Metode</th><th>Status</th><th>Tanggal</th></tr></thead>
-        <tbody id="tblLaporanDetail"></tbody>
+        <tbody>
+        @foreach($transaksi as $t)
+        <tr>
+            <td>{{ $t->no_invoice }}</td>
+            <td>{{ $t->nama }}</td>
+            <td>-</td>
+            <td>{{ $t->jenis }}</td>
+
+            <td>
+                Rp {{ number_format($t->total_tagihan,0,',','.') }}
+            </td>
+
+            <td>{{ $t->jenis }}</td>
+
+            <td>{{ $t->status }}</td>
+
+            <td>{{ $t->created_at->format('d M Y') }}</td>
+        </tr>
+        @endforeach
+        </tbody>
       </table>
     </div>
   </div>

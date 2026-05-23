@@ -67,6 +67,7 @@
                     $inv = $selectedInvoice;
                     $isBPJS = $inv->jenis === 'BPJS';
                     $ppn = $isBPJS ? 0 : round($inv->subtotal * 0.11);
+                    $total  = $isBPJS ? 0 : ($inv->subtotal + $ppn);
                 @endphp
                 
                 <div class="invoice-card card">
@@ -127,7 +128,7 @@
 
                             <div class="inv-total-row" style="padding: 12px; background: var(--cream); border-top: 1px solid var(--cream3); color: #A63D33; display:flex; justify-content:space-between; align-items:center">
                                 <span>Total Tagihan</span>
-                                <span style="font-size: 19px; font-weight:bold;">Rp {{ number_format($inv->total_tagihan, 0, ',', '.') }}</span>
+                                <span style="font-size: 19px; font-weight:bold;">Rp {{ number_format($total, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
@@ -135,22 +136,22 @@
                             <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
                                 @csrf
                                 <div style="display: flex; gap: 8px; margin-top: 20px;">
-                                    <button type="submit" class="btn btn-danger" style="flex: 1; padding: 12px; font-weight: 600; cursor: pointer;">
-                                        💳 Proses Pembayaran
+                                    <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        Proses Pembayaran
                                     </button>
                                 </div>
                             </form>
                         @else
                             <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
                                 <div class="alert-banner" style="background: #e6f4ea; color: #1e7e34; border: 1px solid #c3e6cb; text-align:center; padding:12px; border-radius: 8px; margin-bottom: 0;">
-                                    <span style="font-weight: 600;">✅ Pembayaran Lunas</span>
+                                    <span style="font-weight: 600;"> ✓ &nbsp; Pembayaran Lunas</span>
                                 </div>
                 
                                 <a href="{{ route('invoice.download', $inv->id) }}" 
                                 target="_blank" 
                                 class="btn" 
                                 style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                    📥 Download Invoice (PDF)
+                                    Download Invoice (PDF)
                                 </a>
                             </div>
                         @endif

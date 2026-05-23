@@ -15,12 +15,12 @@ class PasienController extends Controller
     public function index()
     {
         $pasiens = Pasien::all();
-$pasienJson = $pasiens->map(function ($p) {
-    // mapping nilai validasi ke format yang dipakai JS
-    $validasiBPJS = match($p->validasi) {
-        'Disetujui' => 'valid',
-        'Ditolak'   => 'invalid',
-        default     => 'pending',  // 'Menunggu'
+        $pasienJson = $pasiens->map(function ($p) {
+        // mapping nilai validasi ke format yang dipakai JS
+        $validasiBPJS = match($p->validasi) {
+            'Disetujui' => 'valid',
+            'Ditolak'   => 'invalid',
+            default     => 'pending',  // 'Menunggu'
     };
 
     return [
@@ -286,5 +286,28 @@ $pasienJson = $pasiens->map(function ($p) {
                 ? "$jumlah pasien berhasil dikirim ke dokter."
                 : 'Tidak ada pasien yang perlu dikirim.',
         ]);
+    }
+
+    public function report()
+    {
+        $transaksi = Pasien::orderBy('created_at', 'desc')->get();
+
+        $totalPasien = Pasien::count();
+
+        $totalPendapatan = Pasien::sum(
+            \DB::raw("
+                CASE
+                    WHEN jenis = 'BPJS' THEN 150000
+                    WHEN jenis = 'Mandiri' THEN 300000
+                    ELSE 0
+                END
+            ")
+        );
+
+        return view('admin.report', compact(
+            'transaksi',
+            'totalPasien',
+            'totalPendapatan'
+        ));
     }
 }

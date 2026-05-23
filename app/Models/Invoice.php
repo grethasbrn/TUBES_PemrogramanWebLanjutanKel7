@@ -32,6 +32,16 @@ class Invoice extends Model
         return $this->belongsTo(Resep::class, 'resep_id');
     }
 
+    public function getPpnAttribute(): float
+    {
+        return $this->jenis === 'Mandiri' ? round($this->subtotal * 0.11) : 0;
+    }
+
+    public function getTotalTagihanFinalAttribute(): float
+    {
+        return $this->subtotal + $this->getPpnAttribute();
+    }
+
     public function admin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diproses_oleh');

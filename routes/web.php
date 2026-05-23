@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\AdminDokterController;
+use App\Http\Controllers\AdminReportController;
 
 Route::get('/', function () { return view('login'); });
 Route::get('/login', function () { return view('login'); })->name('login');
@@ -62,6 +63,7 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
 // ===================== ADMIN ======================
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
     Route::get('/data', [PasienController::class, 'index'])->name('pasien.index');
     Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
     Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
@@ -69,13 +71,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
+
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::get('/invoice/{id}', [InvoiceController::class, 'show'])->name('invoice.show');
     Route::get('/invoice/{id}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
-    Route::get('/report', function () { return view('admin.report'); });
+    
+    Route::get('/report', [AdminReportController::class, 'index']);
     Route::get('/api/stats', [DashboardController::class, 'stats']);
     Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
     Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');

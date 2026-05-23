@@ -319,7 +319,8 @@
         </div>
         <div class="total-row">
           <span class="total-row-left">Total Tagihan</span>
-          <span class="total-row-right">Rp {{ number_format($inv->total_tagihan, 0, ',', '.') }}</span>
+          @php $totalFinal = $inv->jenis === 'BPJS' ? 0 : round($inv->subtotal * 1.11); @endphp
+          <span class="total-row-right">Rp {{ number_format($totalFinal, 0, ',', '.') }}</span>
         </div>
       @endif
     </div>
