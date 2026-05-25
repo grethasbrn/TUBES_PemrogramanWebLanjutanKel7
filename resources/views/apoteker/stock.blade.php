@@ -98,7 +98,8 @@
                           onsubmit="return confirm('Hapus batch ini?')">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" style="color:red;background:none;border:none;cursor:pointer;">Hapus</button>
+                        <button type="submit" style="color:#fff;background:#A63D33;
+                        border-radius:5px;cursor:pointer; padding:6px;border:none">Hapus</button>
                     </form>
                 </td>
             </tr>

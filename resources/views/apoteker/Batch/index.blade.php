@@ -11,7 +11,7 @@
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--cream3)}
 /* info box kuning kecil */
-.info-box{background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:8px 12px;font-size:12px;color:#7c6000;margin-top:6px}
+.info-box{background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:8px 12px;font-size:12px;color:#7c6000;margin-top:5px; margin-bottom:8px}
 </style>
 
 <div class="modal-overlay" id="modalTambahBatch" onclick="closeModal('modalTambahBatch')">

@@ -136,7 +136,7 @@
                             <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
                                 @csrf
                                 <div style="display: flex; gap: 8px; margin-top: 20px;">
-                                    <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border:none; width:350px">
                                         Proses Pembayaran
                                     </button>
                                 </div>
