@@ -23,32 +23,42 @@ class InvoiceController extends Controller
     
     public function store(Request $request)
     {
-        $resep = Resep::findOrFail($request->resep_id);
+        $resep = Resep::with('pasien')->findOrFail($request->resep_id);
 
-        // Cegah duplikat invoice untuk resep yang sama
         if (Invoice::where('resep_id', $resep->id)->exists()) {
             return redirect()->back()->with('error', 'Invoice untuk resep ini sudah ada.');
         }
 
-        $subtotal = collect($resep->obat_list)
-            ->sum(fn($item) => ($item['jumlah'] ?? 0) * ($item['harga'] ?? 0));
+        $pasien  = $resep->pasien;
+        $isBPJS  = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
 
-        $isBPJS = $resep->jenis === 'BPJS';
-        $ppn    = $isBPJS ? 0 : round($subtotal * 0.11);
+        // Ambil harga dari Batch karena obat_list tidak menyimpan harga
+        $subtotal = collect($resep->obat_list)->sum(function ($item) use ($isBPJS) {
+            if ($isBPJS) return 0;
+
+            $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
+                    '%' . strtolower($item['nama'] ?? '') . '%'
+                ])
+                ->where('jumlah', '>', 0)
+                ->first();
+
+            return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
+        });
+
+        $ppn = $isBPJS ? 0 : round($subtotal * 0.11);
 
         Invoice::create([
             'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
             'resep_id'      => $resep->id,
-            'no_rm'         => $resep->no_rm,
-            'nama'          => $resep->nama,
-            'jenis'         => $resep->jenis,
-            'status'        => 'Masuk',
+            'no_rm'         => $pasien->no_rm ?? '-',
+            'nama'          => $pasien->nama ?? '-',
+            'jenis'         => $pasien->jenis ?? 'Mandiri',
+            'status'        => 'masuk',
             'subtotal'      => $subtotal,
             'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
         ]);
 
-        return redirect()->route('invoice.index')
-                         ->with('success', 'Invoice berhasil dibuat.');
+        return redirect()->route('invoice.index')->with('success', 'Invoice berhasil dibuat.');
     }
 
     public function bayar(Request $request, $id)
@@ -78,5 +88,26 @@ class InvoiceController extends Controller
         $invoice = Invoice::with('resep')->findOrFail($id);
         
         return view('invoice.show', compact('invoice'));
+    }
+
+    public function apiIndex()
+    {
+        return Invoice::with('resep')
+            ->latest()
+            ->get()
+            ->map(fn($inv) => [
+                'id'         => $inv->id,
+                'no_invoice' => $inv->no_invoice,
+                'nama'       => $inv->nama,
+                'no_rm'      => $inv->no_rm,
+                'jenis'      => $inv->jenis,
+                'status'     => strtolower($inv->status),
+                'subtotal'   => $inv->subtotal,
+                'ppn'        => $inv->ppn,
+                'total'      => $inv->total_tagihan,
+                'tanggal'    => $inv->created_at->toDateString(),
+                'diagnosa'   => $inv->resep->diagnosa ?? '-',
+                'obat'       => $inv->resep->obat_list ?? [],
+            ]);
     }
 }

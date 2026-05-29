@@ -47,8 +47,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 .role-card{flex:1;background:var(--white);border:1px solid var(--cream3);border-radius:20px;overflow:hidden;transition:all .35s cubic-bezier(.4,0,.2,1);cursor:pointer;position:relative;padding-bottom:10px;}
 .role-card:hover{border-color:var(--cream4)}
-.role-card.active{flex:1.8;cursor:default}
-.role-card.other{flex:.55;opacity:.7}
+.role-card.active{flex:1.8;cursor:default; max-width:400px;}
+.role-card.other{flex:.85;opacity:.75}
 .role-card.other:hover{opacity:.9}
 
 /* card accent bar */
@@ -77,16 +77,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 /* perms strip — visible when inactive */
 .card-perms{padding:0 26px 20px;display:flex;flex-direction:column;gap:5px;max-height:120px;overflow:hidden;transition:max-height .35s,opacity .35s}
 .role-card.active .card-perms{max-height:0;opacity:0;padding-bottom:0}
-.perm-row{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2); margin-bottom:15px}
-.perm-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 
 /* divider */
 .card-divider{height:1px;background:var(--cream3);margin:0 26px;max-height:1px;overflow:hidden;transition:max-height .35s,opacity .35s}
 .role-card:not(.active) .card-divider{max-height:0;opacity:0}
 
 /* form body */
-.card-form{padding:0 26px;max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1),padding .35s;}
-.role-card.active .card-form{max-height:600px;padding:20px 26px 28px}
+.card-form{padding:0 26px;max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1),padding .35s;max-width:400px;margin:0 auto}
+.role-card.active .card-form{max-height:300px;padding:20px 26px 28px}
 
 .fg{margin-bottom:14px}
 .fg label{display:block;font-size:10px;color:var(--text2);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
@@ -100,7 +98,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .form-footer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
 .remember-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer}
 .remember-row input[type=checkbox]{width:14px;height:14px;cursor:pointer}
-.forgot-link{font-size:12px;text-decoration:none;transition:color .15s}
 .fl-purple{color:var(--purple2)}
 .fl-purple:hover{color:var(--purple3)}
 .fl-teal{color:var(--teal2)}
@@ -204,13 +201,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <div class="card-head-text">
           <div class="card-role-label cl-purple">Role</div>
           <div class="card-title">Dokter</div>
-          <div class="card-sub">Tulis & kirim resep digital langsung ke apoteker tanpa kertas.</div>
         </div>
-      </div>
-      <div class="card-perms">
-        <div class="perm-row"><div class="perm-dot" style="background:var(--purple)"></div>Tulis resep digital</div>
-        <div class="perm-row"><div class="perm-dot" style="background:var(--purple)"></div>Lihat riwayat pasien</div>
-        <div class="perm-row" style="opacity:.45"><div class="perm-dot" style="background:var(--text3)"></div>Stok & laporan</div>
       </div>
       <div class="card-divider"></div>
       <div class="card-form" id="formDokter">
@@ -221,22 +212,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
           <div class="fg">
             <label>Email</label>
-            <input type="email" name="email" placeholder="dokter@rs.id">
+            <input type="email" name="email" placeholder="dokter@pharmbee.com">
           </div>
 
           <div class="fg">
             <label>Password</label>
             <div class="input-wrap">
-              <input type="password" name="password" id="dPass" placeholder="••••••••">
-              <button class="eye-btn" onclick="togglePass('dPass',this)" type="button">👁</button>
+              <input type="password" name="password" id="dPassDokter" placeholder="••••••••">
+              <button class="eye-btn" onclick="togglePass('dPassDokter', this, event)" type="button">👁</button>
             </div>
-          </div>
-
-          <div class="form-footer-row">
-            <label class="remember-row">
-              <input type="checkbox" name="remember"> Ingat saya
-            </label>
-            <a class="forgot-link fl-purple" href="#">Lupa password?</a>
           </div>
 
           <button type="submit" class="submit-btn sb-purple">
@@ -261,13 +245,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <div class="card-head-text">
           <div class="card-role-label cl-teal">Role</div>
           <div class="card-title">Apoteker</div>
-          <div class="card-sub">Kelola stok, validasi resep, dan proses pembayaran Mandiri & BPJS.</div>
         </div>
-      </div>
-      <div class="card-perms">
-        <div class="perm-row"><div class="perm-dot" style="background:var(--teal)"></div>Stok, batch & expired</div>
-        <div class="perm-row"><div class="perm-dot" style="background:var(--teal)"></div>Validasi resep (FEFO)</div>
-        <div class="perm-row"><div class="perm-dot" style="background:var(--teal)"></div>Pembayaran & laporan</div>
       </div>
       <div class="card-divider"></div>
       <div class="card-form" id="formApoteker">
@@ -278,14 +256,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
           <div class="fg">
             <label>Email</label>
-            <input type="email" name="email" placeholder="apoteker@rs.id">
+            <input type="email" name="email" placeholder="apoteker@pharmbee.com">
           </div>
           
           <div class="fg">
             <label>Password</label>
             <div class="input-wrap">
-              <input type="password" name="password" id="dPass" placeholder="••••••••">
-              <button class="eye-btn" onclick="togglePass('dPass',this)" type="button">👁</button>
+              <input type="password" name="password" id="dPassApoteker" placeholder="••••••••">
+              <button class="eye-btn" onclick="togglePass('dPassApoteker', this, event)" type="button">👁</button>
             </div>
           </div>
 
@@ -308,13 +286,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
         <div class="card-head-text">
           <div class="card-role-label cl-gold">Role</div>
           <div class="card-title">Admin</div>
-          <div class="card-sub">Proses pendataan dan pembayaran denganMandiri/BPJS.</div>
         </div>
-      </div>
-      <div class="card-perms">
-        <div class="perm-row"><div class="perm-dot" style="background:var(--gold)"></div>Data Pasien</div>
-        <div class="perm-row"><div class="perm-dot" style="background:var(--gold)"></div>Pembayaran</div>
-        <div class="perm-row"><div class="perm-dot" style="background:var(--gold)"></div>Laporan Keuangan</div>
       </div>
       <div class="card-divider"></div>
       <div class="card-form" id="formAdmin">
@@ -325,14 +297,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
           <div class="fg">
             <label>Email</label>
-            <input type="email" name="email" placeholder="admin@rs.id">
+            <input type="email" name="email" placeholder="admin@pharmbee.com">
           </div>
           
           <div class="fg">
             <label>Password</label>
             <div class="input-wrap">
-              <input type="password" name="password" id="dPass" placeholder="••••••••">
-              <button class="eye-btn" onclick="togglePass('dPass',this)" type="button">👁</button>
+              <input type="password" name="password" id="dPassAdmin" placeholder="••••••••">
+              <button class="eye-btn" onclick="togglePass('dPassAdmin', this, event)" type="button">👁</button>
             </div>
           </div>
 
@@ -412,11 +384,11 @@ function activateCard(role) {
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 
 // ── eye toggle ───────────────────────────────────────────
-function togglePass(id, btn) {
+function togglePass(id, btn, e) {
+  e.stopPropagation();
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
   btn.textContent = el.type === 'password' ? '👁' : '🙈';
-  event.stopPropagation();
 }
 
 // ── toast ────────────────────────────────────────────────
@@ -427,6 +399,36 @@ function toast(msg, type) {
   document.body.appendChild(el);
   setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2600);
 }
+
+document.querySelectorAll("form").forEach(form => {
+  form.addEventListener("submit", function(e) {
+
+    const email = form.querySelector("input[name='email']").value.trim();
+    const password = form.querySelector("input[name='password']").value.trim();
+
+    if (!email || !password) {
+      toast("Email dan password wajib diisi!", "danger");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      e.preventDefault();
+      toast("Format email tidak valid!", "danger");
+      return;
+    }
+
+    // ✅ selain itu → biarin ke backend
+  });
+});
+
+// ── show session messages ─────────────────────────────
+@if(session('error'))
+  toast("{{ session('error') }}", "danger");
+@endif
+
+@if(session('success'))
+  toast("{{ session('success') }}", "success");
+@endif
 
 // ── init: dokter card active by default ──────────────────
 document.getElementById('cardApoteker').classList.add('other');

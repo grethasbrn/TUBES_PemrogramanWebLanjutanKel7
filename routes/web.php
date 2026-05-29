@@ -28,10 +28,12 @@ Route::prefix('apoteker')->middleware(['auth', 'role:apoteker'])->group(function
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
     Route::get('/api/report', [ReportController::class, 'apiStats']);
     Route::get('/api/resep', [ResepController::class, 'index']);
+    Route::get('/api/invoice', [InvoiceController::class, 'apiIndex']);
     Route::get('/api/stok', function () {
         return response()->json(\App\Models\Batch::select('nama_obat', 'harga', 'harga_bpjs', 'jumlah')->get());
     });
     Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
+    Route::post('/api/resep/{id}/update-obat', [ResepController::class, 'updateObat']);
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
@@ -90,4 +92,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');
     Route::put('/dokter/{id}', [AdminDokterController::class, 'update'])->name('admin.dokter.update');
     Route::delete('/dokter/{id}', [AdminDokterController::class, 'destroy'])->name('admin.dokter.destroy');
+});
+
+// Sementara, taruh paling atas setelah Route::get('/')
+Route::get('/debug-invoice', function () {
+    return response()->json([
+        'invoices' => \App\Models\Invoice::count(),
+        'reseps'   => \App\Models\Resep::all(['id','status','obat_list']),
+    ]);
 });
