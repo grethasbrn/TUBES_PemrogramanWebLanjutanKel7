@@ -200,24 +200,9 @@ tr:hover td{background:var(--cream)}
 .inv-section-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px}
 
 /* Penyesuaian untuk list sebelah kiri agar serasi */
-.inv-list-item.card {
-    padding: 15px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid var(--cream3);
-}
-
-.inv-list-item.card.active {
-    border-color: #A63D33;
-    background: var(--red-light);
-}
-
-.inv-list-item .inv-price {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 16px;
-}
+.inv-list-item.card {padding: 15px;margin-bottom: 10px;cursor: pointer;transition: all 0.2s;border: 1px solid var(--cream3);}
+.inv-list-item.card.active {border-color: #A63D33; background: var(--red-light);}
+.inv-list-item .inv-price {font-family: 'Cormorant Garamond', serif;font-weight: 600; font-size: 16px;}
 
 /* ACTIVITY */
 .activity-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream3);font-size:13px}

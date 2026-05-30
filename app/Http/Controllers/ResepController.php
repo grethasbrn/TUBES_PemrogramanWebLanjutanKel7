@@ -103,6 +103,11 @@ class ResepController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
+        \Log::info('MASUK UPDATE STATUS', [
+        'id' => $id,
+        'status' => $request->status
+    ]);
+
         $request->validate([
             'status' => 'required|in:draft,baru,validasi,siap,selesai,ditolak',
         ]);
@@ -113,6 +118,9 @@ class ResepController extends Controller
 
         // Auto buat invoice saat apoteker konfirmasi siap
         if ($request->status === 'siap' && !Invoice::where('resep_id', $id)->exists()) {
+
+            \Log::info('MASUK BUAT INVOICE', ['resep_id' => $id]);
+            
             $pasien = $resep->pasien;
             $isBPJS = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
 
@@ -153,8 +161,9 @@ class ResepController extends Controller
                 'no_rm'         => $pasien->no_rm ?? '-',
                 'nama'          => $pasien->nama  ?? '-',
                 'jenis'         => $pasien->jenis ?? 'Mandiri',
-                'status'        => 'Masuk',
+                'status'        => 'masuk',
                 'subtotal'      => $subtotal,
+                'ppn'           => $ppn,
                 'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
             ]);
         }
