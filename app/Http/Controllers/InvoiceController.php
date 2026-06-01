@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
-use App\Models\Resep; 
+use App\Models\Resep;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
+    /**
+     * Invoice untuk ADMIN
+     */
     public function index(Request $request)
     {
         $invoices = Invoice::with('resep')->orderBy('created_at', 'desc')->get();
@@ -20,7 +23,73 @@ class InvoiceController extends Controller
 
         return view('admin.invoice', compact('invoices', 'selectedInvoice'));
     }
-    
+
+    /**
+     * Halaman invoice untuk APOTEKER — tampilkan daftar resep masuk
+     */
+    public function apotekerIndex(Request $request)
+    {
+        $reseps = Resep::with('pasien')
+            ->whereNotIn('status', ['draft'])
+            ->latest()
+            ->get();
+
+        $selectedResep = null;
+        if ($request->has('resep')) {
+            $selectedResep = Resep::with('pasien')->find($request->resep);
+        }
+
+        return view('apoteker.invoice', compact('reseps', 'selectedResep'));
+    }
+
+    /**
+     * Kirim invoice dari form apoteker (update obat + ubah status ke siap)
+     */
+    public function kirimDariResep(Request $request, $id)
+    {
+        $resep = Resep::with('pasien')->findOrFail($id);
+
+        // Simpan obat list yang sudah diedit apoteker
+        $obatList = collect($request->obat ?? [])->filter(fn($o) => !empty($o['nama']))->values()->toArray();
+        $resep->obat_list = $obatList;
+        $resep->save();
+
+        // Ubah status ke siap → trigger buat invoice otomatis di updateStatus
+        $resep->status = 'siap';
+        $resep->save();
+
+        // Buat invoice jika belum ada
+        if (!Invoice::where('resep_id', $resep->id)->exists()) {
+            $pasien = $resep->pasien;
+            $isBPJS = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
+
+            $subtotal = collect($obatList)->sum(function ($item) use ($isBPJS) {
+                if ($isBPJS) return 0;
+                $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
+                    '%' . strtolower($item['nama'] ?? '') . '%'
+                ])->where('jumlah', '>', 0)->first();
+                return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
+            });
+
+            $ppn = $isBPJS ? 0 : round($subtotal * 0.11);
+
+            Invoice::create([
+                'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
+                'resep_id'      => $resep->id,
+                'no_rm'         => $pasien->no_rm ?? '-',
+                'nama'          => $pasien->nama  ?? '-',
+                'jenis'         => $pasien->jenis ?? 'Mandiri',
+                'status'        => 'masuk',
+                'subtotal'      => $subtotal,
+                'ppn'           => $ppn,
+                'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
+            ]);
+        }
+
+        return redirect()->route('apoteker.invoice')
+            ->with('success', 'Invoice berhasil dikirim ke admin!');
+    }
+
     public function store(Request $request)
     {
         $resep = Resep::with('pasien')->findOrFail($request->resep_id);
@@ -32,16 +101,11 @@ class InvoiceController extends Controller
         $pasien  = $resep->pasien;
         $isBPJS  = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
 
-        // Ambil harga dari Batch karena obat_list tidak menyimpan harga
         $subtotal = collect($resep->obat_list)->sum(function ($item) use ($isBPJS) {
             if ($isBPJS) return 0;
-
             $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
-                    '%' . strtolower($item['nama'] ?? '') . '%'
-                ])
-                ->where('jumlah', '>', 0)
-                ->first();
-
+                '%' . strtolower($item['nama'] ?? '') . '%'
+            ])->where('jumlah', '>', 0)->first();
             return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
         });
 
@@ -67,7 +131,6 @@ class InvoiceController extends Controller
 
             $invoice = Invoice::with('resep')->findOrFail($id);
 
-            // kalau sudah lunas, stop
             if (strtolower($invoice->status) === 'lunas') {
                 return redirect()->back()->with('info', 'Invoice sudah dibayar');
             }
@@ -75,12 +138,9 @@ class InvoiceController extends Controller
             $resep = $invoice->resep;
 
             foreach ($resep->obat_list as $item) {
-
                 $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
-                        '%' . strtolower($item['nama'] ?? '') . '%'
-                    ])
-                    ->where('jumlah', '>', 0)
-                    ->first();
+                    '%' . strtolower($item['nama'] ?? '') . '%'
+                ])->where('jumlah', '>', 0)->first();
 
                 if (!$batch) {
                     throw new \Exception("Obat {$item['nama']} tidak ditemukan di stok");
@@ -94,14 +154,12 @@ class InvoiceController extends Controller
                 $batch->save();
             }
 
-            // update invoice
             $invoice->update([
-                'status' => 'Lunas',
+                'status'        => 'Lunas',
                 'diproses_oleh' => auth()->id(),
-                'no_referensi' => $request->no_referensi ?? 'REF-' . time()
+                'no_referensi'  => $request->no_referensi ?? 'REF-' . time()
             ]);
 
-            // optional: update resep
             $resep->status = 'selesai';
             $resep->save();
 
@@ -112,17 +170,22 @@ class InvoiceController extends Controller
     public function downloadPdf($id)
     {
         $inv = Invoice::with('resep')->findOrFail($id);
-
         $pdf = Pdf::loadView('admin.invoice_pdf', compact('inv'));
-        
-        return $pdf->stream('Invoice-'.$inv->no_invoice.'.pdf');
+        return $pdf->stream('Invoice-' . $inv->no_invoice . '.pdf');
     }
 
     public function show($id)
     {
         $invoice = Invoice::with('resep')->findOrFail($id);
-        
         return view('invoice.show', compact('invoice'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $invoice->status = $request->status;
+        $invoice->save();
+        return redirect()->back()->with('success', 'Status invoice diperbarui.');
     }
 
     public function apiIndex()

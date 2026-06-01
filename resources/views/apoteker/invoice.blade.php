@@ -112,7 +112,7 @@
     {{-- LIST RESEP --}}
     <div id="list-container">
         @forelse($reseps as $r)
-            <a href="{{ route('apoteker.index', ['resep' => $r->id]) }}"
+            <a href="{{ route('apoteker.invoice', ['resep' => $r->id]) }}"
                class="inv-list-item card {{ request('resep') == $r->id ? 'active' : '' }} resep-item"
                data-status="{{ $r->status == 'baru' ? 'resep' : 'invoice' }}">
                 <div>
@@ -191,11 +191,19 @@
                                 <th>Nama</th>
                                 <th>Dosis</th>
                                 <th>Jumlah</th>
+                                <th>Harga Satuan</th>
+                                <th>Subtotal</th>
                                 <th></th> 
                             </tr>
                         </thead>
                         <tbody id="obat-tbody">
                             @foreach($selectedResep->obat_list as $i => $o)
+                            @php
+                                $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%'.strtolower($o['nama'] ?? '').'%'])
+                                    ->where('jumlah', '>', 0)->first();
+                                $harga = ($selectedResep->pasien->jenis === 'BPJS') ? 0 : ($o['harga'] ?? ($batch?->harga ?? 0));
+                                $subtotal = $harga * ($o['jumlah'] ?? 0);
+                            @endphp
                             <tr>
                                 <td style="position:relative;overflow:visible !important;">
                                     <input type="text"
@@ -213,8 +221,17 @@
                                 <td>
                                     <input type="number" name="obat[{{ $i }}][jumlah]"
                                         value="{{ $o['jumlah'] }}"
-                                        class="obat-input jumlah-obat">
+                                        class="obat-input jumlah-obat"
+                                        data-harga="{{ $harga }}"
+                                        oninput="hitungTotal()">
                                     <div class="stok-info" style="font-size:11px;margin-top:3px;color:gray;"></div>
+                                </td>
+                                <td style="font-size:13px;white-space:nowrap">
+                                    Rp {{ number_format($harga, 0, ',', '.') }}
+                                    <input type="hidden" name="obat[{{ $i }}][harga]" value="{{ $harga }}">
+                                </td>
+                                <td class="subtotal-cell" style="font-size:13px;font-weight:600;white-space:nowrap">
+                                    Rp {{ number_format($subtotal, 0, ',', '.') }}
                                 </td>
                                 <td style="width:36px;text-align:center;">
                                     <button type="button" onclick="hapusObat(this)"
@@ -225,6 +242,41 @@
                             </tr>
                             @endforeach
                         </tbody>
+
+                        <tfoot>
+                            <tr style="background:var(--cream)">
+                                <td colspan="4" style="padding:10px 12px;font-weight:600;text-align:right">Subtotal</td>
+                                <td id="totalSubtotal" style="padding:10px 12px;font-weight:600;font-size:14px">
+                                    @php
+                                        $total = collect($selectedResep->obat_list)->sum(function($o) use ($selectedResep) {
+                                            if ($selectedResep->pasien->jenis === 'BPJS') return 0;
+                                            $b = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%'.strtolower($o['nama'] ?? '').'%'])->where('jumlah','>',0)->first();
+                                            return ($o['harga'] ?? $b?->harga ?? 0) * ($o['jumlah'] ?? 0);
+                                        });
+                                        $ppn = $selectedResep->pasien->jenis === 'BPJS' ? 0 : round($total * 0.11);
+                                    @endphp
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr style="background:var(--cream)">
+                                <td colspan="4" style="padding:4px 12px;text-align:right;color:var(--text3);font-size:12px">PPN 11%</td>
+                                <td style="padding:4px 12px;color:var(--text3);font-size:12px">Rp {{ number_format($ppn, 0, ',', '.') }}</td>
+                                <td></td>
+                            </tr>
+                            <tr style="background:#fce8e6">
+                                <td colspan="4" style="padding:10px 12px;font-weight:700;text-align:right;color:#A63D33">TOTAL TAGIHAN</td>
+                                <td id="grandTotal" style="padding:10px 12px;font-weight:700;font-size:15px;color:#A63D33">
+                                    @if($selectedResep->pasien->jenis === 'BPJS')
+                                        <span style="color:#34a853">GRATIS (BPJS)</span>
+                                    @else
+                                        Rp {{ number_format($total + $ppn, 0, ',', '.') }}
+                                    @endif
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+
                     </table>
                 </div>
 
@@ -378,6 +430,25 @@ function hapusObat(btn) {
         return;
     }
     row.remove();
+}
+
+function hitungTotal() {
+    let subtotal = 0;
+    document.querySelectorAll('.jumlah-obat').forEach(input => {
+        const harga = parseFloat(input.getAttribute('data-harga') || 0);
+        const qty   = parseFloat(input.value || 0);
+        subtotal += harga * qty;
+        // update subtotal cell di baris yang sama
+        const row = input.closest('tr');
+        const cell = row.querySelector('.subtotal-cell');
+        if (cell) cell.textContent = 'Rp ' + (harga * qty).toLocaleString('id-ID');
+    });
+    const ppn = subtotal * 0.11;
+    const grand = subtotal + ppn;
+    const el = document.getElementById('totalSubtotal');
+    const gel = document.getElementById('grandTotal');
+    if (el) el.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+    if (gel) gel.textContent = 'Rp ' + grand.toLocaleString('id-ID');
 }
 </script>
 @endsection

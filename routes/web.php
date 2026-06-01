@@ -23,23 +23,53 @@ Route::prefix('apoteker')->middleware(['auth', 'role:apoteker'])->group(function
     Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
     Route::get('/alerts', [BatchController::class, 'alerts'])->name('apoteker.alerts');
-    Route::get('/prescription', function () { return view('apoteker.prescription'); });
-    Route::get('/invoice', [ResepController::class, 'apotekerIndex'])->name('apoteker.index');
-    Route::post('/resep/{id}/kirim', [ResepController::class, 'sendInvoice'])->name('resep.kirim');
+    Route::get('/prescription', [ResepController::class, 'apotekerPrescription']);
+    Route::get('/invoice', [InvoiceController::class, 'apotekerIndex'])->name('apoteker.invoice');
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
     Route::get('/api/report', [ReportController::class, 'apiStats']);
+
+    // Resep API - hanya yang sudah dikirim dokter (bukan draft)
+    Route::get('/api/resep', [ResepController::class, 'indexApoteker']);
+    Route::post('/api/resep/{id}/update-obat', [ResepController::class, 'updateObat']);
+    Route::post('/api/resep/{id}/status', [ResepController::class, 'updateStatus']);
+    Route::post('/api/resep/store', [ResepController::class, 'store']);
+
+    // Invoice API
+    Route::get('/api/invoice', [InvoiceController::class, 'apiIndex']);
+
+    // Stok & obat search
+    Route::get('/api/stok', function () {
+        return response()->json(\App\Models\Batch::select('nama_obat', 'harga', 'harga_bpjs', 'jumlah')->get());
+    });
+    Route::get('/api/obat/search', function (\Illuminate\Http\Request $request) {
+        $q = $request->get('q', '');
+        $results = \App\Models\Batch::where('nama_obat', 'LIKE', "%{$q}%")
+            ->where('jumlah', '>', 0)
+            ->where(function ($query) {
+                $query->whereNull('tgl_expired')
+                      ->orWhere('tgl_expired', '>', now());
+            })
+            ->select('nama_obat as nama', 'jumlah as stok', 'harga')
+            ->orderBy('nama_obat')
+            ->limit(10)
+            ->get();
+        return response()->json($results);
+    })->name('apoteker.obat.search');
+
+    // Kirim invoice dari form resep apoteker
+    Route::post('/invoice/resep/{id}/kirim', [InvoiceController::class, 'kirimDariResep'])->name('resep.kirim');
+
+    // Batch
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
-    Route::post('/cek-obat', [ResepController::class, 'cekObat'])->name('cek.obat');
-    Route::get('/obat/search', [ResepController::class, 'searchObat'])->name('apoteker.obat.search');
 });
 
 // ===================== DOKTER =====================
 Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () {
     Route::get('/dashboard', [DokterController::class, 'dashboard']);
     Route::get('/data', [DokterController::class, 'data']);
-    Route::get('/prescription', [DokterController::class, 'prescription']);
+    Route::get('/prescription', [ResepController::class, 'prescription']);
     Route::get('/status', function () { return view('dokter.status'); });
     Route::get('/history', function () { return view('dokter.history'); });
     Route::get('/api/pasien', [DokterController::class, 'apiPasien']);
@@ -49,9 +79,11 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
     Route::get('/api/obat', function () {
         return response()->json(
             \App\Models\Batch::where('jumlah', '>', 0)
-                ->whereNull('tgl_expired')
-                ->orWhere('tgl_expired', '>', now())
-                ->select('id', 'nama_obat', 'jumlah', 'satuan')
+                ->where(function ($q) {
+                    $q->whereNull('tgl_expired')
+                      ->orWhere('tgl_expired', '>', now());
+                })
+                ->select('id', 'nama_obat', 'tipe', 'kategori', 'jumlah', 'harga', 'harga_bpjs')
                 ->orderBy('nama_obat')
                 ->get()
         );
@@ -76,14 +108,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
-    
+
     Route::get('/report', [AdminReportController::class, 'index']);
     Route::get('/api/stats', [DashboardController::class, 'stats']);
     Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
     Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');
     Route::post('/pasien/{id}/kirim-dokter', [PasienController::class, 'kirimKeDokter'])->name('pasien.kirimDokter');
 
-    // ===== MANAJEMEN AKUN DOKTER =====
     Route::get('/dokter', [AdminDokterController::class, 'index'])->name('admin.dokter.index');
     Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');
     Route::put('/dokter/{id}', [AdminDokterController::class, 'update'])->name('admin.dokter.update');
