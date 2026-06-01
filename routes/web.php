@@ -24,19 +24,15 @@ Route::prefix('apoteker')->middleware(['auth', 'role:apoteker'])->group(function
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
     Route::get('/alerts', [BatchController::class, 'alerts'])->name('apoteker.alerts');
     Route::get('/prescription', function () { return view('apoteker.prescription'); });
-    Route::get('/invoice', function () { return view('apoteker.invoice'); });
+    Route::get('/invoice', [ResepController::class, 'apotekerIndex'])->name('apoteker.index');
+    Route::post('/resep/{id}/kirim', [ResepController::class, 'sendInvoice'])->name('resep.kirim');
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
     Route::get('/api/report', [ReportController::class, 'apiStats']);
-    Route::get('/api/resep', [ResepController::class, 'index']);
-    Route::get('/api/invoice',                [InvoiceController::class, 'apiIndex']);
-    Route::post('/api/resep/{id}/update-obat',[ResepController::class,   'updateObat']);
-    Route::post('/api/resep/{id}/status',     [ResepController::class,   'updateStatus']);
-    Route::get('/api/stok', function () {
-        return response()->json(\App\Models\Batch::select('nama_obat', 'harga', 'harga_bpjs', 'jumlah')->get());
-    });
     Route::get('/batch', [BatchController::class, 'index'])->name('batch.index');
     Route::post('/batch', [BatchController::class, 'store'])->name('batch.store');
     Route::delete('/batch/{batch}', [BatchController::class, 'destroy'])->name('batch.destroy');
+    Route::post('/cek-obat', [ResepController::class, 'cekObat'])->name('cek.obat');
+    Route::get('/obat/search', [ResepController::class, 'searchObat'])->name('apoteker.obat.search');
 });
 
 // ===================== DOKTER =====================

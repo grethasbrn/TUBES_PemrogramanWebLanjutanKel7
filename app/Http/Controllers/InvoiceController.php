@@ -63,15 +63,50 @@ class InvoiceController extends Controller
 
     public function bayar(Request $request, $id)
     {
-        $invoice = Invoice::findOrFail($id);
+        return \DB::transaction(function () use ($request, $id) {
 
-        $invoice->update([
-            'status' => 'Lunas',
-            'diproses_oleh' => auth()->id(),
-            'no_referensi' => $request->no_referensi ?? 'REF-' . time()
-        ]);
+            $invoice = Invoice::with('resep')->findOrFail($id);
 
-        return redirect()->back()->with('success', 'Pembayaran berhasil diproses!');
+            // kalau sudah lunas, stop
+            if (strtolower($invoice->status) === 'lunas') {
+                return redirect()->back()->with('info', 'Invoice sudah dibayar');
+            }
+
+            $resep = $invoice->resep;
+
+            foreach ($resep->obat_list as $item) {
+
+                $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
+                        '%' . strtolower($item['nama'] ?? '') . '%'
+                    ])
+                    ->where('jumlah', '>', 0)
+                    ->first();
+
+                if (!$batch) {
+                    throw new \Exception("Obat {$item['nama']} tidak ditemukan di stok");
+                }
+
+                if ($batch->jumlah < ($item['jumlah'] ?? 0)) {
+                    throw new \Exception("Stok {$item['nama']} tidak cukup");
+                }
+
+                $batch->jumlah -= $item['jumlah'];
+                $batch->save();
+            }
+
+            // update invoice
+            $invoice->update([
+                'status' => 'Lunas',
+                'diproses_oleh' => auth()->id(),
+                'no_referensi' => $request->no_referensi ?? 'REF-' . time()
+            ]);
+
+            // optional: update resep
+            $resep->status = 'selesai';
+            $resep->save();
+
+            return redirect()->back()->with('success', 'Pembayaran berhasil & stok dikurangi!');
+        });
     }
 
     public function downloadPdf($id)

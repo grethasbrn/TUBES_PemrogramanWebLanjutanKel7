@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @stack('styles')
+    <!-- @stack('styles') -->
 </head>
 <body>
     <div class="app">
