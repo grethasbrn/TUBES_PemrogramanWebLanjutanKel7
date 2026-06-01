@@ -65,10 +65,13 @@ class PasienController extends Controller
     |---------------------------
     */
     public function create()
-    {
-        return view('admin.create-pasien');
-    }
+{
+    $today = date('dmy'); // contoh: 010626
+    $countToday = Pasien::whereDate('created_at', today())->count();
+    $noRm = 'RM-' . $today . '-' . str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
 
+    return view('admin.create-pasien', compact('noRm'));
+}
     /*
     |---------------------------
     | SIMPAN PASIEN BARU
