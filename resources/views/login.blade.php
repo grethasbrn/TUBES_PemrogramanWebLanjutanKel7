@@ -125,6 +125,427 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   .topnav{padding:0 20px}
   .footer{padding:16px 20px}
 }
+
+/* ===== PHARMBEE LOGIN FIT SCREEN FINAL ===== */
+
+html,
+body{
+  height:100vh !important;
+  overflow:hidden !important;
+}
+
+.topnav{
+  height:50px !important;
+  padding:0 48px !important;
+}
+
+.main{
+  padding:5px 24px !important;
+  align-items:center !important;
+}
+
+.login-box{
+  max-width:520px !important;
+  transform:scale(.92);
+  transform-origin:center;
+}
+
+.login-header{
+  margin-bottom:12px !important;
+}
+
+.login-tag{
+  margin-bottom:7px !important;
+  padding:4px 15px !important;
+}
+
+.login-title{
+  font-size:28px !important;
+  margin-bottom:3px !important;
+}
+
+.login-sub{
+  font-size:12px !important;
+}
+
+.role-label{
+  margin-bottom:5px !important;
+}
+
+.role-buttons{
+  gap:10px !important;
+  margin-bottom:12px !important;
+}
+
+.role-btn{
+  padding:14px 12px !important;
+}
+
+.rb-icon{
+  width:34px !important;
+  height:34px !important;
+  margin-bottom:5px !important;
+}
+
+.rb-name{
+  font-size:15px !important;
+}
+
+.form-card{
+  padding:26px !important;
+}
+
+.form-title{
+  font-size:17px !important;
+  margin-bottom:10px !important;
+}
+
+.fg{
+  margin-bottom:8px !important;
+}
+
+.fg input{
+  height:38px !important;
+  padding:8px 12px !important;
+}
+
+.submit-btn{
+  padding:10px !important;
+}
+
+.footer{
+  height:42px !important;
+  padding:8px 48px !important;
+}
+
+.footer-logo .fl1{
+  font-size:12px !important;
+}
+
+.footer-copy{
+  font-size:11px !important;
+}
+
+.bg-circle1{
+  width:480px !important;
+  height:480px !important;
+}
+
+.bg-circle2{
+  width:300px !important;
+  height:300px !important;
+}
+/* ===== LOGIN FINAL POLISH ===== */
+
+/* navbar balik ukuran awal */
+.topnav{
+  height:60px !important;
+  padding:0 48px !important;
+}
+
+/* logo navbar lebih proporsional */
+.logo svg{
+  width:32px !important;
+  height:32px !important;
+}
+
+.logo-text{
+  font-size:16px !important;
+  letter-spacing:.22em !important;
+}
+
+
+/* hilangkan tulisan PILIH ROLE */
+.role-label{
+  display:none !important;
+}
+
+
+/* rapikan jarak setelah subtitle */
+.login-header{
+  margin-bottom:20px !important;
+}
+
+
+/* role naik sedikit */
+.role-buttons{
+  margin-top:0 !important;
+  margin-bottom:14px !important;
+}
+
+
+/* biar card tetap besar tapi fit */
+.login-box{
+  max-width:520px !important;
+  transform:scale(.92);
+  transform-origin:center;
+}
+
+/* ===== NAVBAR + LOGIN POSITION FINAL ===== */
+
+/* navbar lebih tinggi */
+.topnav{
+  height:70px !important;
+  padding:0 55px !important;
+}
+
+
+/* logo navbar gede dikit */
+.logo svg{
+  width:38px !important;
+  height:38px !important;
+}
+
+.logo-text{
+  font-size:18px !important;
+  letter-spacing:.24em !important;
+}
+
+
+/* area login naik tapi tetap ada ruang */
+.main{
+  align-items:flex-start !important;
+  padding-top:35px !important;
+}
+
+
+/* posisi box login */
+.login-box{
+  max-width:520px !important;
+  transform:scale(.92);
+  transform-origin:top center;
+}
+
+
+/* tag sistem manajemen */
+.login-tag{
+  margin-top:0 !important;
+}
+
+
+/* jarak judul ke role */
+.login-header{
+  margin-bottom:18px !important;
+}
+
+/* ===== LOGIN FINAL PAS 1366x768 ===== */
+
+/* jangan dibesarkan tinggi, cukup dilebarkan */
+.login-box{
+  max-width:620px !important;
+  transform:scale(.92) !important;
+  transform-origin:top center !important;
+}
+
+
+/* judul */
+.login-title{
+  font-size:31px !important;
+}
+
+.login-sub{
+  font-size:13px !important;
+}
+
+
+/* role dibuat melebar bukan tinggi */
+.role-buttons{
+  gap:14px !important;
+  margin-bottom:14px !important;
+}
+
+.role-btn{
+  height:105px !important;
+  padding:12px 18px !important;
+  border-radius:18px !important;
+}
+
+.rb-icon{
+  width:38px !important;
+  height:38px !important;
+  margin-bottom:5px !important;
+}
+
+.rb-name{
+  font-size:17px !important;
+}
+
+
+/* form lebih lebar */
+.form-card{
+  padding:24px 32px !important;
+  border-radius:22px !important;
+}
+
+.form-title{
+  font-size:20px !important;
+  margin-bottom:12px !important;
+}
+
+
+/* input nyaman tapi tidak tambah tinggi */
+.fg{
+  margin-bottom:9px !important;
+}
+
+.fg input{
+  height:40px !important;
+  font-size:14px !important;
+}
+
+
+/* tombol */
+.submit-btn{
+  height:42px !important;
+  padding:0 !important;
+  font-size:15px !important;
+}
+
+
+/* kasih footer ruang */
+.main{
+  padding-top:22px !important;
+  padding-bottom:0 !important;
+}
+
+/* ===== NAVBAR FINAL SIZE ===== */
+
+.topnav{
+  height:58px !important;
+  padding:0 52px !important;
+}
+
+
+/* logo jangan terlalu gede */
+.logo svg{
+  width:30px !important;
+  height:30px !important;
+}
+
+
+.logo-text{
+  font-size:15px !important;
+  letter-spacing:.22em !important;
+}
+
+
+/* biar konten tetap jaraknya cantik */
+.main{
+  padding-top:28px !important;
+}
+
+/* ===== PHARMBEE REAL LOGO ===== */
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo-img{
+  width:38px !important;
+  height:38px !important;
+  object-fit:contain;
+}
+
+/* matikan aturan svg lama */
+.logo svg{
+  display:none;
+}
+
+/* ===== ROLE CARD CLEAN FINAL ===== */
+
+/* hilangkan tulisan ROLE */
+.rb-label{
+    display:none !important;
+}
+
+
+/* kecilkan kotak role */
+.role-btn{
+    height:85px !important;
+    padding:10px 12px !important;
+    border-radius:16px !important;
+}
+
+
+/* icon role kecil dikit */
+.rb-icon{
+    width:32px !important;
+    height:32px !important;
+    margin-bottom:6px !important;
+}
+
+
+/* tulisan dokter/apoteker/admin */
+.rb-name{
+    font-size:16px !important;
+}
+
+
+/* titik bawah active naik dikit */
+.rb-dot{
+    margin-top:6px !important;
+}
+
+
+/* jarak role ke form */
+.role-buttons{
+    margin-bottom:12px !important;
+}
+
+/* ===== FORM ISI GEDE DIKIT TETAP FIT ===== */
+
+.login-box{
+    max-width:700px !important;
+    transform:scale(.92) !important;
+}
+
+
+/* card jangan tambah tinggi banyak */
+.form-card{
+    padding:26px 42px 20px 42px !important;
+    border-radius:22px !important;
+}
+
+
+/* judul gede dikit */
+.form-title{
+    font-size:22px !important;
+    margin-bottom:16px !important;
+}
+
+
+/* label */
+.fg label{
+    font-size:11px !important;
+}
+
+
+/* input isi space */
+.fg{
+    margin-bottom:12px !important;
+}
+
+.fg input{
+    height:46px !important;
+    font-size:15px !important;
+    padding:10px 16px !important;
+}
+
+
+/* tombol lebih gede */
+.submit-btn{
+    height:48px !important;
+    font-size:16px !important;
+    margin-top:6px !important;
+}
+
+
+/* hilangkan sisa bawah */
+form{
+    margin-bottom:0 !important;
+}
 </style>
 </head>
 <body>
@@ -137,14 +558,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 <!-- TOPNAV -->
 <nav class="topnav">
+
   <a href="#" class="logo">
-    <svg width="30" height="30" viewBox="0 0 34 34" fill="none">
-      <path d="M17 3C17 3 10 10 10 18C10 22.4 13.1 26 17 26C20.9 26 24 22.4 24 18C24 10 17 3 17 3Z" fill="#8B7DB8" opacity=".75"/>
-      <path d="M12 14C12 14 8.5 18 8.5 22C8.5 24.8 10.7 27 13.5 27" stroke="#6B5E9A" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-    </svg>
+
+    <img 
+      src="{{ asset('images/pharmbee-logo.png') }}" 
+      class="logo-img"
+      alt="Pharmbee Logo"
+    >
+
     <span class="logo-text">PHARMBEE</span>
+
   </a>
-  <a href="#" class="nav-link">Fitur</a>
+
+  <a href="#" class="nav-link"></a>
+
 </nav>
 
 <!-- MAIN -->

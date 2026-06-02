@@ -384,3 +384,32 @@ tr:hover td{background:var(--cream)}
     transform: translateX(0);
   }
 }
+
+/* ===== PHARMBEE LOGO CUSTOM ===== */
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo-img{
+  width:45px;
+  height:45px;
+  object-fit:contain;
+  border-radius:12px;
+  filter:drop-shadow(0 5px 12px rgba(139,125,184,.25));
+  transition:all .25s ease;
+}
+
+.logo-img:hover{
+  transform:scale(1.08) rotate(-3deg);
+}
+
+.logo-text .l1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:.22em;
+  color:#2C2416;
+}
