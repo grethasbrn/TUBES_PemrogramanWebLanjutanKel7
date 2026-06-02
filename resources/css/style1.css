@@ -413,3 +413,64 @@ tr:hover td{background:var(--cream)}
   letter-spacing:.22em;
   color:#2C2416;
 }
+/* ===== FIX LOGO APOTEKER SAMA KAYAK DOKTER ===== */
+
+.logo-icon{
+    width:auto !important;
+    height:auto !important;
+
+    background:transparent !important;
+    border-radius:0 !important;
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+
+.pharmbee-logo,
+.logo-img{
+    width:42px !important;
+    height:42px !important;
+
+    object-fit:contain !important;
+}
+
+/* ===== PAKSA LOGO PHARMBEE TANPA BULAT ===== */
+
+.topbar .logo-icon,
+.topbar .logo-icon *,
+.logo img,
+.pharmbee-logo,
+.logo-img{
+
+    background: transparent !important;
+
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+}
+
+
+/* wadah logo */
+.topbar .logo-icon{
+    width:45px !important;
+    height:45px !important;
+
+    padding:0 !important;
+
+    overflow:visible !important;
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+
+/* gambar logo */
+.topbar .logo-icon img{
+    width:45px !important;
+    height:45px !important;
+
+    object-fit:contain !important;
+}
