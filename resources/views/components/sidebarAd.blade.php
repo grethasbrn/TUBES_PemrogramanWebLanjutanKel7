@@ -1,46 +1,62 @@
 <!-- TOPBAR -->
 <div class="topbar">
+
   <div class="logo">
-    <div class="logo-icon">🏥</div>
+
+    <div class="logo-icon">
+      <img 
+        src="{{ asset('images/pharmbee-logo.png') }}" 
+        class="pharmbee-logo"
+        alt="Pharmbee"
+      >
+    </div>
 
     <div class="logo-text">
-      <div class="l1">PharmBee</div>
+      <div class="l1">Pharmbee</div>
     </div>
+
   </div>
+
 
   <div class="topbar-right">
 
     <!-- DATE & TIME -->
-    <div class="date-chip" id="dateChip">
+    <div class="date-chip">
       <div id="dateTag"></div>
     </div>
 
+
     <!-- NOTIFICATION -->
-    <button class="notif-btn"onclick="showSection('invoice')"title="Invoice masuk">
-      🔔 <span class="notif-badge" id="notifBadge"></span>
+    <button class="notif-btn">
+      <span>🔔</span>
+      <span class="notif-badge"></span>
     </button>
+
 
     <!-- USER -->
     <div class="avatar-wrap">
 
       <div class="avatar">
-        {{ strtoupper(substr(Auth::user()->name ?? 'A',0,1)) }}
+        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
       </div>
 
       <div class="avatar-info">
+
         <div class="avatar-name">
-          {{ Auth::user()->name ?? 'Administrator' }}
+          {{ Auth::user()->name ?? 'Admin RS' }}
         </div>
 
         <div class="avatar-role">
           {{ Auth::user()->role ?? 'Admin' }}
         </div>
+
       </div>
 
     </div>
-  </div>
-</div>
 
+  </div>
+
+</div>
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="nav-section">Menu</div>
