@@ -172,7 +172,7 @@
             <td>
               <div class="aksi-group">
                 <a href="{{ route('pasien.edit', $p->id) }}" class="btn-aksi btn-edit" title="Edit">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                   Edit
                 </a>
                 <form action="{{ route('pasien.destroy', $p->id) }}" method="POST"
@@ -579,40 +579,6 @@
 </style>
 
 <script>
-document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
-
-    const selected = dropdown.querySelector('.dropdown-selected');
-    const options = dropdown.querySelector('.dropdown-options');
-    const hidden = dropdown.querySelector('input[type="hidden"]');
-
-    selected.addEventListener('click', (e) => {
-
-        e.stopPropagation();
-
-        document.querySelectorAll('.dropdown-options').forEach(opt => {
-            if (opt !== options) opt.classList.remove('show');
-        });
-
-        options.classList.toggle('show');
-    });
-
-    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
-
-        option.addEventListener('click', () => {
-
-            selected.innerHTML =
-                option.textContent + '<span>▼</span>';
-
-            hidden.value = option.dataset.value;
-
-            options.classList.remove('show');
-
-        });
-
-    });
-
-});
-
 document.addEventListener('click', () => {
     document.querySelectorAll('.dropdown-options').forEach(opt => {
         opt.classList.remove('show');
@@ -860,9 +826,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyFilter() {
         if(!searchInput) return;
         const keyword    = searchInput.value.toLowerCase();
-        const jenis      = filterSels[0]?.value.toLowerCase() || '';
-        const status     = filterSels[1]?.value.toLowerCase() || '';
-        const poli       = filterSels[2]?.value.toLowerCase() || '';
+        const jenis  = document.getElementById('filterJenis').value.toLowerCase();
+        const status = document.getElementById('filterStatus').value.toLowerCase();
+        const poli   = document.getElementById('filterPoli').value.toLowerCase();
 
         rows.forEach(row => {
             const cells   = row.querySelectorAll('td');
@@ -888,6 +854,42 @@ document.addEventListener('DOMContentLoaded', () => {
       searchInput.addEventListener('input', applyFilter);
     }
     filterSels.forEach(sel => sel.addEventListener('change', applyFilter));
+
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hidden = dropdown.querySelector('input[type="hidden"]');
+
+    selected.addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        document.querySelectorAll('.dropdown-options').forEach(opt => {
+            if (opt !== options) opt.classList.remove('show');
+        });
+
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hidden.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+            applyFilter();
+
+        });
+
+    });
+
+});
 });
 </script>
 @endpush

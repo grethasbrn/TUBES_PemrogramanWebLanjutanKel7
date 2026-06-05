@@ -267,6 +267,20 @@ box-shadow:0 8px 24px rgba(0,0,0,.08);overflow:hidden;display:none;z-index:999;}
   background: linear-gradient(180deg, #eaf4fb 0%, #dbeaf5 50%, #cfe2ee 100%) !important;
   border-right: 1px solid rgba(124, 90, 199, 0.15);
   box-shadow: 10px 0 30px rgba(92, 74, 58, 0.08);
+  
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #e0d5cc;
+  border-radius: 99px;
 }
 
 .nav-section {
