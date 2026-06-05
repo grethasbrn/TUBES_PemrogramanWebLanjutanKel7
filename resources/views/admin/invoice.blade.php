@@ -14,12 +14,21 @@
         <div>
             <div class="search-row">
                 <input type="text" class="search-input" placeholder="Cari..." id="srchInvoice">
-                <select class="filter-sel" id="fltrInvoiceStatus">
-                    <option value="">Semua</option>
-                    <option value="Masuk">Masuk</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Lunas">Lunas</option>
-                </select>
+                <div class="custom-dropdown" id="invoiceStatus">
+                <div class="dropdown-selected">
+                    Semua
+                    <span>▼</span>
+                </div>
+
+                <div class="dropdown-options">
+                    <div class="dropdown-option" data-value="">Semua</div>
+                    <div class="dropdown-option" data-value="Masuk">Masuk</div>
+                    <div class="dropdown-option" data-value="Diproses">Diproses</div>
+                    <div class="dropdown-option" data-value="Lunas">Lunas</div>
+                </div>
+
+                <input type="hidden" id="fltrInvoiceStatus" value="">
+            </div>
             </div>
 
             <div id="invoiceList">
@@ -181,6 +190,38 @@
             let text = card.innerText.toLowerCase();
             card.style.display = text.includes(val) ? 'block' : 'none';
         });
+    });
+
+    const dropdown = document.getElementById('invoiceStatus');
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hiddenInput = document.getElementById('fltrInvoiceStatus');
+
+    selected.addEventListener('click', () => {
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hiddenInput.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+            // kalau ada fungsi filter
+            // filterInvoice();
+        });
+
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) {
+            options.classList.remove('show');
+        }
     });
 </script>
 @endsection

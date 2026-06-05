@@ -65,28 +65,51 @@
       <input type="text" class="search-input" placeholder="Cari nama, NIK, atau No. RM...">
     </div>
     <div class="filter-selects">
-      <select class="filter-sel">
-        <option value="">Semua Jenis</option>
-        <option value="BPJS">BPJS</option>
-        <option value="Mandiri">Mandiri</option>
-      </select>
-      <select class="filter-sel">
-        <option value="">Semua Status</option>
-        <option value="Menunggu">Menunggu</option>
-        <option value="Diperiksa">Diperiksa</option>
-        <option value="Selesai">Selesai</option>
-      </select>
-      <select class="filter-sel">
-        <option value="">Semua Poli</option>
-        <option value="Umum">Umum</option>
-        <option value="Anak">Anak</option>
-        <option value="Penyakit Dalam">Penyakit Dalam</option>
-        <option value="Bedah">Bedah</option>
-        <option value="Gigi">Gigi</option>
-        <option value="Kebidanan">Kebidanan</option>
-        <option value="Mata">Mata</option>
-        <option value="UGD">UGD</option>
-      </select>
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Jenis
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Jenis</div>
+            <div class="dropdown-option" data-value="BPJS">BPJS</div>
+            <div class="dropdown-option" data-value="Mandiri">Mandiri</div>
+        </div>
+        <input type="hidden" id="filterJenis" value="">
+      </div>
+
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Status
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Status</div>
+            <div class="dropdown-option" data-value="Menunggu">Menunggu</div>
+            <div class="dropdown-option" data-value="Diperiksa">Diperiksa</div>
+            <div class="dropdown-option" data-value="Selesai">Selesai</div>
+        </div>
+        <input type="hidden" id="filterStatus" value="">
+      </div>
+
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Poli
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Poli</div>
+            <div class="dropdown-option" data-value="Umum">Umum</div>
+            <div class="dropdown-option" data-value="Anak">Anak</div>
+            <div class="dropdown-option" data-value="Penyakit Dalam">Penyakit Dalam</div>
+            <div class="dropdown-option" data-value="Bedah">Bedah</div>
+            <div class="dropdown-option" data-value="Gigi">Gigi</div>
+            <div class="dropdown-option" data-value="Kebidanan">Kebidanan</div>
+            <div class="dropdown-option" data-value="Mata">Mata</div>
+            <div class="dropdown-option" data-value="UGD">UGD</div>
+        </div>
+        <input type="hidden" id="filterPoli" value="">
+      </div>
     </div>
   </div>
 
@@ -556,6 +579,46 @@
 </style>
 
 <script>
+document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hidden = dropdown.querySelector('input[type="hidden"]');
+
+    selected.addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        document.querySelectorAll('.dropdown-options').forEach(opt => {
+            if (opt !== options) opt.classList.remove('show');
+        });
+
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hidden.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+        });
+
+    });
+
+});
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-options').forEach(opt => {
+        opt.classList.remove('show');
+    });
+});
+
 let validasiFilter = 'semua';
 let currentValidasiId = null;
 
