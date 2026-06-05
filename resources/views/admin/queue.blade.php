@@ -142,4 +142,132 @@
 .antrian-empty-text { font-size: 15px; font-weight: 600; color: #A8998A; }
 .antrian-empty-sub  { font-size: 12px; color: #C4B5A5; margin-top: 4px; }
 </style>
+<script>
+const pasienData = @json($belumDikirimJson ?? []);
+
+/* ===== RENDER KANBAN ===== */
+function renderKanban() {
+  const poliCount = {};
+  pasienData.forEach(p => {
+    poliCount[p.poli] = (poliCount[p.poli] || 0) + 1;
+  });
+
+  const board = document.getElementById('kanbanBoard');
+  if (!Object.keys(poliCount).length) {
+    board.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#C4B5A5;padding:20px;font-size:13px">Tidak ada antrian</div>`;
+    return;
+  }
+
+  board.innerHTML = Object.entries(poliCount).map(([poli, count]) => `
+    <div style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1px solid #f0ebe6">
+      <div style="font-size:12px;color:#A8998A;font-weight:600;margin-bottom:8px">${poli}</div>
+      <div style="font-size:24px;font-weight:700;color:#c0825a">${count}</div>
+      <div style="font-size:11px;color:#C4B5A5;margin-top:2px">pasien menunggu</div>
+    </div>
+  `).join('');
+}
+
+/* ===== RENDER TABLE ===== */
+function renderTable() {
+  const tbody = document.getElementById('tblAntrianBody');
+  document.getElementById('antrian-count-badge').textContent = `${pasienData.length} pasien`;
+
+  if (!pasienData.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="7">
+        <div class="antrian-empty">
+          <div class="antrian-empty-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#C4B5A5" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="antrian-empty-text">Tidak ada pasien dalam antrian</div>
+          <div class="antrian-empty-sub">Semua pasien sudah dikirim ke dokter</div>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pasienData.map((p, i) => `
+    <tr class="antrian-row" id="row-${p.id}">
+      <td><span class="antrian-rm">${p.rm}</span></td>
+      <td>
+        <div class="antrian-nama-cell">
+          <div class="antrian-avatar">${p.nama.charAt(0).toUpperCase()}</div>
+          <span class="antrian-nama-txt">${p.nama}</span>
+        </div>
+      </td>
+      <td><span class="poli-chip">${p.poli}</span></td>
+      <td><span class="badge ${p.jenis === 'BPJS' ? 'b-bpjs' : 'b-mandiri'}">${p.jenis}</span></td>
+      <td><span class="antrian-no-badge">${i + 1}</span></td>
+      <td><span class="badge b-belum">Belum Dikirim</span></td>
+      <td style="text-align:center">
+        <button class="btn-kirim-dokter" onclick="kirimPasien(${p.id})">
+          ✈ Kirim ke Dokter
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ===== KIRIM 1 PASIEN ===== */
+function kirimPasien(id) {
+  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+  fetch(`/admin/pasien/${id}/kirim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      // Hapus dari array lokal
+      const idx = pasienData.findIndex(p => p.id == id);
+      if (idx !== -1) pasienData.splice(idx, 1);
+      renderTable();
+      renderKanban();
+      showToast(`${data.nama} berhasil dikirim ke dokter`, 'success');
+    } else {
+      showToast(data.message || 'Gagal mengirim pasien', 'danger');
+    }
+  })
+  .catch(() => showToast('Terjadi kesalahan koneksi', 'danger'));
+}
+
+/* ===== KIRIM SEMUA ===== */
+document.querySelector('.btn.btn-primary').addEventListener('click', function () {
+  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+  fetch('/admin/pasien/kirim-semua', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      pasienData.length = 0;
+      renderTable();
+      renderKanban();
+      showToast(data.message, 'success');
+    } else {
+      showToast(data.message || 'Gagal', 'danger');
+    }
+  })
+  .catch(() => showToast('Terjadi kesalahan koneksi', 'danger'));
+});
+
+/* ===== TOAST ===== */
+function showToast(msg, type) {
+  const colors = { success: '#4caf50', danger: '#e53935', info: '#1976d2' };
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${colors[type]||colors.info};color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2)`;
+  t.innerText = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+/* ===== INIT ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  renderTable();
+  renderKanban();
+});
+</script>
 @endpush

@@ -2,7 +2,24 @@
 
 @section('content')
 
-<script id="pasien-data" type="application/json">{!! json_encode($pasienJson) !!}</script>
+<script id="pasien-data" type="application/json">{!! json_encode($pasienJson->map(fn($p) => [
+    'id'      => (string)($p['id'] ?? $p->id ?? ''),
+    'nama'    => $p['nama'] ?? $p->nama ?? '',
+    'rm'      => $p['rm'] ?? $p['no_rm'] ?? '',
+    'usia'    => $p['usia'] ?? '',
+    'jk'      => $p['jk'] ?? $p['jenis_kelamin'] ?? '-',
+    'bayar'   => $p['bayar'] ?? $p['jenis'] ?? '',
+    'poli'    => $p['poli'] ?? $p['poli_tujuan'] ?? '',
+    'status'  => $p['status'] ?? '',
+    'keluhan' => $p['keluhan'] ?? '-',
+    'riwayat' => $p['riwayat'] ?? '-',
+    'alergi'  => $p['alergi'] ?? '-',
+    'bb'      => $p['bb'] ?? $p['berat_badan'] ?? '',
+    'tb'      => $p['tb'] ?? $p['tinggi_badan'] ?? '',
+    'td'      => $p['td'] ?? $p['tekanan_darah'] ?? '-',
+])) !!}
+</script>
+
 <script id="obat-data"   type="application/json">{!! json_encode($obatJson)  !!}</script>
 
 <style>
@@ -196,7 +213,6 @@
 .btn-primary:hover { opacity: .88; }
 .btn-draft { background: #fff3e0; color: #f57c00; border-color: #ffe0b2; }
 </style>
-
 <div class="rx-header">
     <h2>Resep <span>Pasien</span></h2>
     <div class="rx-toolbar">
@@ -398,7 +414,7 @@ function filterTable() {
 
 // ─── Modal ──────────────────────────────────────────────
 function openResepModal(id) {
-    const p = allPasien.find(x => x.id === id);
+    const p = allPasien.find(x => x.id == id);
     if (!p) return;
     activePasienId = id;
 

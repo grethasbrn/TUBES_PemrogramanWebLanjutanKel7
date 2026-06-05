@@ -35,11 +35,6 @@ class Pasien extends Model
         'alergi',
     ];
 
-    public function userDokter()
-    {
-        return $this->belongsTo(User::class, 'dokter'); 
-    }
-
     // Relasi: satu pasien bisa punya banyak resep
     public function reseps()
     {

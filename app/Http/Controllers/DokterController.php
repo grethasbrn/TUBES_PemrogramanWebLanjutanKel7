@@ -187,7 +187,7 @@ class DokterController extends Controller
         $obatList = Batch::where('jumlah', '>', 0)
             ->where(function ($q) {
                 $q->whereNull('tgl_expired')
-                  ->orWhere('tgl_expired', '>', now());
+                ->orWhere('tgl_expired', '>', now());
             })
             ->orderBy('nama_obat')
             ->get(['id', 'nama_obat', 'tipe', 'kategori', 'harga', 'jumlah']);
