@@ -15,6 +15,7 @@ class Invoice extends Model
         'jenis',
         'status',
         'subtotal',
+        'ppn',           
         'total_tagihan',
         'no_referensi',
         'created_at',

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('no_rm');
             $table->string('nama');
             $table->enum('jenis', ['Mandiri', 'BPJS']);
-            $table->enum('status', ['Masuk', 'Diproses', 'Lunas'])->default('Masuk');
+            $table->enum('status', ['masuk', 'diproses', 'lunas'])->default('masuk');
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('total_tagihan', 12, 2)->default(0);
             $table->string('no_referensi')->nullable();   
