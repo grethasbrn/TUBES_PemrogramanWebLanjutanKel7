@@ -474,3 +474,71 @@ tr:hover td{background:var(--cream)}
 
     object-fit:contain !important;
 }
+
+/* ===== PROFILE LOGOUT DROPDOWN ===== */
+
+.profile-menu{
+    position:relative;
+}
+
+
+.avatar-wrap{
+    cursor:pointer;
+}
+
+
+.profile-dropdown{
+
+    display:none;
+
+    position:absolute;
+    right:0;
+    top:48px;
+
+    width:150px;
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:8px;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.12);
+
+    z-index:9999;
+}
+
+
+.profile-dropdown.show{
+    display:block;
+}
+
+
+.logout-btn{
+
+    width:100%;
+
+    border:none;
+    background:none;
+
+    padding:10px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    font-family:'DM Sans';
+
+    color:#8d6fd1;
+}
+
+
+.logout-btn:hover{
+
+    background:#f2ecff;
+
+    border-radius:10px;
+}
