@@ -45,8 +45,8 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
     Route::get('/dashboard', [DokterController::class, 'dashboard']);
     Route::get('/data', [DokterController::class, 'data']);
     Route::get('/prescription', [ResepController::class, 'prescription']);
-    Route::get('/status', function () { return view('dokter.status'); });
-    Route::get('/history', function () { return view('dokter.history'); });
+    Route::get('/status', [DokterController::class, 'status']);
+    Route::get('/history', [DokterController::class, 'history']);
     Route::get('/api/pasien', [DokterController::class, 'apiPasien']);
     Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
     Route::get('/api/resep', [ResepController::class, 'index']);
