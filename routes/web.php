@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\DokterController;
 
 Route::get('/', function () {
     return view('login');
@@ -38,19 +40,26 @@ Route::prefix('admin')->group(function () {
     Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
     Route::post('/pasien/{id}/validasi', [PasienController::class, 'updateValidasi']);
 
-    // Edit, Update, Delete pasien
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
 
+    Route::get('/dokter', [DokterController::class, 'index'])->name('admin.dokter.index');
+    Route::post('/dokter', [DokterController::class, 'store']);
+    Route::put('/dokter/{id}', [DokterController::class, 'update']);
+    Route::delete('/dokter/{id}', [DokterController::class, 'destroy']);
+
     Route::get('/queue', function () { return view('admin.queue'); });
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::get('/payment', function () { return view('admin.payment'); });
-    Route::get('/report', function () { return view('admin.report'); });
 
     Route::get('/batch', [BatchController::class, 'index']);
     Route::post('/batch/store', [BatchController::class, 'store']);
 
     // API untuk dashboard stats
     Route::get('/api/stats', [DashboardController::class, 'stats']);
+
+    // Report — hanya satu, pakai controller
+    Route::get('/report', [AdminReportController::class, 'index'])->name('admin.report.index');
+    Route::get('/report/stats', [AdminReportController::class, 'stats'])->name('admin.report.stats');
 });
