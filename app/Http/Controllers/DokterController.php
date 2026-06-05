@@ -12,7 +12,6 @@ class DokterController extends Controller
 {
     /**
      * Ambil poli dokter yang sedang login.
-     * Jika kolom poli null/kosong, fallback ke null (tampilkan semua — untuk backward compat).
      */
     private function getPoliDokter(): ?string
     {
@@ -40,10 +39,12 @@ class DokterController extends Controller
         $today = Carbon::today();
 
         $pasienHariIni = $this->queryPasienPoli()
+            ->where('status_kirim', 'Terkirim')
             ->whereIn('status', ['Menunggu', 'Diperiksa'])
             ->count();
 
         $antrian = $this->queryPasienPoli()
+            ->where('status_kirim', 'Terkirim')
             ->whereIn('status', ['Menunggu', 'Diperiksa'])
             ->orderBy('created_at')
             ->take(8)
@@ -69,11 +70,11 @@ class DokterController extends Controller
 
         $resepJson = $resepTerbaru->map(function ($r) {
             return [
-                'id'      => (string) $r->id,
-                'pasien'  => $r->pasien->nama ?? '-',
-                'rm'      => $r->pasien->no_rm ?? '-',
-                'diagnosa'=> $r->diagnosa,
-                'status'  => $r->status,
+                'id'       => (string) $r->id,
+                'pasien'   => $r->pasien->nama ?? '-',
+                'rm'       => $r->pasien->no_rm ?? '-',
+                'diagnosa' => $r->diagnosa,
+                'status'   => $r->status,
             ];
         });
 
@@ -89,6 +90,7 @@ class DokterController extends Controller
     public function data()
     {
         $pasiens = $this->queryPasienPoli()
+            ->where('status_kirim', 'Terkirim')
             ->whereIn('status', ['Menunggu', 'Diperiksa'])
             ->orderBy('created_at')
             ->get();
@@ -120,6 +122,7 @@ class DokterController extends Controller
     public function apiPasien()
     {
         $pasiens = $this->queryPasienPoli()
+            ->where('status_kirim', 'Terkirim')
             ->whereNotIn('status', ['Selesai'])
             ->orderBy('created_at')
             ->get()
@@ -158,6 +161,7 @@ class DokterController extends Controller
     public function prescription()
     {
         $pasiens = $this->queryPasienPoli()
+            ->where('status_kirim', 'Terkirim')
             ->whereNotIn('status', ['Selesai'])
             ->orderBy('created_at')
             ->get();
@@ -181,7 +185,6 @@ class DokterController extends Controller
             ];
         });
 
-        // ✅ Ambil obat tersedia dari database
         $obatList = Batch::where('jumlah', '>', 0)
             ->where(function ($q) {
                 $q->whereNull('tgl_expired')
