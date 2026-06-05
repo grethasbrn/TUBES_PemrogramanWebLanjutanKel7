@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Controllers;
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,19 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Invoice extends Model
 {
     protected $fillable = [
-        'no_invoice',
-        'resep_id',
-        'no_rm',
-        'nama',
-        'jenis',
-        'status',
-        'subtotal',
-        'ppn',           
-        'total_tagihan',
-        'no_referensi',
-        'created_at',
-        'updated_at',
-        'diproses_oleh'
+        'no_invoice', 'resep_id', 'no_rm', 'nama', 'jenis', 'status',
+        'subtotal', 'ppn', 'total_tagihan', 'no_referensi', 'diproses_oleh',
     ];
 
     protected $casts = [
@@ -28,23 +19,18 @@ class Invoice extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function resep(): BelongsTo 
+    public function pasien()
+    {
+        return $this->belongsTo(Pasien::class, 'no_rm', 'no_rm');
+    }
+
+    public function resep(): BelongsTo
     {
         return $this->belongsTo(Resep::class, 'resep_id');
     }
 
-    public function getPpnAttribute(): float
+    public function getPoliAttribute()
     {
-        return $this->jenis === 'Mandiri' ? round($this->subtotal * 0.11) : 0;
-    }
-
-    public function getTotalTagihanFinalAttribute(): float
-    {
-        return $this->subtotal + $this->getPpnAttribute();
-    }
-
-    public function admin(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'diproses_oleh');
+        return $this->pasien?->poli_tujuan ?? '-';
     }
 }

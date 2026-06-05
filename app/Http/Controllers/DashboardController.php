@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pasien;
-use App\Models\Invoice; 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,43 +18,41 @@ class DashboardController extends Controller
         $today = Carbon::today();
 
         $totalHariIni = Pasien::whereDate('created_at', $today)->count();
-
         $menungguValidasi = Pasien::where('validasi', 'Menunggu')->count();
 
         $antriPerPoli = Pasien::whereDate('created_at', $today)
             ->selectRaw('poli_tujuan, count(*) as total')
-            ->groupBy('poli_tujuan')
-            ->get();
+            ->groupBy('poli_tujuan')->get();
 
         $statusPasien = Pasien::whereDate('created_at', $today)
             ->selectRaw('status, count(*) as total')
-            ->groupBy('status')
-            ->get();
+            ->groupBy('status')->get();
 
         $aktivitas = Pasien::latest()->take(5)->get(['nama', 'no_rm', 'status', 'created_at']);
 
-        $invoiceMasuk = Invoice::where('status', 'masuk')->count();
+        $invoiceHariIni = DB::table('invoices')->whereDate('created_at', $today)->count();
+        $pemasukanHariIni = DB::table('invoices')->whereDate('created_at', $today)->where('status', 'Lunas')->sum('total_tagihan');
+        $transaksiLunas = DB::table('invoices')->whereDate('created_at', $today)->where('status', 'Lunas')->count();
 
-        $pemasukanHariIni = Invoice::where('status', 'Lunas')
-            ->whereDate('updated_at', $today) 
-            ->sum('total_tagihan');
-
-        // PERBAIKAN: Menggunakan standar Koleksi Laravel agar terhindar dari error typo loop konvensional
-        $pemasukan7Hari = collect(range(6, 0))->map(function ($i) {
-            return (float) Invoice::where('status', 'Lunas')
-                ->whereDate('updated_at', Carbon::today()->subDays($i))
-                ->sum('total_tagihan');
-        })->all();
+        $pemasukan7Hari = [];
+        $labels7Hari = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $tgl = Carbon::today()->subDays($i);
+            $pemasukan7Hari[] = (int) DB::table('invoices')->whereDate('created_at', $tgl)->where('status', 'Lunas')->sum('total_tagihan');
+            $labels7Hari[] = $tgl->translatedFormat('D, d M') ?? $tgl->format('D, d M');
+        }
 
         return response()->json([
-            'total_hari_ini'    => (int)$totalHariIni,
-            'menunggu_validasi' => (int)$menungguValidasi,
-            'invoice'           => (int)$invoiceMasuk,
-            'pemasukan'         => (float)$pemasukanHariIni, 
+            'total_hari_ini'    => $totalHariIni,
+            'menunggu_validasi' => $menungguValidasi,
+            'invoice'           => $invoiceHariIni,
+            'pemasukan'         => (int) $pemasukanHariIni,
+            'transaksi_lunas'   => $transaksiLunas,
             'antri_per_poli'    => $antriPerPoli,
             'status_pasien'     => $statusPasien,
             'aktivitas'         => $aktivitas,
-            'pemasukan_7_hari'  => $pemasukan7Hari 
+            'pemasukan_7hari'   => $pemasukan7Hari,
+            'labels_7hari'      => $labels7Hari,
         ]);
     }
 }

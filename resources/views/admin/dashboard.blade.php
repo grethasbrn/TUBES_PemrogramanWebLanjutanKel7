@@ -69,15 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch('/admin/api/stats')
         .then(r => r.json())
         .then(data => {
-            // ===== 1. METRICS =====
-            document.getElementById('m-total-pasien').innerText = data.total_hari_ini ?? 0;
-            document.getElementById('m-total-sub').innerText    = (data.total_hari_ini ?? 0) + ' pasien terdaftar hari ini';
-            document.getElementById('m-validasi').innerText     = data.menunggu_validasi ?? 0;
-            document.getElementById('m-invoice').innerText      = data.invoice ?? 0;
-            
-            const nominal = typeof data.pemasukan === 'number' ? data.pemasukan : 0;
-            document.getElementById('m-pemasukan').innerText    = 'Rp ' + nominal.toLocaleString('id-ID');
-            document.getElementById('m-pemasukan-sub').innerText = 'Update hari ini';
+            // ===== METRICS =====
+            document.getElementById('m-total-pasien').innerText  = data.total_hari_ini;
+            document.getElementById('m-total-sub').innerText     = data.total_hari_ini + ' pasien terdaftar hari ini';
+            document.getElementById('m-validasi').innerText      = data.menunggu_validasi;
+            document.getElementById('m-invoice').innerText       = data.invoice;
+            document.getElementById('m-pemasukan').innerText     = 'Rp ' + data.pemasukan.toLocaleString('id-ID');
+            document.getElementById('m-pemasukan-sub').innerText = data.transaksi_lunas + ' transaksi lunas';
 
             // ===== 2. ANTRIAN PER POLI =====
             const poliWrap = document.getElementById('dashAntrianPoli');
@@ -136,22 +134,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // ===== 5. CHART PEMASUKAN =====
+            // ===== CHART PEMASUKAN 7 HARI (dari DB) =====
             const ctxPemasukan = document.getElementById('chartPemasukan').getContext('2d');
-            const days = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                days.push(d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' }));
-            }
-            
             new Chart(ctxPemasukan, {
                 type: 'bar',
                 data: {
-                    labels: days,
+                    labels: data.labels_7hari,
                     datasets: [{
                         label: 'Pemasukan (Rp)',
-                        data: data.pemasukan_7_hari && data.pemasukan_7_hari.length ? data.pemasukan_7_hari : [0,0,0,0,0,0,0],
+                        data: data.pemasukan_7hari,
                         backgroundColor: '#c0825a',
                         borderRadius: 6,
                     }]
@@ -161,7 +152,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { size: 11 },
+                                callback: v => 'Rp ' + v.toLocaleString('id-ID')
+                            }
+                        },
                         x: { ticks: { font: { size: 11 } } }
                     }
                 }
