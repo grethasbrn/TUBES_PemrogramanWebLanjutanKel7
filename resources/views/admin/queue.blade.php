@@ -8,9 +8,12 @@
       <div class="page-title">Antrian & Poli haloo</div>
       <div class="page-sub">Kirim pasien ke dokter sesuai poli tujuan</div>
     </div>
-    <button class="btn btn-primary">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      Kirim Semua ke Dokter
+    <button class="btn btn-primary" style="display: flex !important; align-items: center !important; justify-content: center !important; width: 200px; height: 42px; gap: 8px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: inline-block !important; flex-shrink: 0; margin: 0;">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+      <span style="white-space: nowrap !important; font-size: 13px; display: inline-block !important; line-height: 1;">Kirim Semua ke Dokter</span>
     </button>
   </div>
 

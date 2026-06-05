@@ -25,14 +25,6 @@
       <div id="dateTag"></div>
     </div>
 
-
-    <!-- NOTIFICATION -->
-    <button class="notif-btn">
-      <span>🔔</span>
-      <span class="notif-badge"></span>
-    </button>
-
-
     <!-- USER -->
     <div class="avatar-wrap">
 

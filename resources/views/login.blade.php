@@ -16,90 +16,127 @@
   --white:#FDFAF5;--white2:#FAF6EF;
   --green:#52B788;--red:#E63946;
 }
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+html, body{
+  height:100vh;
+  overflow:hidden;
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+}
 
 /* ── BG DECOR ── */
 .bg-decor{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.bg-circle1{position:absolute;width:600px;height:600px;border-radius:50%;background:var(--purple-light);opacity:.5;top:-180px;right:-150px}
-.bg-circle2{position:absolute;width:380px;height:380px;border-radius:50%;background:var(--teal-light);opacity:.5;bottom:-80px;left:-100px}
+.bg-circle1{position:absolute;width:480px;height:480px;border-radius:50%;background:var(--purple-light);opacity:.5;top:-180px;right:-150px}
+.bg-circle2{position:absolute;width:300px;height:300px;border-radius:50%;background:var(--teal-light);opacity:.5;bottom:-80px;left:-100px}
 .bg-grain{position:absolute;inset:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
 
 /* ── TOPNAV ── */
-.topnav{position:relative;z-index:10;background:rgba(253,250,245,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--cream3);height:60px;display:flex;align-items:center;padding:0 48px;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-text{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;letter-spacing:.2em;color:var(--text)}
-.nav-link{font-size:13px;color:var(--text2);text-decoration:none}
-.nav-link:hover{color:var(--text)}
+.topnav{
+  position:relative;
+  z-index:10;
+  background:rgba(253,250,245,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--cream3);
+  height:58px;
+  display:flex;
+  align-items:center;
+  padding:0 52px;
+  justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-img{width:38px;height:38px;object-fit:contain}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;letter-spacing:.22em;color:var(--text)}
 
 /* ── MAIN ── */
-.main{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:48px 24px}
-
-.login-box{width:100%;max-width:460px}
-
-.login-header{text-align:center;margin-bottom:36px}
-.login-tag{display:inline-flex;align-items:center;gap:7px;background:var(--purple-light);color:var(--purple2);padding:5px 16px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:16px;letter-spacing:.05em}
+.main{
+  position:relative;
+  z-index:1;
+  flex:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:28px 24px 0 24px;
+}
+.login-box{
+  width:100%;
+  max-width:700px;
+  transform:scale(.92);
+  transform-origin:top center;
+}
+.login-header{text-align:center;margin-bottom:18px}
+.login-tag{display:inline-flex;align-items:center;gap:7px;background:var(--purple-light);color:var(--purple2);padding:4px 15px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:7px;letter-spacing:.05em}
 .tag-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.login-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--text);margin-bottom:6px}
+.login-title{font-family:'Cormorant Garamond',serif;font-size:31px;font-weight:600;color:var(--text);margin-bottom:3px}
 .login-sub{font-size:13px;color:var(--text3)}
 
 /* ── ROLE SELECTOR ── */
-.role-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;text-align:center}
-
-.role-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
-
-.role-btn{position:relative;background:var(--white);border:2px solid var(--cream3);border-radius:16px;padding:18px 12px 16px;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1);text-align:center;outline:none;width:100%}
+.role-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px}
+.role-btn{
+  position:relative;
+  background:var(--white);
+  border:2px solid var(--cream3);
+  border-radius:16px;
+  height:95px;
+  padding:10px 12px;
+  cursor:pointer;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  text-align:center;
+  outline:none;
+  width:100%;
+}
 .role-btn:hover{border-color:var(--cream4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.06)}
-
 .role-btn.active-dokter{border-color:var(--purple);background:var(--purple-pale);box-shadow:0 0 0 4px rgba(139,125,184,.12)}
 .role-btn.active-apoteker{border-color:var(--teal);background:var(--teal-light);box-shadow:0 0 0 4px rgba(42,157,143,.12)}
 .role-btn.active-admin{border-color:var(--gold);background:var(--gold-light);box-shadow:0 0 0 4px rgba(201,151,42,.12)}
 
-.rb-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.rb-icon{width:32px;height:32px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
 .rb-icon-purple{background:var(--purple-light)}
 .rb-icon-teal{background:var(--teal-light)}
 .rb-icon-gold{background:var(--gold-light)}
-
-.rb-label{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
-.lc-purple{color:var(--purple2)}
-.lc-teal{color:var(--teal2)}
-.lc-gold{color:var(--gold2)}
-
-.rb-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--text)}
+.rb-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--text)}
 
 /* active indicator dot */
-.rb-dot{width:7px;height:7px;border-radius:50%;margin:8px auto 0;opacity:0;transition:opacity .2s}
+.rb-dot{width:7px;height:7px;border-radius:50%;margin:2px auto 0;opacity:0;transition:opacity .2s}
 .role-btn.active-dokter .rb-dot{background:var(--purple);opacity:1}
 .role-btn.active-apoteker .rb-dot{background:var(--teal);opacity:1}
 .role-btn.active-admin .rb-dot{background:var(--gold);opacity:1}
 
 /* ── FORM CARD ── */
-.form-card{background:var(--white);border:1px solid var(--cream3);border-radius:20px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.05);transition:all .3s}
+.form-card{
+  background:var(--white);
+  border:1px solid var(--cream3);
+  border-radius:22px;
+  padding:26px 42px 20px 42px;
+  box-shadow:0 4px 24px rgba(0,0,0,.05);
+  transition:all .3s;
+}
 .form-card.border-dokter{border-top:3px solid var(--purple)}
 .form-card.border-apoteker{border-top:3px solid var(--teal)}
 .form-card.border-admin{border-top:3px solid var(--gold)}
 
-.form-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.form-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .form-title-dot{width:8px;height:8px;border-radius:50%}
 .dot-purple{background:var(--purple)}
 .dot-teal{background:var(--teal)}
 .dot-gold{background:var(--gold)}
 
-.fg{margin-bottom:16px}
-.fg label{display:block;font-size:10px;color:var(--text2);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
-.fg input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--cream3);background:var(--cream);font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,background .15s}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.fg input{width:100%;height:46px;padding:10px 16px;border-radius:10px;border:1px solid var(--cream3);background:var(--cream);font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,background .15s}
 .fg input:focus{background:var(--white)}
 .fg input:focus.fi-purple{border-color:var(--purple)}
 .fg input:focus.fi-teal{border-color:var(--teal)}
 .fg input:focus.fi-gold{border-color:var(--gold)}
-/* use JS to add focus class */
+
 .input-wrap{position:relative}
 .input-wrap input{padding-right:42px}
 .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0;line-height:1}
 .eye-btn:hover{color:var(--text2)}
 
-.submit-btn{width:100%;padding:13px;border-radius:11px;font-size:15px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:none;transition:all .2s;letter-spacing:.01em;margin-top:4px}
+.submit-btn{width:100%;height:48px;border-radius:11px;font-size:16px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:none;transition:all .2s;letter-spacing:.01em;margin-top:6px}
 .sb-purple{background:var(--purple);color:white}
 .sb-purple:hover{background:var(--purple2)}
 .sb-teal{background:var(--teal);color:white}
@@ -114,437 +151,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .toast-danger{background:var(--red)}
 
 /* ── FOOTER ── */
-.footer{position:relative;z-index:1;background:var(--text);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.footer-logo .fl1{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;letter-spacing:.2em;color:var(--cream2)}
-.footer-copy{font-size:12px;color:var(--text3)}
+.footer{position:relative;z-index:1;background:var(--text);height:42px;padding:8px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer-logo .fl1{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:600;letter-spacing:.2em;color:var(--cream2)}
+.footer-copy{font-size:11px;color:var(--text3)}
 
 @media(max-width:500px){
-  .role-buttons{grid-template-columns:repeat(3,1fr);gap:8px}
-  .rb-name{font-size:15px}
-  .main{padding:32px 16px}
+  .role-buttons{gap:8px}
+  .rb-name{font-size:14px}
+  .main{padding:16px 16px 0 16px}
   .topnav{padding:0 20px}
-  .footer{padding:16px 20px}
-}
-
-/* ===== PHARMBEE LOGIN FIT SCREEN FINAL ===== */
-
-html,
-body{
-  height:100vh !important;
-  overflow:hidden !important;
-}
-
-.topnav{
-  height:50px !important;
-  padding:0 48px !important;
-}
-
-.main{
-  padding:5px 24px !important;
-  align-items:center !important;
-}
-
-.login-box{
-  max-width:520px !important;
-  transform:scale(.92);
-  transform-origin:center;
-}
-
-.login-header{
-  margin-bottom:12px !important;
-}
-
-.login-tag{
-  margin-bottom:7px !important;
-  padding:4px 15px !important;
-}
-
-.login-title{
-  font-size:28px !important;
-  margin-bottom:3px !important;
-}
-
-.login-sub{
-  font-size:12px !important;
-}
-
-.role-label{
-  margin-bottom:5px !important;
-}
-
-.role-buttons{
-  gap:10px !important;
-  margin-bottom:12px !important;
-}
-
-.role-btn{
-  padding:14px 12px !important;
-}
-
-.rb-icon{
-  width:34px !important;
-  height:34px !important;
-  margin-bottom:5px !important;
-}
-
-.rb-name{
-  font-size:15px !important;
-}
-
-.form-card{
-  padding:26px !important;
-}
-
-.form-title{
-  font-size:17px !important;
-  margin-bottom:10px !important;
-}
-
-.fg{
-  margin-bottom:8px !important;
-}
-
-.fg input{
-  height:38px !important;
-  padding:8px 12px !important;
-}
-
-.submit-btn{
-  padding:10px !important;
-}
-
-.footer{
-  height:42px !important;
-  padding:8px 48px !important;
-}
-
-.footer-logo .fl1{
-  font-size:12px !important;
-}
-
-.footer-copy{
-  font-size:11px !important;
-}
-
-.bg-circle1{
-  width:480px !important;
-  height:480px !important;
-}
-
-.bg-circle2{
-  width:300px !important;
-  height:300px !important;
-}
-/* ===== LOGIN FINAL POLISH ===== */
-
-/* navbar balik ukuran awal */
-.topnav{
-  height:60px !important;
-  padding:0 48px !important;
-}
-
-/* logo navbar lebih proporsional */
-.logo svg{
-  width:32px !important;
-  height:32px !important;
-}
-
-.logo-text{
-  font-size:16px !important;
-  letter-spacing:.22em !important;
-}
-
-
-/* hilangkan tulisan PILIH ROLE */
-.role-label{
-  display:none !important;
-}
-
-
-/* rapikan jarak setelah subtitle */
-.login-header{
-  margin-bottom:20px !important;
-}
-
-
-/* role naik sedikit */
-.role-buttons{
-  margin-top:0 !important;
-  margin-bottom:14px !important;
-}
-
-
-/* biar card tetap besar tapi fit */
-.login-box{
-  max-width:520px !important;
-  transform:scale(.92);
-  transform-origin:center;
-}
-
-/* ===== NAVBAR + LOGIN POSITION FINAL ===== */
-
-/* navbar lebih tinggi */
-.topnav{
-  height:70px !important;
-  padding:0 55px !important;
-}
-
-
-/* logo navbar gede dikit */
-.logo svg{
-  width:38px !important;
-  height:38px !important;
-}
-
-.logo-text{
-  font-size:18px !important;
-  letter-spacing:.24em !important;
-}
-
-
-/* area login naik tapi tetap ada ruang */
-.main{
-  align-items:flex-start !important;
-  padding-top:35px !important;
-}
-
-
-/* posisi box login */
-.login-box{
-  max-width:520px !important;
-  transform:scale(.92);
-  transform-origin:top center;
-}
-
-
-/* tag sistem manajemen */
-.login-tag{
-  margin-top:0 !important;
-}
-
-
-/* jarak judul ke role */
-.login-header{
-  margin-bottom:18px !important;
-}
-
-/* ===== LOGIN FINAL PAS 1366x768 ===== */
-
-/* jangan dibesarkan tinggi, cukup dilebarkan */
-.login-box{
-  max-width:620px !important;
-  transform:scale(.92) !important;
-  transform-origin:top center !important;
-}
-
-
-/* judul */
-.login-title{
-  font-size:31px !important;
-}
-
-.login-sub{
-  font-size:13px !important;
-}
-
-
-/* role dibuat melebar bukan tinggi */
-.role-buttons{
-  gap:14px !important;
-  margin-bottom:14px !important;
-}
-
-.role-btn{
-  height:105px !important;
-  padding:12px 18px !important;
-  border-radius:18px !important;
-}
-
-.rb-icon{
-  width:38px !important;
-  height:38px !important;
-  margin-bottom:5px !important;
-}
-
-.rb-name{
-  font-size:17px !important;
-}
-
-
-/* form lebih lebar */
-.form-card{
-  padding:24px 32px !important;
-  border-radius:22px !important;
-}
-
-.form-title{
-  font-size:20px !important;
-  margin-bottom:12px !important;
-}
-
-
-/* input nyaman tapi tidak tambah tinggi */
-.fg{
-  margin-bottom:9px !important;
-}
-
-.fg input{
-  height:40px !important;
-  font-size:14px !important;
-}
-
-
-/* tombol */
-.submit-btn{
-  height:42px !important;
-  padding:0 !important;
-  font-size:15px !important;
-}
-
-
-/* kasih footer ruang */
-.main{
-  padding-top:22px !important;
-  padding-bottom:0 !important;
-}
-
-/* ===== NAVBAR FINAL SIZE ===== */
-
-.topnav{
-  height:58px !important;
-  padding:0 52px !important;
-}
-
-
-/* logo jangan terlalu gede */
-.logo svg{
-  width:30px !important;
-  height:30px !important;
-}
-
-
-.logo-text{
-  font-size:15px !important;
-  letter-spacing:.22em !important;
-}
-
-
-/* biar konten tetap jaraknya cantik */
-.main{
-  padding-top:28px !important;
-}
-
-/* ===== PHARMBEE REAL LOGO ===== */
-
-.logo{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo-img{
-  width:38px !important;
-  height:38px !important;
-  object-fit:contain;
-}
-
-/* matikan aturan svg lama */
-.logo svg{
-  display:none;
-}
-
-/* ===== ROLE CARD CLEAN FINAL ===== */
-
-/* hilangkan tulisan ROLE */
-.rb-label{
-    display:none !important;
-}
-
-
-/* kecilkan kotak role */
-.role-btn{
-    height:85px !important;
-    padding:10px 12px !important;
-    border-radius:16px !important;
-}
-
-
-/* icon role kecil dikit */
-.rb-icon{
-    width:32px !important;
-    height:32px !important;
-    margin-bottom:6px !important;
-}
-
-
-/* tulisan dokter/apoteker/admin */
-.rb-name{
-    font-size:16px !important;
-}
-
-
-/* titik bawah active naik dikit */
-.rb-dot{
-    margin-top:6px !important;
-}
-
-
-/* jarak role ke form */
-.role-buttons{
-    margin-bottom:12px !important;
-}
-
-/* ===== FORM ISI GEDE DIKIT TETAP FIT ===== */
-
-.login-box{
-    max-width:700px !important;
-    transform:scale(.92) !important;
-}
-
-
-/* card jangan tambah tinggi banyak */
-.form-card{
-    padding:26px 42px 20px 42px !important;
-    border-radius:22px !important;
-}
-
-
-/* judul gede dikit */
-.form-title{
-    font-size:22px !important;
-    margin-bottom:16px !important;
-}
-
-
-/* label */
-.fg label{
-    font-size:11px !important;
-}
-
-
-/* input isi space */
-.fg{
-    margin-bottom:12px !important;
-}
-
-.fg input{
-    height:46px !important;
-    font-size:15px !important;
-    padding:10px 16px !important;
-}
-
-
-/* tombol lebih gede */
-.submit-btn{
-    height:48px !important;
-    font-size:16px !important;
-    margin-top:6px !important;
-}
-
-
-/* hilangkan sisa bawah */
-form{
-    margin-bottom:0 !important;
+  .footer{padding:8px 20px}
+  .login-box{transform:scale(1)}
 }
 </style>
 </head>
@@ -556,26 +173,13 @@ form{
   <div class="bg-grain"></div>
 </div>
 
-<!-- TOPNAV -->
 <nav class="topnav">
-
   <a href="#" class="logo">
-
-    <img 
-      src="{{ asset('images/pharmbee-logo.png') }}" 
-      class="logo-img"
-      alt="Pharmbee Logo"
-    >
-
+    <img src="{{ asset('images/pharmbee-logo.png') }}" class="logo-img" alt="Pharmbee Logo">
     <span class="logo-text">PHARMBEE</span>
-
   </a>
-
-  <a href="#" class="nav-link"></a>
-
 </nav>
 
-<!-- MAIN -->
 <main class="main">
   <div class="login-box">
 
@@ -585,10 +189,7 @@ form{
       <div class="login-sub">Pilih role untuk melanjutkan</div>
     </div>
 
-    <!-- ROLE BUTTONS -->
-    <div class="role-label">Pilih Role</div>
     <div class="role-buttons">
-
       <button class="role-btn active-dokter" id="btnDokter" onclick="selectRole('dokter')">
         <div class="rb-icon rb-icon-purple">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -596,7 +197,6 @@ form{
             <path d="M4 19c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="#8B7DB8" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
         </div>
-        <div class="rb-label lc-purple">Role</div>
         <div class="rb-name">Dokter</div>
         <div class="rb-dot"></div>
       </button>
@@ -609,7 +209,6 @@ form{
             <path d="M8.5 18.5h5M11 16v2.5" stroke="#2A9D8F" stroke-width="1.3" stroke-linecap="round"/>
           </svg>
         </div>
-        <div class="rb-label lc-teal">Role</div>
         <div class="rb-name">Apoteker</div>
         <div class="rb-dot"></div>
       </button>
@@ -621,17 +220,13 @@ form{
             <path d="M19.4 15a7.97 7.97 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8.2 8.2 0 0 0-1.7-1L15 3h-6l-.4 2.9c-.6.3-1.2.6-1.7 1l-2.4-1-2 3.5 2 1.5a7.97 7.97 0 0 0 0 2l-2 1.5 2 3.5 2.4-1c.5.4 1.1.7 1.7 1L9 21h6l.4-2.9c.6-.3 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.5Z" stroke="#A07820" stroke-width="1.3" stroke-linejoin="round"/>
           </svg>
         </div>
-        <div class="rb-label lc-gold">Role</div>
         <div class="rb-name">Admin</div>
         <div class="rb-dot"></div>
       </button>
-
     </div>
 
-    <!-- FORM CARD -->
     <div class="form-card border-dokter" id="formCard">
 
-      <!-- DOKTER FORM -->
       <div id="formDokter">
         <div class="form-title">
           <div class="form-title-dot dot-purple"></div>
@@ -655,7 +250,6 @@ form{
         </form>
       </div>
 
-      <!-- APOTEKER FORM -->
       <div id="formApoteker" style="display:none">
         <div class="form-title">
           <div class="form-title-dot dot-teal"></div>
@@ -679,7 +273,6 @@ form{
         </form>
       </div>
 
-      <!-- ADMIN FORM -->
       <div id="formAdmin" style="display:none">
         <div class="form-title">
           <div class="form-title-dot dot-gold"></div>
@@ -707,7 +300,6 @@ form{
   </div>
 </main>
 
-<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-logo">
     <div class="fl1">PHARMBEE</div>
@@ -722,23 +314,19 @@ function selectRole(role) {
   if (activeRole === role) return;
   activeRole = role;
 
-  // reset all buttons
   ['dokter','apoteker','admin'].forEach(r => {
     const btn = document.getElementById('btn' + cap(r));
     btn.className = 'role-btn';
   });
 
-  // activate selected
   const btn = document.getElementById('btn' + cap(role));
   btn.classList.add('active-' + role);
 
-  // show correct form
   ['formDokter','formApoteker','formAdmin'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
   document.getElementById('form' + cap(role)).style.display = 'block';
 
-  // update card border
   const card = document.getElementById('formCard');
   card.className = 'form-card border-' + role;
 }

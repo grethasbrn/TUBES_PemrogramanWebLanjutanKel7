@@ -24,6 +24,8 @@ class Pasien extends Model
         'jenis_kunjungan',
         'status',
         'validasi',
+        'status_kirim', 
+        'dokter', 
         'keluhan',
         'riwayat_penyakit',
         // Kolom medis baru untuk dokter
@@ -32,6 +34,11 @@ class Pasien extends Model
         'tekanan_darah',
         'alergi',
     ];
+
+    public function userDokter()
+    {
+        return $this->belongsTo(User::class, 'dokter'); 
+    }
 
     // Relasi: satu pasien bisa punya banyak resep
     public function reseps()

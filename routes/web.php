@@ -111,9 +111,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/report', [AdminReportController::class, 'index']);
     Route::get('/api/stats', [DashboardController::class, 'stats']);
-    Route::get('/queue', [PasienController::class, 'queue'])->name('admin.queue');
-    Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua'])->name('pasien.kirimSemua');
-    Route::post('/pasien/{id}/kirim-dokter', [PasienController::class, 'kirimKeDokter'])->name('pasien.kirimDokter');
+    Route::get('/queue', [PasienController::class, 'queue'])->name('pasien.queue');
+    Route::post('/queue/kirim/{id}', [PasienController::class, 'kirimKeDokter']);
+    Route::post('/queue/kirim-semua', [PasienController::class, 'kirimSemua']);
 
     Route::get('/dokter', [AdminDokterController::class, 'index'])->name('admin.dokter.index');
     Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');

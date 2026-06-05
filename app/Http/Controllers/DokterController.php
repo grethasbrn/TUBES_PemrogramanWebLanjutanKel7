@@ -25,8 +25,7 @@ class DokterController extends Controller
     private function queryPasienPoli()
     {
         $poli = $this->getPoliDokter();
-
-        $query = Pasien::query();
+        $query = Pasien::query()->where('status_kirim', 'Terkirim'); 
 
         if ($poli) {
             $query->where('poli_tujuan', $poli);

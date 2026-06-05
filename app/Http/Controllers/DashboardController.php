@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pasien;
+use App\Models\Invoice; 
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -16,35 +17,44 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        // Total pasien hari ini
         $totalHariIni = Pasien::whereDate('created_at', $today)->count();
 
-        // Menunggu validasi
         $menungguValidasi = Pasien::where('validasi', 'Menunggu')->count();
 
-        // Antrian per poli (semua pasien aktif hari ini)
         $antriPerPoli = Pasien::whereDate('created_at', $today)
             ->selectRaw('poli_tujuan, count(*) as total')
             ->groupBy('poli_tujuan')
             ->get();
 
-        // Status pasien hari ini
         $statusPasien = Pasien::whereDate('created_at', $today)
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->get();
 
-        // Aktivitas terbaru (5 pasien terakhir)
         $aktivitas = Pasien::latest()->take(5)->get(['nama', 'no_rm', 'status', 'created_at']);
 
+        $invoiceMasuk = Invoice::where('status', 'masuk')->count();
+
+        $pemasukanHariIni = Invoice::where('status', 'Lunas')
+            ->whereDate('updated_at', $today) 
+            ->sum('total_tagihan');
+
+        // PERBAIKAN: Menggunakan standar Koleksi Laravel agar terhindar dari error typo loop konvensional
+        $pemasukan7Hari = collect(range(6, 0))->map(function ($i) {
+            return (float) Invoice::where('status', 'Lunas')
+                ->whereDate('updated_at', Carbon::today()->subDays($i))
+                ->sum('total_tagihan');
+        })->all();
+
         return response()->json([
-            'total_hari_ini'    => $totalHariIni,
-            'menunggu_validasi' => $menungguValidasi,
-            'invoice'           => 0, // bisa disambung ke model Invoice nanti
-            'pemasukan'         => 0, // bisa disambung ke model Payment nanti
+            'total_hari_ini'    => (int)$totalHariIni,
+            'menunggu_validasi' => (int)$menungguValidasi,
+            'invoice'           => (int)$invoiceMasuk,
+            'pemasukan'         => (float)$pemasukanHariIni, 
             'antri_per_poli'    => $antriPerPoli,
             'status_pasien'     => $statusPasien,
             'aktivitas'         => $aktivitas,
+            'pemasukan_7_hari'  => $pemasukan7Hari 
         ]);
     }
 }

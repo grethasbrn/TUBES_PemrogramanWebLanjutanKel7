@@ -2,23 +2,28 @@
 @section('content')
 
 <style>
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 /* ── Layout ── */
 .page-header{margin-bottom:20px}
 .page-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--text)}
 .page-title span{color:#A63D33;font-style:italic}
 .page-sub{font-size:12px;color:var(--text3);margin-top:2px}
 
+/* Ditambahkan modifier class .full-width untuk menyembunyikan detail saat melihat invoice */
 .grid2{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+.grid2.full-width{grid-template-columns:1fr !important;}
+.grid2.full-width #detail-container{display:none !important;}
+
 @media(max-width:900px){.grid2{grid-template-columns:1fr}}
 
 /* ── Stats ── */
 .inv-stats{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
 .inv-stat{flex:1;min-width:110px;background:var(--white);border:1px solid var(--cream3);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
 .inv-stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.si-red    {background:#fce8e6;color:#A63D33}
+.si-red    {background:#fce8e6;color:#A63D33}
 .si-orange {background:#fff3e0;color:#f57c00}
-.si-blue   {background:#e8f0fe;color:#1a73e8}
-.si-green  {background:#e6f4ea;color:#34a853}
+.si-blue   {background:#e8f0fe;color:#1a73e8}
+.si-green  {background:#e6f4ea;color:#34a853}
 .inv-stat-info label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:500}
 .inv-stat-info strong{font-size:18px;font-weight:600;color:var(--text)}
 
@@ -38,16 +43,19 @@
 .filter-sel:focus{border-color:#A63D33}
 
 /* ── Obat table ── */
-/* PENTING: Ubah overflow menjadi visible agar dropdown absolute tidak terpotong */
 .obat-table-wrap{border:1px solid var(--cream3);border-radius:8px;overflow:visible;margin-bottom:10px}
 .obat-table{width:100%;border-collapse:collapse;font-size:13px}
 .obat-table thead th{background:var(--cream);padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--text2);border-bottom:1px solid var(--cream3)}
-.obat-table tbody td{padding:10px 12px;border-bottom:1px solid var(--cream3);vertical-align:middle;position:relative;} /* Ditambahkan posisi relative */
+.obat-table tbody td{padding:10px 12px;border-bottom:1px solid var(--cream3);vertical-align:middle;position:relative;}
 .obat-table tbody tr:last-child td{border-bottom:none}
 .obat-table tbody tr:hover td{background:var(--cream)}
 
-.obat-input{width:100%;padding:6px 8px;border:1px solid var(--cream3);border-radius:6px;background:var(--white);font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;box-sizing:border-box}
-.obat-input:focus{border-color:#A63D33}
+.obat-input {padding: 6px 8px;border: 1px solid var(--cream3);border-radius: 6px;background: var(--white);
+font-size: 12px;font-family: 'DM Sans', sans-serif;color: var(--text); outline: none;box-sizing: border-box;}
+.obat-input:focus {border-color: #A63D33;}
+.obat-input.nama-obat {width: 100%; }
+.obat-input.dosis-obat, 
+.obat-input.jumlah-obat {width: 75px;}
 
 /* ── Buttons ── */
 .btn{padding:10px 16px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid var(--cream3);background:var(--cream);color:var(--text);transition:all .15s;font-weight:500}
@@ -108,51 +116,74 @@
 </div>
 
 {{-- Grid --}}
-<div class="grid2">
-    {{-- LIST RESEP --}}
+<div class="grid2" id="main-grid">
+    {{-- LIST RESEP / INVOICE (BAGIAN KIRI) --}}
     <div id="list-container">
         @forelse($reseps as $r)
-            <a href="{{ route('apoteker.invoice', ['resep' => $r->id]) }}"
-               class="inv-list-item card {{ request('resep') == $r->id ? 'active' : '' }} resep-item"
-               data-status="{{ $r->status == 'baru' ? 'resep' : 'invoice' }}">
-                <div>
-                    <div style="font-size:11px;color:#A63D33">{{ $r->no_resep }}</div>
-                    <div style="font-weight:600">{{ $r->pasien->nama }}</div>
-                    <div style="font-size:12px;color:gray">{{ $r->pasien->no_rm }}</div>
+            @php
+                $isSelected = request('resep') == $r->id;
+                $payBadge = $r->pasien->jenis === 'BPJS' ? 'b-bpjs' : 'b-mandiri';
+                $statusBadge = [
+                    'baru' => 'b-warn',
+                    'validasi' => 'b-validasi',
+                    'siap' => 'b-siap',
+                    'selesai' => 'b-selesai',
+                    'ditolak' => 'b-ditolak'
+                ][$r->status] ?? 'b-warn';
+
+                // Hitung total harga item di list samping jika statusnya bukan resep baru
+                $listTotal = collect($r->obat_list)->sum(function($o) use ($r) {
+                    if ($r->pasien->jenis === 'BPJS') return 0;
+                    $b = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%'.strtolower($o['nama'] ?? '').'%'])->where('jumlah','>',0)->first();
+                    return ($o['harga'] ?? $b?->harga ?? 0) * ($o['jumlah'] ?? 0);
+                });
+                $listPpn = $r->pasien->jenis === 'BPJS' ? 0 : round($listTotal * 0.11);
+                $listGrandTotal = $listTotal + $listPpn;
+            @endphp
+
+            {{-- Jika statusnya 'baru' link aktif mengarah ke detail, jika sudah terkirim (invoice) link dinonaktifkan (pointer-events: none) --}}
+            <a href="{{ $r->status == 'baru' ? route('apoteker.invoice', ['resep' => $r->id]) : '#' }}"
+               class="card resep-item"
+               data-status="{{ $r->status == 'baru' ? 'resep' : 'invoice' }}"
+               style="display:block; text-decoration:none; margin-bottom:12px; border-width: 1px; border-style: solid; border-color:{{ ($isSelected && $r->status == 'baru') ? '#A63D33' : 'var(--cream3)' }}; background:{{ ($isSelected && $r->status == 'baru') ? 'var(--red-light)' : 'var(--white)' }}; padding: 14px; border-radius: 8px; {{ $r->status != 'baru' ? 'pointer-events: none;' : '' }}">
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                    <div>
+                        <div style="font-size:11px; color:#A63D33; font-weight: 500;">{{ $r->no_resep }}</div>
+                        <div style="font-weight:600; font-size:14px; color:var(--text); margin-top:2px;">{{ $r->pasien->nama }}</div>
+                        <div style="font-size:12px; color:var(--text2); margin-top:2px">{{ $r->pasien->no_rm }} ·  {{ $r->pasien->dokter }}</div>
+                        
+                        <div style="margin-top:8px; display:flex; gap:6px">
+                            <span class="badge {{ $payBadge }}">{{ $r->pasien->jenis }}</span>
+                            <span class="badge {{ $statusBadge }}">{{ $r->status }}</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align:right">
+                        @if($r->pasien->jenis === 'BPJS')
+                            <div style="font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:600; color:#34a853">Gratis</div>
+                        @else
+                            <div style="font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:600; color:var(--text)">Rp {{ number_format($listGrandTotal, 0, ',', '.') }}</div>
+                        @endif
+                        <div style="font-size:11px; color:var(--text3); margin-top:4px">{{ $r->created_at ? $r->created_at->format('d M Y') : '' }}</div>
+                    </div>
                 </div>
-                <span class="badge 
-                    @if($r->status == 'baru') b-warn
-                    @elseif($r->status == 'validasi') b-validasi
-                    @elseif($r->status == 'siap') b-siap
-                    @elseif($r->status == 'selesai') b-selesai
-                    @elseif($r->status == 'ditolak') b-ditolak
-                    @endif">
-                    {{ $r->status }}
-                </span>
             </a>
         @empty
             <div class="empty-state">Tidak ada resep</div>
         @endforelse
     </div>
 
-    {{-- DETAIL --}}
-    <div>
-        @if($selectedResep)
+    {{-- DETAIL (BAGIAN KANAN) --}}
+    <div id="detail-container">
+        @if($selectedResep && $selectedResep->status == 'baru')
             <div class="invoice-card">
                 <div class="inv-header">
                     <div>
                         <div class="inv-title">{{ $selectedResep->pasien->nama }}</div>
                         <div class="inv-no">{{ $selectedResep->no_resep }}</div>
                     </div>
-                    <span class="badge 
-                    @if($selectedResep->status == 'baru') b-warn
-                    @elseif($selectedResep->status == 'validasi') b-validasi
-                    @elseif($selectedResep->status == 'siap') b-siap
-                    @elseif($selectedResep->status == 'selesai') b-selesai
-                    @elseif($selectedResep->status == 'ditolak') b-ditolak
-                    @endif">
-                    {{ $selectedResep->status }}
-                </span>
+                    <span class="badge b-warn">{{ $selectedResep->status }}</span>
                 </div>
 
                 <div class="info-grid">
@@ -216,7 +247,7 @@
                                 <td>
                                     <input type="text" name="obat[{{ $i }}][dosis]"
                                         value="{{ $o['dosis'] }}"
-                                        class="obat-input">
+                                        class="obat-input dosis-obat">
                                 </td>
                                 <td>
                                     <input type="number" name="obat[{{ $i }}][jumlah]"
@@ -330,7 +361,6 @@ document.addEventListener('input', function(e) {
             return;
         }
 
-        // Pakai absolute bukan fixed, karena dropdown ada di body
         globalDropdown.style.position = 'absolute';
         posisiDropdown();
         globalDropdown.style.display = 'block';
@@ -348,15 +378,27 @@ document.addEventListener('input', function(e) {
                 div.classList.add('dropdown-item');
                 div.innerHTML = `<b>${item.nama}</b><br><small style="color:#666">Stok: ${item.stok} | Harga: Rp ${Number(item.harga).toLocaleString('id-ID')}</small>`;
                 div.addEventListener('mousedown', function(ev) {
-                    ev.preventDefault(); // cegah blur dulu
+                    ev.preventDefault();
                     activeInput.value = item.nama;
                     let stokInfo    = activeRow.querySelector('.stok-info');
                     let jumlahInput = activeRow.querySelector('.jumlah-obat');
+                    
                     stokInfo.innerHTML = `Stok: <b>${item.stok}</b> | Harga: Rp ${Number(item.harga).toLocaleString('id-ID')}`;
                     jumlahInput.max = item.stok;
                     jumlahInput.setAttribute('data-harga', item.harga);
+                    
+                    // ── TAMBAHKAN KODE DI BAWAH INI ──
+                    // Berfungsi memperbarui teks Harga Satuan (kolom ke-4) dan input hidden harganya
+                    let hargaCell = activeRow.cells[3]; 
+                    if (hargaCell) {
+                        hargaCell.innerHTML = `Rp ${Number(item.harga).toLocaleString('id-ID')} <input type="hidden" name="${jumlahInput.name.replace('[jumlah]', '[harga]')}" value="${item.harga}">`;
+                    }
+                    
                     globalDropdown.innerHTML = '';
                     globalDropdown.style.display = 'none';
+                    
+                    // Pemicu hitung ulang subtotal & grand total secara real-time
+                    hitungTotal(); 
                 });
                 globalDropdown.appendChild(div);
             });
@@ -375,23 +417,23 @@ document.addEventListener('click', function(e) {
 function switchTab(type) {
     document.querySelectorAll('.rx-tab').forEach(tab => tab.classList.remove('active'));
     document.getElementById(type === 'resep' ? 'tab-resep' : 'tab-invoice').classList.add('active');
+    
+    const mainGrid = document.getElementById('main-grid');
+    
+    if(type === 'invoice') {
+        // Sembunyikan detail & buat list kiri memenuhi lebar layar (1 column full)
+        mainGrid.classList.add('full-width');
+    } else {
+        // Kembalikan ke format split grid 2 column saat tab resep masuk dibuka
+        mainGrid.classList.remove('full-width');
+    }
+
     document.querySelectorAll('.resep-item').forEach(item => {
         item.style.display = item.getAttribute('data-status') === type ? 'block' : 'none';
     });
 }
+// Default startup
 switchTab('resep');
-
-document.addEventListener('input', function (e) {
-    if (e.target.classList.contains('jumlah-obat')) {
-        let total = 0;
-        document.querySelectorAll('.jumlah-obat').forEach(input => {
-            let harga = parseFloat(input.getAttribute('data-harga') || 0);
-            let qty   = parseFloat(input.value || 0);
-            total += (harga * qty);
-        });
-        console.log("Total: Rp " + total);
-    }
-});
 
 let obatIndex = {{ $selectedResep ? count($selectedResep->obat_list) : 0 }};
 function tambahObat() {
@@ -405,12 +447,18 @@ function tambahObat() {
         </td>
         <td>
             <input type="text" name="obat[${i}][dosis]" value=""
-                class="obat-input" placeholder="Misal: 3x1">
-        </td>
+                class="obat-input dosis-obat" placeholder="Misal: 3x1"> </td>
         <td>
             <input type="number" name="obat[${i}][jumlah]" value=""
                 class="obat-input jumlah-obat" placeholder="0">
             <div class="stok-info" style="font-size:11px;margin-top:3px;color:gray;"></div>
+        </td>
+        <td style="font-size:13px;white-space:nowrap">
+            Rp 0
+            <input type="hidden" name="obat[${i}][harga]" value="0">
+        </td>
+        <td class="subtotal-cell" style="font-size:13px;font-weight:600;white-space:nowrap">
+            Rp 0
         </td>
         <td style="width:36px;text-align:center;">
             <button type="button" onclick="hapusObat(this)"
@@ -438,7 +486,6 @@ function hitungTotal() {
         const harga = parseFloat(input.getAttribute('data-harga') || 0);
         const qty   = parseFloat(input.value || 0);
         subtotal += harga * qty;
-        // update subtotal cell di baris yang sama
         const row = input.closest('tr');
         const cell = row.querySelector('.subtotal-cell');
         if (cell) cell.textContent = 'Rp ' + (harga * qty).toLocaleString('id-ID');

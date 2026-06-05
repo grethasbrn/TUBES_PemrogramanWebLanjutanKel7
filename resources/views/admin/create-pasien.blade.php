@@ -32,11 +32,11 @@
 
         <div class="form-group">
           <label for="no_rm">No. Rekam Medis <span class="required">*</span></label>
-         <input type="text" id="no_rm" name="no_rm"
-          class="form-input @error('no_rm') is-error @enderror"
-          value="{{ old('no_rm', $noRm) }}"
-          readonly
-          style="background:#f0ebe6;color:#A8998A;cursor:not-allowed;">
+          <input type="text" id="no_rm" name="no_rm"
+            class="form-input @error('no_rm') is-error @enderror"
+            value="{{ old('no_rm', $noRm) }}"
+            readonly
+            style="background:#f0ebe6;color:#A8998A;cursor:not-allowed;">
         </div>
 
         <div class="form-group">
@@ -228,6 +228,21 @@
             placeholder="Contoh: Penisilin (kosongkan jika tidak ada)"
             value="{{ old('alergi') }}">
           @error('alergi')<span class="form-error">{{ $message }}</span>@enderror
+        </div>
+
+        {{-- TAMBAHAN: Dropdown Dokter Terintegrasi --}}
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label for="dokter">Dokter Pemeriksa <span class="required">*</span></label>
+          <select id="dokter" name="dokter"
+            class="form-input @error('dokter') is-error @enderror">
+            <option value="" disabled {{ old('dokter') ? '' : 'selected' }}>— Pilih Dokter Pemeriksa —</option>
+            @foreach($dokters as $d)
+              <option value="{{ $d->id }}" {{ old('dokter') == $d->id ? 'selected' : '' }}>
+                Dr. {{ $d->name }}
+              </option>
+            @endforeach
+          </select>
+          @error('dokter')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 
       </div>
