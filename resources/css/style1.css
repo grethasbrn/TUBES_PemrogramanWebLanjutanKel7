@@ -542,3 +542,121 @@ tr:hover td{background:var(--cream)}
 
     border-radius:10px;
 }
+
+/* ===== SIDEBAR COLLAPSE RAPII ===== */
+
+.sidebar{
+    width:220px !important;
+    transition:.3s ease !important;
+    overflow:hidden;
+}
+
+
+/* MENU + BUTTON */
+.sidebar-top{
+
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+
+    padding:0 24px !important;
+    margin-bottom:22px !important;
+
+}
+
+
+/* tulisan menu */
+.sidebar-top .nav-section{
+
+    padding:0 !important;
+    margin:0 !important;
+
+    line-height:32px;
+
+}
+
+
+/* tombol garis tiga */
+.sidebar-toggle{
+
+    width:32px;
+    height:32px;
+
+    border:none;
+    background:#fff;
+
+    border-radius:10px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+
+    cursor:pointer;
+
+    color:#8c79c7;
+
+
+    box-shadow:
+    0 6px 18px rgba(140,121,199,.18);
+
+}
+
+
+/* sidebar kecil */
+body.sidebar-close .sidebar{
+
+    width:78px !important;
+
+}
+
+
+/* hide tulisan */
+body.sidebar-close .nav-section,
+body.sidebar-close .nav-item span{
+
+    display:none !important;
+
+}
+
+
+/* icon menu tengah */
+body.sidebar-close .nav-item{
+
+    width:52px !important;
+
+    margin-left:auto !important;
+    margin-right:auto !important;
+
+    padding:13px 0 !important;
+
+    justify-content:center !important;
+
+}
+
+
+/* icon */
+body.sidebar-close .nav-icon{
+
+    margin:0 !important;
+
+}
+
+
+/* tombol pas kecil */
+body.sidebar-close .sidebar-top{
+
+    padding:0 !important;
+
+    justify-content:center !important;
+
+}
+
+
+/* content geser */
+body.sidebar-close .main{
+
+    margin-left:78px !important;
+
+}

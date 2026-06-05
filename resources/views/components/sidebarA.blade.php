@@ -36,9 +36,8 @@
       <div class="avatar-wrap" onclick="toggleProfileMenu()">
 
         <div class="avatar">
-          {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
+          {{ strtoupper(substr(Auth::user()->name ?? 'A',0,1)) }}
         </div>
-
 
         <div class="avatar-info">
 
@@ -82,28 +81,57 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
 
-  <div class="nav-section">Menu</div>
+
+  <div class="sidebar-top">
+
+    <div class="nav-section">
+      Menu
+    </div>
+
+
+    <button 
+      type="button"
+      class="sidebar-toggle"
+      onclick="toggleSidebar()"
+    >
+      ☰
+    </button>
+
+  </div>
+
+
+
 
 
   <a class="nav-item {{ request()->is('apoteker/dashboard*') ? 'active' : '' }}" 
      href="{{ url('apoteker/dashboard') }}">
+
     <i class="bi bi-grid-1x2 nav-icon"></i>
-    Dashboard
+    <span>Dashboard</span>
+
   </a>
+
 
 
   <a class="nav-item {{ request()->is('apoteker/stock*') ? 'active' : '' }}" 
      href="{{ url('apoteker/stock') }}">
+
     <i class="bi bi-capsule-pill nav-icon"></i>
-    Stok
+    <span>Stok</span>
+
   </a>
+
 
 
   <a class="nav-item {{ request()->is('apoteker/alerts*') ? 'active' : '' }}" 
      href="{{ url('apoteker/alerts') }}">
+
     <i class="bi bi-bell nav-icon"></i>
-    Peringatan
+    <span>Peringatan</span>
+
   </a>
+
+
 
 
 
@@ -112,18 +140,27 @@
   </div>
 
 
+
   <a class="nav-item {{ request()->is('apoteker/prescription*') ? 'active' : '' }}" 
      href="{{ url('apoteker/prescription') }}">
+
     <i class="bi bi-clipboard2-check nav-icon"></i>
-    Resep
+    <span>Resep</span>
+
   </a>
+
+
 
 
   <a class="nav-item {{ request()->is('apoteker/invoice*') ? 'active' : '' }}" 
      href="{{ url('apoteker/invoice') }}">
+
     <i class="bi bi-receipt nav-icon"></i>
-    Invoice
+    <span>Invoice</span>
+
   </a>
+
+
 
 
 
@@ -132,10 +169,13 @@
   </div>
 
 
+
   <a class="nav-item {{ request()->is('apoteker/report*') ? 'active' : '' }}" 
      href="{{ url('apoteker/report') }}">
+
     <i class="bi bi-graph-up nav-icon"></i>
-    Laporan
+    <span>Laporan</span>
+
   </a>
 
 
@@ -145,8 +185,8 @@
 
 
 
-
 <script>
+
 
 function updateDateTime(){
 
@@ -154,17 +194,21 @@ function updateDateTime(){
 
 
     const tanggal = now.toLocaleDateString('id-ID',{
+
         weekday:'long',
         day:'numeric',
         month:'long',
         year:'numeric'
+
     });
 
 
     const jam = now.toLocaleTimeString('id-ID',{
+
         hour:'2-digit',
         minute:'2-digit',
         second:'2-digit'
+
     });
 
 
@@ -172,6 +216,7 @@ function updateDateTime(){
       `${tanggal} • ${jam}`;
 
 }
+
 
 
 
@@ -186,8 +231,19 @@ function toggleProfileMenu(){
 
 
 
+
+function toggleSidebar(){
+
+    document.body.classList.toggle('sidebar-close');
+
+}
+
+
+
+
 updateDateTime();
 
 setInterval(updateDateTime,1000);
+
 
 </script>
