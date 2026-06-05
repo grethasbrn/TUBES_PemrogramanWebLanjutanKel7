@@ -5,7 +5,7 @@
 <div class="page-section active" id="sec-antrian">
   <div class="page-header">
     <div>
-      <div class="page-title">Antrian & Poli haloo</div>
+      <div class="page-title">Antrian & Poli</div>
       <div class="page-sub">Kirim pasien ke dokter sesuai poli tujuan</div>
     </div>
     <button class="btn btn-primary" style="display: flex !important; align-items: center !important; justify-content: center !important; width: 200px; height: 42px; gap: 8px;">
@@ -18,10 +18,6 @@
   </div>
 
   {{-- KANBAN BOARD --}}
-  <div class="antrian-section-label">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:middle"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Ringkasan per Poli
-  </div>
   <div id="kanbanBoard" class="kanban-board"></div>
 
   {{-- TABLE --}}
@@ -56,13 +52,6 @@
 
 @push('scripts')
 <style>
-/* ===== SECTION LABEL ===== */
-.antrian-section-label {
-  font-size: 12px; font-weight: 600; color: #A8998A;
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 12px; display: flex; align-items: center;
-}
-
 /* ===== KANBAN BOARD ===== */
 .kanban-board {
   display: grid;
@@ -201,7 +190,11 @@ function renderTable() {
       <td><span class="badge b-belum">Belum Dikirim</span></td>
       <td style="text-align:center">
         <button class="btn-kirim-dokter" onclick="kirimPasien(${p.id})">
-          ✈ Kirim ke Dokter
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: inline-block !important; flex-shrink: 0; margin: 0;">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>  
+          <span>Kirim ke Dokter</span>
         </button>
       </td>
     </tr>

@@ -102,6 +102,7 @@ class BatchController extends Controller
 
     public function store(Request $request)
     {
+        
         $request->validate([
             'nama_obat'   => 'required|string|max:255',
             'tipe'        => 'required|string|max:100',

@@ -9,22 +9,38 @@
       <div class="page-sub">Ringkasan aktivitas, pasien, dan keuangan</div>
     </div>
     <div class="no-print" style="display:flex;gap:8px;align-items:center">
-      <select class="filter-sel" id="laporanBulan">
-        <option value="1">Januari 2026</option>
-        <option value="2">Februari 2026</option>
-        <option value="3">Maret 2026</option>
-        <option value="4">April 2026</option>
-        <option value="5">Mei 2026</option>
-        <option value="6" selected>Juni 2026</option>
-        <option value="7">Juli 2026</option>
-        <option value="8">Agustus 2026</option>
-        <option value="9">September 2026</option>
-        <option value="10">Oktober 2026</option>
-        <option value="11">November 2026</option>
-        <option value="12">Desember 2026</option>
-      </select>
-      <button class="btn btn-teal no-print" onclick="window.print()">Cetak</button>
-      <button class="btn btn-primary no-print" onclick="exportCSV()">Export CSV</button>
+        <div class="custom-dropdown" id="bulanDropdown">
+
+            <div class="dropdown-selected">
+                Juni 2026
+                <span>▼</span>
+            </div>
+
+            <div class="dropdown-options">
+                <div class="dropdown-option" data-value="1">Januari 2026</div>
+                <div class="dropdown-option" data-value="2">Februari 2026</div>
+                <div class="dropdown-option" data-value="3">Maret 2026</div>
+                <div class="dropdown-option" data-value="4">April 2026</div>
+                <div class="dropdown-option" data-value="5">Mei 2026</div>
+                <div class="dropdown-option" data-value="6">Juni 2026</div>
+                <div class="dropdown-option" data-value="7">Juli 2026</div>
+                <div class="dropdown-option" data-value="8">Agustus 2026</div>
+                <div class="dropdown-option" data-value="9">September 2026</div>
+                <div class="dropdown-option" data-value="10">Oktober 2026</div>
+                <div class="dropdown-option" data-value="11">November 2026</div>
+                <div class="dropdown-option" data-value="12">Desember 2026</div>
+            </div>
+
+            <input type="hidden" id="laporanBulan" value="6">
+        </div>
+
+        <button class="btn btn-teal no-print" onclick="window.print()">
+            Cetak
+        </button>
+
+        <button class="btn btn-primary no-print" onclick="exportCSV()">
+            Export CSV
+        </button>
     </div>
   </div>
 
@@ -85,6 +101,38 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+const bulanDropdown = document.getElementById('bulanDropdown');
+const bulanSelected = bulanDropdown.querySelector('.dropdown-selected');
+const bulanOptions = bulanDropdown.querySelector('.dropdown-options');
+const laporanBulan = document.getElementById('laporanBulan');
+
+bulanSelected.addEventListener('click', () => {
+    bulanOptions.classList.toggle('show');
+});
+
+bulanDropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+    option.addEventListener('click', () => {
+
+        bulanSelected.innerHTML =
+            option.textContent + '<span>▼</span>';
+
+        laporanBulan.value = option.dataset.value;
+
+        bulanOptions.classList.remove('show');
+
+    });
+
+});
+
+document.addEventListener('click', (e) => {
+
+    if (!bulanDropdown.contains(e.target)) {
+        bulanOptions.classList.remove('show');
+    }
+
+});
+
   // ── State ──────────────────────────────────────────────
   let chartKunjungan = null;
   let chartJenis     = null;

@@ -9,20 +9,31 @@
       <div class="page-sub">Laporan bulanan aktivitas farmasi</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <select class="filter-sel" id="reportMonth" onchange="loadReport()">
-        @php
-          $months = [
-            '2026-05' => 'Mei 2026',
-            '2026-04' => 'April 2026',
-            '2026-03' => 'Maret 2026',
-            '2026-02' => 'Februari 2026',
-            '2026-01' => 'Januari 2026',
-          ];
-        @endphp
-        @foreach($months as $val => $label)
-          <option value="{{ $val }}">{{ $label }}</option>
-        @endforeach
-      </select>
+      @php
+        $months = [
+          '2026-06' => 'Juni 2026',
+          '2026-05' => 'Mei 2026',
+          '2026-04' => 'April 2026',
+          '2026-03' => 'Maret 2026',
+          '2026-02' => 'Februari 2026',
+          '2026-01' => 'Januari 2026',
+        ];
+      @endphp
+
+      <div class="custom-dropdown">
+          <div class="dropdown-selected">
+              Juni 2026
+              <span>▼</span>
+          </div>
+          <div class="dropdown-options">
+              @foreach($months as $val => $label)
+                  <div class="dropdown-option" data-value="{{ $val }}">
+                      {{ $label }}
+                  </div>
+              @endforeach
+          </div>
+          <input type="hidden" id="reportMonth" value="2026-05">
+        </div>
       <button class="btn btn-teal" onclick="exportPDF()">⬇ Export PDF</button>
     </div>
   </div>
@@ -72,6 +83,59 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hidden = dropdown.querySelector('input[type="hidden"]');
+
+    selected.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hidden.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+            if(hidden.id === 'reportMonth'){
+                loadReport();
+            }
+
+        });
+
+    });
+
+});
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-options').forEach(opt => {
+        opt.classList.remove('show');
+    });
+});
+
+option.addEventListener('click', () => {
+
+    selected.innerHTML =
+        option.textContent + '<span>▼</span>';
+
+    hidden.value = option.dataset.value;
+
+    options.classList.remove('show');
+
+    if(hidden.id === 'reportMonth'){
+        loadReport();
+    }
+
+});
+
 let chartInstance = null;
 
 async function loadReport() {

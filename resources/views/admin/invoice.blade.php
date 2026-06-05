@@ -14,12 +14,21 @@
         <div>
             <div class="search-row">
                 <input type="text" class="search-input" placeholder="Cari..." id="srchInvoice">
-                <select class="filter-sel" id="fltrInvoiceStatus">
-                    <option value="">Semua</option>
-                    <option value="Masuk">Masuk</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Lunas">Lunas</option>
-                </select>
+                <div class="custom-dropdown" id="invoiceStatus">
+                <div class="dropdown-selected">
+                    Semua
+                    <span>▼</span>
+                </div>
+
+                <div class="dropdown-options">
+                    <div class="dropdown-option" data-value="">Semua</div>
+                    <div class="dropdown-option" data-value="Masuk">Masuk</div>
+                    <div class="dropdown-option" data-value="Diproses">Diproses</div>
+                    <div class="dropdown-option" data-value="Lunas">Lunas</div>
+                </div>
+
+                <input type="hidden" id="fltrInvoiceStatus" value="">
+            </div>
             </div>
 
             <div id="invoiceList">
@@ -82,10 +91,6 @@
                     <div class="detail-body">
                         <div style="display:flex; gap:6px; margin-bottom:12px">
                             <span class="badge {{ $isBPJS ? 'b-bpjs' : 'b-mandiri' }}">{{ $inv->jenis }}</span>
-                        </div>
-
-                        <div class="alert-banner info" style="{{ $isBPJS ? 'background: var(--teal-light); color: #0F6E56;' : '' }} font-size: 12px; margin-bottom:15px">
-                            <span>{{ $isBPJS ? '🏥 Pasien BPJS — biaya ditanggung pemerintah' : '💳 Pasien Mandiri — biaya dibayar penuh' }}</span>
                         </div>
 
                         <div class="inv-section-title" style="font-weight: bold; margin-bottom: 8px;">RINCIAN OBAT</div>
@@ -174,13 +179,73 @@
 </div>
 
 <script>
-    // JS Hanya untuk filter list di sisi client (opsional)
-    document.getElementById('srchInvoice').addEventListener('input', function() {
-        let val = this.value.toLowerCase();
+document.addEventListener('DOMContentLoaded', () => {
+
+    const searchInput = document.getElementById('srchInvoice');
+    const dropdown = document.getElementById('invoiceStatus');
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hiddenInput = document.getElementById('fltrInvoiceStatus');
+
+    // FILTER SEARCH + STATUS
+    function filterInvoice() {
+        const keyword = searchInput.value.toLowerCase();
+        const status = hiddenInput.value.toLowerCase();
+
         document.querySelectorAll('#invoiceList .card').forEach(card => {
-            let text = card.innerText.toLowerCase();
-            card.style.display = text.includes(val) ? 'block' : 'none';
+
+            const text = card.innerText.toLowerCase();
+
+            const cocokSearch =
+                keyword === '' || text.includes(keyword);
+
+            const cocokStatus =
+                status === '' || text.includes(status);
+
+            card.style.display =
+                (cocokSearch && cocokStatus)
+                    ? 'block'
+                    : 'none';
         });
+    }
+
+    // SEARCH
+    searchInput.addEventListener('input', filterInvoice);
+
+    // BUKA / TUTUP DROPDOWN
+    selected.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.classList.toggle('show');
     });
+
+    // PILIH STATUS
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent +
+                '<span>▼</span>';
+
+            hiddenInput.value =
+                option.dataset.value;
+
+            options.classList.remove('show');
+
+            filterInvoice();
+        });
+
+    });
+
+    // KLIK DI LUAR DROPDOWN
+    document.addEventListener('click', (e) => {
+
+        if (!dropdown.contains(e.target)) {
+            options.classList.remove('show');
+        }
+
+    });
+
+});
 </script>
 @endsection
