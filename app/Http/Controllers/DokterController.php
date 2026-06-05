@@ -109,4 +109,76 @@ class DokterController extends Controller
         $obatJson = $obatList->map(fn($o) => ['id' => $o->id, 'nama' => $o->nama_obat, 'tipe' => $o->tipe, 'kategori' => $o->kategori, 'harga' => $o->harga, 'stok' => $o->jumlah]);
         return view('dokter.prescription', compact('pasienJson', 'obatJson'));
     }
+
+    public function status()
+    {
+        $reseps = Resep::with('pasien')
+            ->whereHas('pasien', function ($q) {
+                $poli = $this->getPoliDokter();
+                if ($poli) $q->where('poli_tujuan', $poli);
+            })
+            ->whereNotIn('status', ['draft'])
+            ->latest()
+            ->get();
+
+        $resepJson = $reseps->map(function ($r) {
+            return [
+                'id'              => (string) $r->id,
+                'no_resep'        => $r->no_resep ?? '-',
+                'pasien'          => $r->pasien->nama ?? '-',
+                'rm'              => $r->pasien->no_rm ?? '-',
+                'diagnosa'        => $r->diagnosa ?? '-',
+                'status'          => $r->status,
+                'tanggal'         => $r->created_at->format('d/m/Y'),
+                'catatan_dokter'  => $r->catatan_dokter ?? '-',
+                'tanggal_kontrol' => $r->tanggal_kontrol?->format('d/m/Y') ?? '-',
+                'obat'            => $r->obat_list ?? [],
+            ];
+        });
+
+        return view('dokter.status', compact('resepJson'));
+    }
+
+    public function history()
+    {
+        $pasiens = $this->queryPasienPoli()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $reseps = Resep::with('pasien')
+            ->whereHas('pasien', function ($q) {
+                $poli = $this->getPoliDokter();
+                if ($poli) $q->where('poli_tujuan', $poli);
+            })
+            ->latest()
+            ->get();
+
+        $pasienJson = $pasiens->map(function ($p) {
+            return [
+                'id'     => (string) $p->id,
+                'nama'   => $p->nama,
+                'rm'     => $p->no_rm,
+                'usia'   => $p->usia,
+                'jk'     => $p->jenis_kelamin ?? '-',
+                'bayar'  => $p->jenis,
+                'poli'   => $p->poli_tujuan,
+                'status' => $p->status,
+                'tgl'    => $p->created_at->toDateString(),
+            ];
+        });
+
+        $resepJson = $reseps->map(function ($r) {
+            return [
+                'id'       => (string) $r->id,
+                'pasienId' => (string) $r->pasien_id,
+                'no_resep' => $r->no_resep ?? '-',
+                'diagnosa' => $r->diagnosa ?? '-',
+                'status'   => $r->status,
+                'tanggal'  => $r->created_at->toDateString(),
+                'obat'     => $r->obat_list ?? [],
+            ];
+        });
+
+        return view('dokter.history', compact('pasienJson', 'resepJson'));
+    }
 }
