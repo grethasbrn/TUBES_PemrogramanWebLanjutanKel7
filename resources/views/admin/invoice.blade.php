@@ -1,282 +1,251 @@
 @extends('layouts.admin')
 
 @section('content')
-
 <div class="page-section active" id="sec-invoice">
-  <div class="page-header">
-    <div>
-      <div class="page-title">Invoice Masuk</div>
-      <div class="page-sub">Invoice dari apoteker untuk diproses pembayaran</div>
-    </div>
-  </div>
-
-  <div class="grid2" style="align-items:start">
-    <div>
-      <div class="search-row">
-        <input type="text" class="search-input" placeholder="Cari no. invoice atau pasien..." id="srchInvoice" oninput="renderInvoiceList()">
-        <select class="filter-sel" id="fltrInvoiceStatus" onchange="renderInvoiceList()">
-          <option value="">Semua</option>
-          <option value="Masuk">Masuk</option>
-          <option value="Diproses">Diproses</option>
-          <option value="Lunas">Lunas</option>
-        </select>
-      </div>
-      <div id="invoiceList"></div>
+    <div class="page-header">
+        <div>
+            <div class="page-title">Invoice Masuk</div>
+            <div class="page-sub">Invoice dari apoteker untuk diproses pembayaran</div>
+        </div>
     </div>
 
-    <div id="invoiceDetail">
-      <div class="empty-state card"><div class="icon">🧾</div><div class="label">Pilih invoice untuk detail</div></div>
+    <div class="grid2" style="align-items:start">
+        {{-- BAGIAN KIRI: LIST INVOICE --}}
+        <div>
+            <div class="search-row">
+                <input type="text" class="search-input" placeholder="Cari..." id="srchInvoice">
+                <div class="custom-dropdown" id="invoiceStatus">
+                <div class="dropdown-selected">
+                    Semua
+                    <span>▼</span>
+                </div>
+
+                <div class="dropdown-options">
+                    <div class="dropdown-option" data-value="">Semua</div>
+                    <div class="dropdown-option" data-value="Masuk">Masuk</div>
+                    <div class="dropdown-option" data-value="Diproses">Diproses</div>
+                    <div class="dropdown-option" data-value="Lunas">Lunas</div>
+                </div>
+
+                <input type="hidden" id="fltrInvoiceStatus" value="">
+            </div>
+            </div>
+
+            <div id="invoiceList">
+                @forelse($invoices as $inv)
+                    @php
+                        $isSelected = request('id') == $inv->id;
+                        $payBadge = $inv->jenis === 'BPJS' ? 'b-bpjs' : 'b-mandiri';
+                        $statusBadge = [
+                            'Masuk' => 'b-danger',
+                            'Diproses' => 'b-warn',
+                            'Lunas' => 'b-selesai'
+                        ][$inv->status] ?? 'b-warn';
+                    @endphp
+
+                    <a href="?id={{ $inv->id }}" class="card {{ $isSelected ? 'active' : '' }}" 
+                       style="display:block; text-decoration:none; margin-bottom:12px; border-color:{{ $isSelected ? '#A63D33' : 'var(--cream3)' }}; background:{{ $isSelected ? 'var(--red-light)' : 'var(--white)' }}">
+                        
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                            <div>
+                                <div style="font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:600; color:var(--text)">{{ $inv->no_invoice }}</div>
+                                <div style="font-size:12px; color:var(--text2); margin-top:2px">{{ $inv->nama }} · {{ $inv->no_rm }}</div>
+                                
+                                <div style="margin-top:8px; display:flex; gap:6px">
+                                    <span class="badge {{ $payBadge }}">{{ $inv->jenis }}</span>
+                                    <span class="badge {{ $statusBadge }}">{{ $inv->status }}</span>
+                                </div>
+                            </div>
+
+                            <div style="text-align:right">
+                                <div style="font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600; color:var(--text)">Rp {{ number_format($inv->total_tagihan, 0, ',', '.') }}</div>
+                                <div style="font-size:11px; color:var(--text3); margin-top:4px">{{ $inv->created_at->format('d M Y') }}</div>
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    <div style="color:var(--text3); font-size:13px; padding:24px; text-align:center">Tidak ada invoice</div>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- BAGIAN KANAN: DETAIL INVOICE --}}
+        <div id="invoiceDetail">
+            @if($selectedInvoice)
+                @php
+                    $inv = $selectedInvoice;
+                    $isBPJS = $inv->jenis === 'BPJS';
+                    $ppn = $isBPJS ? 0 : round($inv->subtotal * 0.11);
+                    $total  = $isBPJS ? 0 : ($inv->subtotal + $ppn);
+                @endphp
+                
+                <div class="invoice-card card">
+                    <div class="inv-header" style="background: #A63D33; margin: -22px -22px 18px -22px; padding: 22px; border-radius: 12px 12px 0 0; color: white; display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="inv-title" style="color: white; font-size: 18px;">{{ $inv->no_invoice }}</div>
+                            <div class="inv-no" style="color: rgba(255,255,255,0.8); font-size: 13px;">{{ $inv->nama }} · {{ $inv->no_rm }}</div>
+                        </div>
+                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">{{ $inv->status }}</span>
+                    </div>
+
+                    <div class="detail-body">
+                        <div style="display:flex; gap:6px; margin-bottom:12px">
+                            <span class="badge {{ $isBPJS ? 'b-bpjs' : 'b-mandiri' }}">{{ $inv->jenis }}</span>
+                        </div>
+
+                        <div class="inv-section-title" style="font-weight: bold; margin-bottom: 8px;">RINCIAN OBAT</div>
+
+                        <div style="border: 1px solid var(--cream3); border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+                            @foreach($inv->resep->obat_list as $item)
+                            <div class="inv-row" style="padding: 10px 12px; background: var(--white); display:flex; justify-content:space-between; border-bottom: 1px solid var(--cream3)">
+                                <div>
+                                    <div style="font-weight: 500; color: var(--text);">{{ $item['nama'] ?? 'Obat' }}</div>
+                                    <div style="font-size: 11px; color: var(--text3);">
+                                        {{ $item['jumlah'] ?? 0 }} × 
+                                        
+                                        Rp {{ number_format($item['harga'] ?? 0, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                                <div style="font-weight: 600;">
+                                    {{-- Kalkulasi otomatis: Jumlah x Harga --}}
+                                    Rp {{ number_format(($item['jumlah'] ?? 0) * ($item['harga'] ?? 0), 0, ',', '.') }}
+                                </div>
+                            </div>
+                            @endforeach
+
+                            <div style="padding: 12px; background: var(--cream2);">
+                                <div class="inv-row" style="display:flex; justify-content:space-between; margin-bottom:4px">
+                                    <span style="color: var(--text2);">Subtotal</span>
+                                    <span>Rp {{ number_format($inv->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                @if(!$isBPJS)
+                                <div class="inv-row" style="display:flex; justify-content:space-between; margin-bottom:4px">
+                                    <span>PPN 11%</span>
+                                    <span>Rp {{ number_format($ppn, 0, ',', '.') }}</span>
+                                </div>
+                                @else
+                                <div class="inv-row" style="display:flex; justify-content:space-between; color: var(--teal);">
+                                    <span>Ditanggung BPJS</span>
+                                    <span>- Rp {{ number_format($inv->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                @endif
+                            </div>
+
+                            <div class="inv-total-row" style="padding: 12px; background: var(--cream); border-top: 1px solid var(--cream3); color: #A63D33; display:flex; justify-content:space-between; align-items:center">
+                                <span>Total Tagihan</span>
+                                <span style="font-size: 19px; font-weight:bold;">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+
+                        @if($inv->status !== 'Lunas')
+                            <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
+                                @csrf
+                                <div style="display: flex; gap: 8px; margin-top: 20px;">
+                                    <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border:none; width:350px">
+                                        Proses Pembayaran
+                                    </button>
+                                </div>
+                            </form>
+                        @else
+                            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                                <div class="alert-banner" style="background: #e6f4ea; color: #1e7e34; border: 1px solid #c3e6cb; text-align:center; padding:12px; border-radius: 8px; margin-bottom: 0;">
+                                    <span style="font-weight: 600;"> ✓ &nbsp; Pembayaran Lunas</span>
+                                </div>
+                
+                                <a href="{{ route('invoice.download', $inv->id) }}" 
+                                target="_blank" 
+                                class="btn" 
+                                style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    Download Invoice (PDF)
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @else
+                <div class="card" style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; min-height: 250px; padding: 40px 20px; color: var(--text3); text-align: center;">
+                <div style="display: flex !important; align-items: center !important; justify-content: center !important; width: 60px; height: 60px; border-radius: 50%; background-color: rgba(166, 61, 51, 0.1); margin-bottom: 16px; flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#A63D33" style="display: block !important;">
+                    <path d="M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v44q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z"/>
+                    </svg>
+                </div>
+                <div class="label" style="font-size: 14px; font-weight: 500; line-height: 1.4; max-width: 280px; margin: 0 auto;">
+                    Pilih invoice untuk melihat detail
+                </div>
+                </div>
+            @endif
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-let invoiceData = [
-  {
-    id: 'INV-2026-001',
-    pasien: 'Sari Dewi',
-    rm: 'RM-2026-0042',
-    tanggal: '24 Apr 2026',
-    status: 'Masuk',
-    bayar: 'Mandiri',
-    items: [
-      { nama: 'Levofloxacin 500mg', qty: 5, harga: 45000 },
-      { nama: 'Fexofenadine 120mg', qty: 10, harga: 12000 },
-      { nama: 'Paracetamol 500mg', qty: 15, harga: 3500 }
-    ]
-  },
-  {
-    id: 'INV-2026-002',
-    pasien: 'Ahmad Ridwan',
-    rm: 'RM-2026-0078',
-    tanggal: '24 Apr 2026',
-    status: 'Diproses',
-    bayar: 'BPJS',
-    items: [
-      { nama: 'Amoxicillin', qty: 10, harga: 5000 }
-    ]
-  },
-  {
-    id: 'INV-2026-003',
-    pasien: 'Nur Halimah',
-    rm: 'RM-2026-0091',
-    tanggal: '23 Apr 2026',
-    status: 'Lunas',
-    bayar: 'Mandiri',
-    items: [
-      { nama: 'Vitamin C', qty: 1, harga: 52500 }
-    ]
-  }
-];
+document.addEventListener('DOMContentLoaded', () => {
 
-let currentInvoice = null;
+    const searchInput = document.getElementById('srchInvoice');
+    const dropdown = document.getElementById('invoiceStatus');
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hiddenInput = document.getElementById('fltrInvoiceStatus');
 
-console.log(invoiceData);
+    // FILTER SEARCH + STATUS
+    function filterInvoice() {
+        const keyword = searchInput.value.toLowerCase();
+        const status = hiddenInput.value.toLowerCase();
 
-function fRp(n){
-  return 'Rp ' + n.toLocaleString();
-}
+        document.querySelectorAll('#invoiceList .card').forEach(card => {
 
-function renderInvoiceList() {
-  const q = (document.getElementById('srchInvoice').value || '').toLowerCase();
-  const fs = document.getElementById('fltrInvoiceStatus').value;
+            const text = card.innerText.toLowerCase();
 
-  let data = invoiceData.filter(i => {
-    if (q && !i.id.toLowerCase().includes(q) && !i.pasien.toLowerCase().includes(q)) return false;
-    if (fs && i.status !== fs) return false;
-    return true;
-  });
+            const cocokSearch =
+                keyword === '' || text.includes(keyword);
 
-  // Pemetaan badge sesuai sistem CSS kamu
-  const sBadge = { 
-    'Masuk': 'b-danger', 
-    'Diproses': 'b-warn', 
-    'Lunas': 'b-selesai' 
-  };
+            const cocokStatus =
+                status === '' || text.includes(status);
 
-  document.getElementById('invoiceList').innerHTML = data.map(i => {
-    const total = i.items.reduce((s, x) => s + x.qty * x.harga, 0);
-    const isSelected = currentInvoice && currentInvoice.id === i.id;
-    
-    // Gunakan class b-bpjs atau b-mandiri sesuai data
-    const payBadge = i.bayar === 'BPJS' ? 'b-bpjs' : 'b-mandiri';
+            card.style.display =
+                (cocokSearch && cocokStatus)
+                    ? 'block'
+                    : 'none';
+        });
+    }
 
-    return `
-      <div class="card ${isSelected ? 'active' : ''}" 
-           onclick="selectInvoice('${i.id}')" 
-           style="margin-bottom:12px; cursor:pointer; border-color:${isSelected ? '#A63D33' : 'var(--cream3)'}; background:${isSelected ? 'var(--red-light)' : 'var(--white)'}">
-        
-        <div style="display:flex; justify-content:space-between; align-items:flex-start">
-          <div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:600; color:var(--text)">${i.id}</div>
-            <div style="font-size:12px; color:var(--text2); margin-top:2px">${i.pasien} · ${i.rm}</div>
-            
-            <div style="margin-top:8px; display:flex; gap:6px">
-              <span class="badge ${payBadge}">${i.bayar}</span>
-              <span class="badge ${sBadge[i.status] || 'b-warn'}">${i.status}</span>
-            </div>
-          </div>
+    // SEARCH
+    searchInput.addEventListener('input', filterInvoice);
 
-          <div style="text-align:right">
-            <div style="font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600; color:var(--text)">${fRp(total)}</div>
-            <div style="font-size:11px; color:var(--text3); margin-top:4px">${i.tgl || '24 Apr 2026'}</div>
-          </div>
-        </div>
+    // BUKA / TUTUP DROPDOWN
+    selected.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.classList.toggle('show');
+    });
 
-      </div>`;
-  }).join('');
+    // PILIH STATUS
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
 
-  if (!data.length) {
-    document.getElementById('invoiceList').innerHTML = `
-      <div style="color:var(--text3); font-size:13px; padding:24px; text-align:center">
-        Tidak ada invoice
-      </div>`;
-  }
-}
+        option.addEventListener('click', () => {
 
-function selectInvoice(id) {
-  currentInvoice = invoiceData.find(i => i.id === id);
-  renderInvoiceList();
-  renderInvoiceDetail();
-}
+            selected.innerHTML =
+                option.textContent +
+                '<span>▼</span>';
 
-function renderInvoiceDetail() {
-  const inv = currentInvoice;
-  const detailContainer = document.getElementById('invoiceDetail');
+            hiddenInput.value =
+                option.dataset.value;
 
-  if (!inv) {
-    detailContainer.innerHTML = `
-      <div class="card" style="text-align:center; padding: 50px 20px; color: var(--text3);">
-        <div style="font-size: 40px; margin-bottom: 10px;">🧾</div>
-        <div class="label">Pilih invoice untuk melihat detail</div>
-      </div>`;
-    return;
-  }
+            options.classList.remove('show');
 
-  const subtotal = inv.items.reduce((s, i) => s + i.qty * i.harga, 0);
-  const isBPJS = inv.bayar === 'BPJS';
-  const ppn = isBPJS ? 0 : Math.round(subtotal * 0.11);
-  const totalAkhir = isBPJS ? 0 : subtotal + ppn;
-  
-  // Mapping badge status sesuai CSS sistem kamu
-  const sBadge = { Masuk: 'b-danger', Diproses: 'b-warn', Lunas: 'b-selesai' };
+            filterInvoice();
+        });
 
-  detailContainer.innerHTML = `
-    <div class="invoice-card">
-      <div class="inv-header" style="background: #A63D33; margin: -22px -22px 18px -22px; padding: 22px; border-radius: 12px 12px 0 0; color: white; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <div class="inv-title" style="color: white; font-size: 18px;">${inv.id}</div>
-          <div class="inv-no" style="color: rgba(255,255,255,0.8); font-size: 13px;">${inv.pasien} · ${inv.rm}</div>
-        </div>
-        <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: none;">${inv.status}</span>
-      </div>
+    });
 
-      <div class="detail-body">
-        <div style="display:flex; gap:6px; margin-bottom:12px">
-          ${badgeBayar(inv.bayar)}
-        </div>
+    // KLIK DI LUAR DROPDOWN
+    document.addEventListener('click', (e) => {
 
-        ${isBPJS ? 
-          `<div class="alert-banner info" style="background: var(--teal-light); color: #0F6E56; border: none; font-size: 12px;">
-            <span>🏥 Pasien BPJS — biaya obat standar ditanggung pemerintah</span>
-          </div>` : 
-          `<div class="alert-banner info" style="font-size: 12px;">
-            <span>💳 Pasien Mandiri — biaya dibayar penuh</span>
-          </div>`
+        if (!dropdown.contains(e.target)) {
+            options.classList.remove('show');
         }
 
-        <div class="inv-section-title">RINCIAN OBAT</div>
+    });
 
-        <div style="border: 1px solid var(--cream3); border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
-          ${inv.items.map(i => `
-            <div class="inv-row" style="padding: 10px 12px; background: var(--white);">
-              <div>
-                <div style="font-weight: 500; color: var(--text);">${i.nama}</div>
-                <div style="font-size: 11px; color: var(--text3);">${i.qty} × ${fRp(i.harga)}</div>
-              </div>
-              <div style="font-weight: 600;">${fRp(i.qty * i.harga)}</div>
-            </div>
-          `).join('')}
-
-          <div style="padding: 12px; background: var(--cream2); border-top: 1px solid var(--cream3);">
-            <div class="inv-row" style="border: none; padding: 2px 0;">
-              <span style="color: var(--text2);">Subtotal</span>
-              <span>${fRp(subtotal)}</span>
-            </div>
-            ${isBPJS ? 
-              `<div class="inv-row" style="border: none; padding: 2px 0; color: var(--teal);">
-                <span>Ditanggung BPJS</span>
-                <span>- ${fRp(subtotal)}</span>
-              </div>` : 
-              `<div class="inv-row" style="border: none; padding: 2px 0;">
-                <span>PPN 11%</span>
-                <span>${fRp(ppn)}</span>
-              </div>`
-            }
-          </div>
-
-          <div class="inv-total-row" style="padding: 12px; background: var(--cream); border-top: 1px solid var(--cream3); color: #A63D33;">
-            <span>Total Tagihan</span>
-            <span style="font-size: 19px;">${isBPJS ? 'Rp 0' : fRp(totalAkhir)}</span>
-          </div>
-        </div>
-
-        ${inv.status !== 'Lunas' ? `
-          <div style="display: flex; gap: 8px; margin-top: 20px;">
-            <button class="btn btn-danger" style="flex: 1; padding: 12px; font-weight: 600;" onclick="prosesInvoice('${inv.id}')">💳 Proses Pembayaran</button>
-            ${inv.status === 'Masuk' ? 
-              `<button class="btn btn-teal btn-sm" style="padding: 0 15px;" onclick="ubahStatusInv('${inv.id}','Diproses')">🔄 Tandai Diproses</button>` : 
-              ''
-            }
-          </div>` : 
-          `<div class="alert-banner info" style="background: var(--green-light); color: #1F6B43; border: 1px solid var(--green); justify-content: center;">
-            <span style="font-weight: 600;">✅ Invoice ini sudah lunas</span>
-          </div>`
-        }
-      </div>
-    </div>
-  `;
-}
-
-// menampilkan badge pembayaran
-function badgeBayar(metode) {
-    const cls = metode === 'BPJS' ? 'b-bpjs' : 'b-mandiri';
-    return `<span class="badge ${cls}">${metode}</span>`;
-}
-
-// memproses pembayaran (Tombol Merah)
-function prosesInvoice(id) {
-    const inv = invoiceData.find(i => i.id === id);
-    if (inv) {
-        inv.status = 'Lunas';
-        alert('Pembayaran ' + id + ' berhasil diproses!');
-        renderInvoiceList();
-        renderInvoiceDetail();
-    }
-}
-
-function ubahStatusInv(id, statusBaru) {
-    const inv = invoiceData.find(i => i.id === id);
-    if (inv) {
-        inv.status = statusBaru;
-        renderInvoiceList();
-        renderInvoiceDetail();
-    }
-}
-
-function fRp(n) {
-    return 'Rp ' + n.toLocaleString('id-ID');
-}
-
-function bayar(){
-  currentInvoice.status = 'Lunas';
-  alert('Berhasil bayar');
-  renderInvoiceList();
-  renderInvoiceDetail();
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-  renderInvoiceList();
 });
 </script>
 @endsection

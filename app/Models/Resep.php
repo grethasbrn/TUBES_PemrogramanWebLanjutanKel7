@@ -18,6 +18,7 @@ class Resep extends Model
 
     protected $casts = [
         'obat_list' => 'array',  // otomatis encode/decode JSON
+        'tanggal_kontrol' => 'date',
     ];
 
     // Relasi ke pasien

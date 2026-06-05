@@ -34,9 +34,9 @@
           <label for="no_rm">No. Rekam Medis <span class="required">*</span></label>
           <input type="text" id="no_rm" name="no_rm"
             class="form-input @error('no_rm') is-error @enderror"
-            placeholder="Contoh: RM-2024-001"
-            value="{{ old('no_rm') }}">
-          @error('no_rm')<span class="form-error">{{ $message }}</span>@enderror
+            value="{{ old('no_rm', $noRm) }}"
+            readonly
+            style="background:#f0ebe6;color:#A8998A;cursor:not-allowed;">
         </div>
 
         <div class="form-group">

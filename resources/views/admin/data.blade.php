@@ -9,9 +9,12 @@
       <div class="page-title">Data Pasien</div>
       <div class="page-sub">Input dan kelola data pasien yang mendaftar</div>
     </div>
-    <a href="{{ route('pasien.create') }}" class="btn btn-primary">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Daftar Pasien Baru
+    <a href="{{ route('pasien.create') }}" class="btn btn-primary" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px; height: 42px; text-decoration: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display: inline-block !important; flex-shrink: 0; margin: 0;">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span style="white-space: nowrap !important; display: inline-block !important; line-height: 1;">Daftar Pasien Baru</span>
     </a>
   </div>
 
@@ -62,28 +65,51 @@
       <input type="text" class="search-input" placeholder="Cari nama, NIK, atau No. RM...">
     </div>
     <div class="filter-selects">
-      <select class="filter-sel">
-        <option value="">Semua Jenis</option>
-        <option value="BPJS">BPJS</option>
-        <option value="Mandiri">Mandiri</option>
-      </select>
-      <select class="filter-sel">
-        <option value="">Semua Status</option>
-        <option value="Menunggu">Menunggu</option>
-        <option value="Diperiksa">Diperiksa</option>
-        <option value="Selesai">Selesai</option>
-      </select>
-      <select class="filter-sel">
-        <option value="">Semua Poli</option>
-        <option value="Umum">Umum</option>
-        <option value="Anak">Anak</option>
-        <option value="Penyakit Dalam">Penyakit Dalam</option>
-        <option value="Bedah">Bedah</option>
-        <option value="Gigi">Gigi</option>
-        <option value="Kebidanan">Kebidanan</option>
-        <option value="Mata">Mata</option>
-        <option value="UGD">UGD</option>
-      </select>
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Jenis
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Jenis</div>
+            <div class="dropdown-option" data-value="BPJS">BPJS</div>
+            <div class="dropdown-option" data-value="Mandiri">Mandiri</div>
+        </div>
+        <input type="hidden" id="filterJenis" value="">
+      </div>
+
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Status
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Status</div>
+            <div class="dropdown-option" data-value="Menunggu">Menunggu</div>
+            <div class="dropdown-option" data-value="Diperiksa">Diperiksa</div>
+            <div class="dropdown-option" data-value="Selesai">Selesai</div>
+        </div>
+        <input type="hidden" id="filterStatus" value="">
+      </div>
+
+      <div class="custom-dropdown">
+        <div class="dropdown-selected">
+            Semua Poli
+            <span>▼</span>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option" data-value="">Semua Poli</div>
+            <div class="dropdown-option" data-value="Umum">Umum</div>
+            <div class="dropdown-option" data-value="Anak">Anak</div>
+            <div class="dropdown-option" data-value="Penyakit Dalam">Penyakit Dalam</div>
+            <div class="dropdown-option" data-value="Bedah">Bedah</div>
+            <div class="dropdown-option" data-value="Gigi">Gigi</div>
+            <div class="dropdown-option" data-value="Kebidanan">Kebidanan</div>
+            <div class="dropdown-option" data-value="Mata">Mata</div>
+            <div class="dropdown-option" data-value="UGD">UGD</div>
+        </div>
+        <input type="hidden" id="filterPoli" value="">
+      </div>
     </div>
   </div>
 
@@ -146,7 +172,7 @@
             <td>
               <div class="aksi-group">
                 <a href="{{ route('pasien.edit', $p->id) }}" class="btn-aksi btn-edit" title="Edit">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="currentColor"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                   Edit
                 </a>
                 <form action="{{ route('pasien.destroy', $p->id) }}" method="POST"
@@ -553,24 +579,41 @@
 </style>
 
 <script>
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-options').forEach(opt => {
+        opt.classList.remove('show');
+    });
+});
+
 let validasiFilter = 'semua';
 let currentValidasiId = null;
-let pasienData = @json($pasienJson);
+
+// Memastikan data pasien ter-render dengan aman sebagai array object JavaScript
+let pasienData = @json($pasienJson ?? []);
 
 /* ===== BADGE HELPERS ===== */
 function badgeValidasi(v){
-  if(v==='valid')   return `<span class="badge b-valid">✓ Valid</span>`;
-  if(v==='invalid') return `<span class="badge b-invalid">✕ Tidak Valid</span>`;
+  if(!v) return `<span class="badge b-pending">Pending</span>`;
+  let normStatus = v.toLowerCase();
+  if(normStatus === 'valid')     return `<span class="badge b-valid">✓ Valid</span>`;
+  if(normStatus === 'invalid' || normStatus === 'tidak valid')   return `<span class="badge b-invalid">✕ Tidak Valid</span>`;
   return `<span class="badge b-pending">Pending</span>`;
 }
+
 function badgeBayar(j){
-  return j==='BPJS'
+  return j === 'BPJS'
     ? `<span class="badge b-bpjs">BPJS</span>`
     : `<span class="badge b-mandiri">Mandiri</span>`;
 }
-function fDate(d){ return new Date(d).toLocaleDateString('id-ID'); }
+
+function fDate(d){ 
+  if(!d) return '-';
+  return new Date(d).toLocaleDateString('id-ID'); 
+}
+
 function hitungUsia(t){
-  return Math.floor((Date.now()-new Date(t))/(1000*60*60*24*365))+' thn';
+  if(!t) return '-';
+  return Math.floor((Date.now() - new Date(t)) / (1000 * 60 * 60 * 24 * 365)) + ' thn';
 }
 
 /* ===== TOAST ===== */
@@ -578,16 +621,16 @@ function showToast(msg, type){
   const c = {'success':'#4caf50','danger':'#e53935','info':'#1976d2'};
   const t = document.createElement('div');
   t.className = 'vtoast';
-  t.style.background = c[type]||c.info;
+  t.style.background = c[type] || c.info;
   t.innerText = msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
+  setTimeout(() => t.remove(), 3000);
 }
 
 /* ===== FILTER ===== */
 function filterValidasi(f, el){
   validasiFilter = f;
-  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   renderValidasiList(f);
 }
@@ -595,151 +638,179 @@ function filterValidasi(f, el){
 /* ===== RENDER LIST ===== */
 function renderValidasiList(f){
   let data = [...pasienData];
-  if(f==='pending') data = data.filter(p=>p.validasiBPJS==='pending');
-  else if(f==='valid')   data = data.filter(p=>p.validasiBPJS==='valid');
-  else if(f==='invalid') data = data.filter(p=>p.validasiBPJS==='invalid');
+  
+  if(f !== 'semua') {
+    data = data.filter(p => {
+      let status = (p.validasiBPJS || 'pending').toLowerCase();
+      if(f === 'invalid') return status === 'invalid' || status === 'tidak valid';
+      return status === f;
+    });
+  }
 
   const wrap = document.getElementById('validasiList');
-
   if(!data.length){
-    wrap.innerHTML = `<div style="padding:30px;text-align:center;color:#C4B5A5;font-size:13px">Tidak ada data</div>`;
+    wrap.innerHTML = `<div style="padding:30px;text-align:center;color:#C4B5A5;font-size:13px">Tidak ada data pasien</div>`;
     return;
   }
 
-  wrap.innerHTML = data.map(p=>`
-    <div class="validasi-row ${currentValidasiId===p.id?'selected':''}" id="vrow-${p.id}">
-      <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="selectValidasi('${p.id}')">
-        <div class="v-avatar">${p.nama.charAt(0)}</div>
+  wrap.innerHTML = data.map(p => {
+    let currentStatus = (p.validasiBPJS || 'pending').toLowerCase();
+    return `
+    <div class="validasi-row ${Number(currentValidasiId) === Number(p.id) ? 'selected' : ''}" id="vrow-${p.id}">
+      <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="selectValidasi(${p.id})">
+        <div class="v-avatar">${p.nama ? p.nama.charAt(0).toUpperCase() : '?'}</div>
         <div>
           <div class="v-name">${p.nama}</div>
-          <div class="v-sub">${p.rm} · ${badgeBayar(p.jenisBayar)}</div>
+          <div class="v-sub">${p.rm || '-'} · ${badgeBayar(p.jenisBayar)}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         ${badgeValidasi(p.validasiBPJS)}
-        ${p.validasiBPJS==='pending'?`
-          <button class="btn-valid-ok" title="Valid" onclick="ubahValidasi('${p.id}','valid')">✓</button>
-          <button class="btn-valid-no" title="Tidak Valid" onclick="ubahValidasi('${p.id}','invalid')">✕</button>
-        `:''}
+        ${currentStatus === 'pending' ? `
+          <button class="btn-valid-ok" title="Valid" onclick="ubahValidasi(${p.id}, 'valid')">✓</button>
+          <button class="btn-valid-no" title="Tidak Valid" onclick="ubahValidasi(${p.id}, 'invalid')">✕</button>
+        ` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ===== SELECT DETAIL ===== */
 function selectValidasi(id){
   currentValidasiId = id;
-  const p = pasienData.find(x=>x.id===id);
+  // Menggunakan '==' (bukan ===) agar toleran terhadap perbedaan tipe data string/number
+  const p = pasienData.find(x => x.id == id); 
   if(!p) return;
 
-  document.querySelectorAll('.validasi-row').forEach(r=>r.classList.remove('selected'));
-  const row = document.getElementById('vrow-'+id);
+  document.querySelectorAll('.validasi-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById('vrow-' + id);
   if(row) row.classList.add('selected');
 
+  let currentStatus = (p.validasiBPJS || 'pending').toLowerCase();
   const detail = document.getElementById('validasiDetail');
+  
   detail.innerHTML = `
     <div class="vdetail-header">
       <div>
         <div class="vdetail-title">${p.nama}</div>
-        <div class="vdetail-sub">${p.rm} · Verifikasi Status</div>
+        <div class="vdetail-sub">${p.rm || '-'} · Verifikasi Status</div>
       </div>
       ${badgeValidasi(p.validasiBPJS)}
     </div>
     <div class="vdetail-body">
       <div class="info-grid">
-        <div class="info-item"><label>NIK</label><span style="font-family:monospace">${p.nik}</span></div>
+        <div class="info-item"><label>NIK</label><span style="font-family:monospace">${p.nik || '-'}</span></div>
         <div class="info-item"><label>Tgl Lahir</label><span>${fDate(p.tglLahir)} (${hitungUsia(p.tglLahir)})</span></div>
-        <div class="info-item"><label>Jenis Kelamin</label><span>${p.jk==='L'?'Laki-laki':p.jk==='P'?'Perempuan':'-'}</span></div>
+        <div class="info-item"><label>Jenis Kelamin</label><span>${p.jk === 'L' ? 'Laki-laki' : p.jk === 'P' ? 'Perempuan' : '-'}</span></div>
         <div class="info-item"><label>Jenis Pasien</label><span>${badgeBayar(p.jenisBayar)}</span></div>
-        ${p.jenisBayar==='BPJS'?`<div class="info-item" style="grid-column:1/-1"><label>Nomor BPJS</label><span style="font-family:monospace">${p.noBPJS||'-'}</span></div>`:''}
+        ${p.jenisBayar === 'BPJS' ? `<div class="info-item" style="grid-column:1/-1"><label>Nomor BPJS</label><span style="font-family:monospace">${p.noBPJS || '-'}</span></div>` : ''}
       </div>
 
-      ${p.jenisBayar==='BPJS'?`
+      ${p.jenisBayar === 'BPJS' ? `
         <div class="vcheck-box">
           <div class="vcheck-title">Pengecekan BPJS</div>
-          <div class="vcheck-row"><span>Nomor BPJS</span><span style="font-family:monospace;font-weight:600">${p.noBPJS||'-'}</span></div>
+          <div class="vcheck-row"><span>Nomor BPJS</span><span style="font-family:monospace;font-weight:600">${p.noBPJS || '-'}</span></div>
           <div class="vcheck-row">
             <span>Kesesuaian NIK</span>
-            <span style="color:${p.validasiBPJS!=='invalid'?'#2e7d32':'#c62828'};font-weight:600">
-              ${p.validasiBPJS!=='invalid'?'✓ Sesuai':'✕ Tidak Sesuai'}
+            <span style="color:${currentStatus !== 'invalid' ? '#2e7d32' : '#c62828'};font-weight:600">
+              ${currentStatus !== 'invalid' ? '✓ Sesuai' : '✕ Tidak Sesuai'}
             </span>
           </div>
           <div class="vcheck-row">
             <span>Status Kepesertaan</span>
-            <span style="color:${p.validasiBPJS==='valid'?'#2e7d32':p.validasiBPJS==='invalid'?'#c62828':'#e65100'};font-weight:600">
-              ${p.validasiBPJS==='valid'?'Aktif':p.validasiBPJS==='invalid'?'Tidak Aktif':'Perlu Dicek'}
+            <span style="color:${currentStatus === 'valid' ? '#2e7d32' : (currentStatus === 'invalid' ? '#c62828' : '#e65100')};font-weight:600">
+              ${currentStatus === 'valid' ? 'Aktif' : (currentStatus === 'invalid' ? 'Tidak Aktif' : 'Perlu Dicek')}
             </span>
           </div>
         </div>
-        ${p.validasiBPJS==='invalid'?`<div class="valert-invalid">⚠️ Status BPJS tidak valid. Pasien perlu konfirmasi ke loket BPJS atau beralih ke pembayaran mandiri.</div>`:''}
-      `:`<div class="valert-mandiri">💳 Pasien Mandiri: tidak memerlukan validasi BPJS. Status otomatis valid.</div>`}
+        ${currentStatus === 'invalid' ? `<div class="valert-invalid">⚠️ Status BPJS tidak valid. Pasien perlu konfirmasi ke loket BPJS atau beralih ke pembayaran mandiri.</div>` : ''}
+      ` : `<div class="valert-mandiri">💳 Pasien Mandiri: tidak memerlukan validasi BPJS. Status otomatis valid.</div>`}
 
-      ${p.validasiBPJS==='pending'?`
+      ${currentStatus === 'pending' ? `
         <div style="font-size:12px;color:#A8998A;margin-bottom:12px">Konfirmasi status kepesertaan pasien:</div>
         <div class="vaction-row">
-          <button class="vbtn-ok" onclick="ubahValidasi('${p.id}','valid')">✓ Konfirmasi Valid</button>
-          <button class="vbtn-no" onclick="ubahValidasi('${p.id}','invalid')">✕ Tidak Valid</button>
-        </div>`:''}
+          <button class="vbtn-ok" onclick="ubahValidasi(${p.id}, 'valid')">✓ Konfirmasi Valid</button>
+          <button class="vbtn-no" onclick="ubahValidasi(${p.id}, 'invalid')">✕ Tidak Valid</button>
+        </div>` : ''}
 
-      ${p.validasiBPJS==='invalid'?`
+      ${currentStatus === 'invalid' ? `
         <div class="vaction-row">
-          <button class="vbtn-amber" onclick="ubahValidasi('${p.id}','valid')">🔄 Ubah ke Valid</button>
-          <button class="vbtn-outline" onclick="ubahJenisBayar('${p.id}')">Beralih ke Mandiri</button>
-        </div>`:''}
+          <button class="vbtn-amber" onclick="ubahValidasi(${p.id}, 'valid')">🔄 Ubah ke Valid</button>
+          <button class="vbtn-outline" onclick="ubahJenisBayar(${p.id})">Beralih ke Mandiri</button>
+        </div>` : ''}
     </div>`;
 }
 
 /* ===== UBAH VALIDASI (ke server) ===== */
 function ubahValidasi(id, status){
-  const p = pasienData.find(x=>x.id===id);
+  const p = pasienData.find(x => x.id == id);
   if(!p) return;
-  p.validasiBPJS = status;
+
+  // Menggunakan fallback jika tag meta CSRF di layout utama Anda tidak ditemukan
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
   fetch(`/admin/pasien/${id}/validasi`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      'X-CSRF-TOKEN': csrfToken
     },
     body: JSON.stringify({ validasi: status })
   })
-  .then(r=>r.json())
-  .then(()=>{
-    renderValidasiList(validasiFilter);
-    if(currentValidasiId===id) selectValidasi(id);
-    showToast(`${p.nama}: ${status==='valid'?'✅ Valid':'❌ Tidak Valid'}`, status==='valid'?'success':'danger');
+  .then(res => {
+    if(!res.ok) throw new Error("HTTP error " + res.status);
+    return res.json();
   })
-  .catch(()=>showToast('Gagal menyimpan validasi','danger'));
+  .then(() => {
+    p.validasiBPJS = status;
+    renderValidasiList(validasiFilter);
+    if(Number(currentValidasiId) === Number(id)) selectValidasi(id);
+    showToast(`${p.nama}: ${status === 'valid' ? '✅ Valid' : '❌ Tidak Valid'}`, status === 'valid' ? 'success' : 'danger');
+  })
+  .catch((err) => {
+    console.error(err);
+    showToast('Gagal menyimpan validasi. Periksa Route/Controller Anda.', 'danger');
+  });
 }
 
 /* ===== UBAH JENIS BAYAR ===== */
 function ubahJenisBayar(id){
-  const p = pasienData.find(x=>x.id===id);
+  const p = pasienData.find(x => x.id == id);
   if(!p) return;
-  p.jenisBayar = 'Mandiri';
-  p.noBPJS = '';
-  p.validasiBPJS = 'valid';
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
   fetch(`/admin/pasien/${id}/validasi`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      'X-CSRF-TOKEN': csrfToken
     },
-    body: JSON.stringify({ validasi: 'valid' })
+    body: JSON.stringify({ validasi: 'valid', jenisBayar: 'Mandiri' })
   })
-  .then(r=>r.json())
-  .then(()=>{
+  .then(res => {
+    if(!res.ok) throw new Error("HTTP error " + res.status);
+    return res.json();
+  })
+  .then(() => {
+    p.jenisBayar = 'Mandiri';
+    p.noBPJS = '';
+    p.validasiBPJS = 'valid';
     renderValidasiList(validasiFilter);
-    if(currentValidasiId===id) selectValidasi(id);
+    if(Number(currentValidasiId) === Number(id)) selectValidasi(id);
     showToast(`${p.nama} beralih ke Mandiri`, 'info');
   })
-  .catch(()=>showToast('Gagal menyimpan','danger'));
+  .catch((err) => {
+    console.error(err);
+    showToast('Gagal memproses perubahan pembayaran', 'danger');
+  });
 }
 
 /* ===== SHOW SECTION ===== */
 function showSection(id){
-  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if(target) target.classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -753,10 +824,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const rows        = document.querySelectorAll('tbody tr');
 
     function applyFilter() {
+        if(!searchInput) return;
         const keyword    = searchInput.value.toLowerCase();
-        const jenis      = filterSels[0].value.toLowerCase();
-        const status     = filterSels[1].value.toLowerCase();
-        const poli       = filterSels[2].value.toLowerCase();
+        const jenis  = document.getElementById('filterJenis').value.toLowerCase();
+        const status = document.getElementById('filterStatus').value.toLowerCase();
+        const poli   = document.getElementById('filterPoli').value.toLowerCase();
 
         rows.forEach(row => {
             const cells   = row.querySelectorAll('td');
@@ -778,8 +850,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    searchInput.addEventListener('input', applyFilter);
+    if(searchInput) {
+      searchInput.addEventListener('input', applyFilter);
+    }
     filterSels.forEach(sel => sel.addEventListener('change', applyFilter));
+
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hidden = dropdown.querySelector('input[type="hidden"]');
+
+    selected.addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        document.querySelectorAll('.dropdown-options').forEach(opt => {
+            if (opt !== options) opt.classList.remove('show');
+        });
+
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hidden.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+            applyFilter();
+
+        });
+
+    });
+
+});
 });
 </script>
 @endpush

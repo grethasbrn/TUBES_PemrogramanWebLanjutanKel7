@@ -24,6 +24,8 @@ class Pasien extends Model
         'jenis_kunjungan',
         'status',
         'validasi',
+        'status_kirim', 
+        'dokter', 
         'keluhan',
         'riwayat_penyakit',
         // Kolom medis baru untuk dokter

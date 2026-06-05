@@ -13,21 +13,36 @@
 
   <div class="search-row">
     <input type="text" class="search-input" placeholder="Cari nama obat, batch..." id="stockSearch" oninput="renderStockTable()">
-    <select class="filter-sel" id="stockFilterTipe" onchange="renderStockTable()">
-      <option value="">Semua Tipe</option>
-      <option value="Tablet">Tablet</option>
-      <option value="Sirup">Sirup</option>
-      <option value="Kapsul">Kapsul</option>
-      <option value="Injeksi">Injeksi</option>
-      <option value="Salep">Salep</option>
-    </select>
-    <select class="filter-sel" id="stockFilterStatus" onchange="renderStockTable()">
-      <option value="">Semua Status</option>
-      <option value="aman">Aman</option>
-      <option value="kritis">Kritis (&lt;10)</option>
-      <option value="expired">Expired</option>
-      <option value="exp-soon">Exp &lt; 90 hari</option>
-    </select>
+    <div class="custom-dropdown">
+      <div class="dropdown-selected">
+          Semua Tipe
+          <span>▼</span>
+      </div>
+      <div class="dropdown-options">
+          <div class="dropdown-option" data-value="">Semua Tipe</div>
+          <div class="dropdown-option" data-value="Tablet">Tablet</div>
+          <div class="dropdown-option" data-value="Sirup">Sirup</div>
+          <div class="dropdown-option" data-value="Kapsul">Kapsul</div>
+          <div class="dropdown-option" data-value="Injeksi">Injeksi</div>
+          <div class="dropdown-option" data-value="Salep">Salep</div>
+      </div>
+      <input type="hidden" id="stockFilterTipe" value="">
+    </div>
+
+    <div class="custom-dropdown">
+      <div class="dropdown-selected">
+          Semua Status
+          <span>▼</span>
+      </div>
+      <div class="dropdown-options">
+          <div class="dropdown-option" data-value="">Semua Status</div>
+          <div class="dropdown-option" data-value="aman">Aman</div>
+          <div class="dropdown-option" data-value="kritis">Kritis (&lt;10)</div>
+          <div class="dropdown-option" data-value="expired">Expired</div>
+          <div class="dropdown-option" data-value="exp-soon">Exp &lt; 90 hari</div>
+      </div>
+      <input type="hidden" id="stockFilterStatus" value="">
+    </div>
   </div>
 
   <div class="tbl-wrap">
@@ -98,7 +113,8 @@
                           onsubmit="return confirm('Hapus batch ini?')">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" style="color:red;background:none;border:none;cursor:pointer;">Hapus</button>
+                        <button type="submit" style="color:#fff;background:#A63D33;
+                        border-radius:5px;cursor:pointer; padding:6px;border:none">Hapus</button>
                     </form>
                 </td>
             </tr>
@@ -124,5 +140,46 @@
         const modal = document.getElementById(id);
         if (modal) modal.classList.remove('open');
     }
+
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const selected = dropdown.querySelector('.dropdown-selected');
+    const options = dropdown.querySelector('.dropdown-options');
+    const hidden = dropdown.querySelector('input[type="hidden"]');
+
+    selected.addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        document.querySelectorAll('.dropdown-options').forEach(opt => {
+            if (opt !== options) opt.classList.remove('show');
+        });
+
+        options.classList.toggle('show');
+    });
+
+    dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+
+        option.addEventListener('click', () => {
+
+            selected.innerHTML =
+                option.textContent + '<span>▼</span>';
+
+            hidden.value = option.dataset.value;
+
+            options.classList.remove('show');
+
+            renderStockTable();
+        });
+
+    });
+
+});
+
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-options').forEach(opt => {
+        opt.classList.remove('show');
+    });
+});
 </script>
 @endsection

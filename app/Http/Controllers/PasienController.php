@@ -11,32 +11,34 @@ class PasienController extends Controller
     |---------------------------
     | HALAMAN DATA PASIEN
     |---------------------------
+    | 
     */
     public function index()
     {
         $pasiens = Pasien::all();
-$pasienJson = $pasiens->map(function ($p) {
-    // mapping nilai validasi ke format yang dipakai JS
-    $validasiBPJS = match($p->validasi) {
-        'Disetujui' => 'valid',
-        'Ditolak'   => 'invalid',
-        default     => 'pending',  // 'Menunggu'
-    };
 
-    return [
-        'id'           => (string) $p->id,
-        'nama'         => $p->nama,
-        'rm'           => $p->no_rm,
-        'nik'          => $p->nik,
-        'tglLahir'     => $p->tgl_lahir,
-        'jk'           => $p->jenis_kelamin ?? '-',
-        'jenisBayar'   => $p->jenis,
-        'noBPJS'       => $p->no_bpjs ?? '',
-        'validasi'     => $p->validasi,
-        'validasiBPJS' => $validasiBPJS,   // <-- tambahkan ini
-        'statusKirim'  => $p->status_kirim,
-    ];
-});
+        $pasienJson = $pasiens->map(function ($p) {
+            $validasiBPJS = match($p->validasi) {
+                'Disetujui' => 'valid',
+                'Ditolak'   => 'invalid',
+                default     => 'pending',
+            };
+
+            return [
+                'id'           => (string) $p->id,
+                'nama'         => $p->nama,
+                'rm'           => $p->no_rm,
+                'nik'          => $p->nik,
+                'tglLahir'     => $p->tgl_lahir,
+                'jk'           => $p->jenis_kelamin ?? '-',
+                'jenisBayar'   => $p->jenis,
+                'noBPJS'       => $p->no_bpjs ?? '',
+                'validasi'     => $p->validasi,
+                'validasiBPJS' => $validasiBPJS,
+                'statusKirim'  => $p->status_kirim,
+            ];
+        });
+
         return view('admin.data', compact('pasiens', 'pasienJson'));
     }
 
@@ -47,26 +49,41 @@ $pasienJson = $pasiens->map(function ($p) {
     */
     public function queue()
     {
-        $belumDikirim = Pasien::where('validasi', 'Disetujui')
-                              ->where('status_kirim', 'Belum')
-                              ->orderBy('created_at')
-                              ->get();
+        $belumDikirim = Pasien::where('status_kirim', 'Belum')
+            ->orderBy('created_at')
+            ->get();
 
         $sudahDikirim = Pasien::where('status_kirim', 'Terkirim')
-                              ->orderBy('updated_at', 'desc')
-                              ->get();
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-        return view('admin.queue', compact('belumDikirim', 'sudahDikirim'));
+        $belumDikirimJson = $belumDikirim->map(function($p) {
+            return [
+                'id'          => $p->id,
+                'rm'          => $p->no_rm,
+                'nama'        => $p->nama,
+                'poli'        => $p->poli_tujuan,
+                'jenis'       => $p->jenis,
+                'status_kirim'=> $p->status_kirim,
+            ];
+        });
+
+        return view('admin.queue', compact('belumDikirim', 'sudahDikirim', 'belumDikirimJson'));
     }
 
     /*
     |---------------------------
     | FORM TAMBAH PASIEN
     |---------------------------
+    | Mengambil data user yang memiliki peran/role Dokter
     */
     public function create()
     {
-        return view('admin.create-pasien');
+        $today = date('dmy'); 
+        $countToday = Pasien::whereDate('created_at', today())->count();
+        $noRm = 'RM-' . $today . '-' . str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+
+        return view('admin.create-pasien', compact('noRm'));
     }
 
     /*
@@ -212,23 +229,43 @@ $pasienJson = $pasiens->map(function ($p) {
     | UPDATE VALIDASI PASIEN
     |---------------------------
     */
+    
     public function updateValidasi(Request $request, $id)
     {
         $pasien = Pasien::findOrFail($id);
+        
+        // 1. Ambil nilai dari frontend ('valid' / 'invalid')
+        $inputValidasi = $request->input('validasi'); 
+        
+        // 2. Petakan ke istilah database Anda ('Disetujui' / 'Ditolak')
+        $statusDatabase = match($inputValidasi) {
+            'valid'   => 'Disetujui',
+            'invalid' => 'Ditolak',
+            default   => 'Menunggu'
+        };
 
-        $validasi = $request->validasi; // 'Disetujui' atau 'Ditolak'
+        // 3. Handle jika ada request beralih ke Mandiri dari tombol khusus frontend
+        if ($request->has('jenisBayar')) {
+            $pasien->jenis = $request->input('jenisBayar'); // Mengubah ke 'Mandiri'
+            $pasien->no_bpjs = null;
+        }
 
-        if ($pasien->jenis === 'BPJS' && $validasi === 'Disetujui' && empty($pasien->no_bpjs)) {
+        // 4. Proteksi: Mencegah status BPJS disetujui jika nomor BPJS kosong
+        if ($pasien->jenis === 'BPJS' && $statusDatabase === 'Disetujui' && empty($pasien->no_bpjs)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No BPJS belum diisi, tidak bisa disetujui'
             ], 422);
         }
 
-        $pasien->validasi = $validasi;
+        // 5. Simpan perubahan ke database
+        $pasien->validasi = $statusDatabase;
         $pasien->save();
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Status validasi berhasil diperbarui menjadi ' . $statusDatabase
+        ]);
     }
 
     /*
@@ -240,6 +277,7 @@ $pasienJson = $pasiens->map(function ($p) {
     {
         $pasien = Pasien::findOrFail($id);
 
+        // Hapus if pertama yang toleran 'valid' — cukup satu check ini:
         if ($pasien->validasi !== 'Disetujui') {
             return response()->json([
                 'success' => false,
@@ -256,7 +294,7 @@ $pasienJson = $pasiens->map(function ($p) {
 
         $pasien->update([
             'status_kirim' => 'Terkirim',
-            'status'       => 'Diperiksa',
+            'status'       => 'Menunggu', // <- lebih masuk akal: dokter belum periksa
         ]);
 
         return response()->json([
@@ -286,5 +324,27 @@ $pasienJson = $pasiens->map(function ($p) {
                 ? "$jumlah pasien berhasil dikirim ke dokter."
                 : 'Tidak ada pasien yang perlu dikirim.',
         ]);
+    }
+
+    public function report()
+    {
+        $transaksi = Pasien::orderBy('created_at', 'desc')->get();
+        $totalPasien = Pasien::count();
+
+        $totalPendapatan = Pasien::sum(
+            \DB::raw("
+                CASE
+                    WHEN jenis = 'BPJS' THEN 150000
+                    WHEN jenis = 'Mandiri' THEN 300000
+                    ELSE 0
+                END
+            ")
+        );
+
+        return view('admin.report', compact(
+            'transaksi',
+            'totalPasien',
+            'totalPendapatan'
+        ));
     }
 }

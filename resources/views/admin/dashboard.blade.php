@@ -46,13 +46,17 @@
   </div>
 
   <div class="grid22">
-    <div class="card">
-      <div class="card-title">Status Pasien Hari Ini</div>
-      <canvas id="chartStatusPasien" height="210"></canvas>
+    <div class="card" style="position: relative; height: 320px; min-height: 320px;">
+        <div class="card-title" style="margin-bottom: 15px;">Status Pasien Hari Ini</div>
+        <div style="position: relative; height: 230px; width: 100%;">
+            <canvas id="chartStatusPasien"></canvas>
+        </div>
     </div>
-    <div class="card">
-      <div class="card-title">Pemasukan 7 Hari Terakhir</div>
-      <canvas id="chartPemasukan" height="210"></canvas>
+    <div class="card" style="position: relative; height: 320px; min-height: 320px;">
+      <div class="card-title" style="margin-bottom: 15px;">Pemasukan 7 Hari Terakhir</div>
+      <div style="position: relative; height: 230px; width: 100%;">
+          <canvas id="chartPemasukan"></canvas>
+      </div>
     </div>
   </div>
 </div>
@@ -66,48 +70,52 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(data => {
             // ===== METRICS =====
-            document.getElementById('m-total-pasien').innerText = data.total_hari_ini;
-            document.getElementById('m-total-sub').innerText    = data.total_hari_ini + ' pasien terdaftar hari ini';
-            document.getElementById('m-validasi').innerText     = data.menunggu_validasi;
-            document.getElementById('m-invoice').innerText      = data.invoice;
-            document.getElementById('m-pemasukan').innerText    = 'Rp ' + data.pemasukan.toLocaleString('id-ID');
-            document.getElementById('m-pemasukan-sub').innerText = data.pemasukan + ' transaksi lunas';
+            document.getElementById('m-total-pasien').innerText  = data.total_hari_ini;
+            document.getElementById('m-total-sub').innerText     = data.total_hari_ini + ' pasien terdaftar hari ini';
+            document.getElementById('m-validasi').innerText      = data.menunggu_validasi;
+            document.getElementById('m-invoice').innerText       = data.invoice;
+            document.getElementById('m-pemasukan').innerText     = 'Rp ' + data.pemasukan.toLocaleString('id-ID');
+            document.getElementById('m-pemasukan-sub').innerText = data.transaksi_lunas + ' transaksi lunas';
 
-            // ===== ANTRIAN PER POLI =====
+            // ===== 2. ANTRIAN PER POLI =====
             const poliWrap = document.getElementById('dashAntrianPoli');
-            if (data.antri_per_poli.length === 0) {
+            if (!data.antri_per_poli || data.antri_per_poli.length === 0) {
                 poliWrap.innerHTML = '<div style="color:#C4B5A5;font-size:13px;padding:16px">Belum ada antrian hari ini</div>';
             } else {
                 poliWrap.innerHTML = data.antri_per_poli.map(p => `
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f7f3f0">
-                        <span style="font-size:13px;color:#2d2016">${p.poli_tujuan}</span>
-                        <span style="font-size:13px;font-weight:700;color:#c0825a">${p.total} pasien</span>
+                        <span style="font-size:13px;color:#2d2016">${p.poli_tujuan ? p.poli_tujuan : 'Umum'}</span>
+                        <span style="font-size:13px;font-weight:700;color:#c0825a">${p.total ?? 0} pasien</span>
                     </div>
                 `).join('');
             }
 
-            // ===== AKTIVITAS TERBARU =====
+            // ===== 3. AKTIVITAS TERBARU =====
             const aktWrap = document.getElementById('dashAktivitas');
-            if (data.aktivitas.length === 0) {
+            if (!data.aktivitas || data.aktivitas.length === 0) {
                 aktWrap.innerHTML = '<div style="color:#C4B5A5;font-size:13px;padding:16px">Belum ada aktivitas</div>';
             } else {
-                aktWrap.innerHTML = data.aktivitas.map(a => `
-                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f7f3f0">
-                        <div style="width:36px;height:36px;border-radius:50%;background:#fde8d8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#c0825a;font-size:14px;flex-shrink:0">
-                            ${a.nama.charAt(0)}
+                aktWrap.innerHTML = data.aktivitas.map(a => {
+                    const inisial = a.nama ? a.nama.charAt(0).toUpperCase() : '?';
+                    return `
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f7f3f0">
+                            <div style="width:36px;height:36px;border-radius:50%;background:#fde8d8;display:flex;align-items:center;justify-content:center;font-weight:700;color:#c0825a;font-size:14px;flex-shrink:0">
+                                ${inisial}
+                            </div>
+                            <div>
+                                <div style="font-size:13px;font-weight:600;color:#2d2016">${a.nama ?? 'Tanpa Nama'}</div>
+                                <div style="font-size:11px;color:#A8998A">${a.no_rm ?? '-'} · ${a.status ?? 'Aktif'}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size:13px;font-weight:600;color:#2d2016">${a.nama}</div>
-                            <div style="font-size:11px;color:#A8998A">${a.no_rm} · ${a.status}</div>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
-            // ===== CHART STATUS PASIEN =====
+            // ===== 4. CHART STATUS PASIEN =====
             const ctxStatus = document.getElementById('chartStatusPasien').getContext('2d');
-            const statusLabels = data.status_pasien.map(s => s.status);
-            const statusData   = data.status_pasien.map(s => s.total);
+            const statusLabels = data.status_pasien ? data.status_pasien.map(s => s.status ?? 'N/A') : [];
+            const statusData   = data.status_pasien ? data.status_pasien.map(s => s.total ?? 0) : [];
+            
             new Chart(ctxStatus, {
                 type: 'doughnut',
                 data: {
@@ -119,40 +127,46 @@ document.addEventListener('DOMContentLoaded', function () {
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } },
                     cutout: '65%',
                 }
             });
 
-            // ===== CHART PEMASUKAN (placeholder) =====
+            // ===== CHART PEMASUKAN 7 HARI (dari DB) =====
             const ctxPemasukan = document.getElementById('chartPemasukan').getContext('2d');
-            const days = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                days.push(d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' }));
-            }
             new Chart(ctxPemasukan, {
                 type: 'bar',
                 data: {
-                    labels: days,
+                    labels: data.labels_7hari,
                     datasets: [{
                         label: 'Pemasukan (Rp)',
-                        data: [0, 0, 0, 0, 0, 0, 0],
+                        data: data.pemasukan_7hari,
                         backgroundColor: '#c0825a',
                         borderRadius: 6,
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { size: 11 },
+                                callback: v => 'Rp ' + v.toLocaleString('id-ID')
+                            }
+                        },
                         x: { ticks: { font: { size: 11 } } }
                     }
                 }
             });
         })
-        .catch(err => console.error('Gagal ambil data dashboard:', err));
+        .catch(err => {
+            console.error('Gagal ambil data dashboard:', err);
+        });
 });
 </script>
 @endpush

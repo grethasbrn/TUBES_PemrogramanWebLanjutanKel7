@@ -61,6 +61,7 @@ class BatchController extends Controller
     public function index()
     {
         $batches = Batch::all();
+        $nextNoBatch = $this->generateNoBatch();
 
         $stockData = $batches->map(function($b) {
             $tglExpired = $b->tgl_expired?->format('Y-m-d');
@@ -89,11 +90,19 @@ class BatchController extends Controller
             ];
         });
 
-        return view('apoteker.stock', compact('batches', 'stockData'));
+        return view('apoteker.stock', compact('batches', 'stockData', 'nextNoBatch'));
+    }
+
+    private function generateNoBatch(): string
+    {
+        $last = Batch::orderBy('id', 'desc')->first();
+        $nextNumber = $last ? $last->id + 1 : 1;
+        return 'BCH-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     public function store(Request $request)
     {
+        
         $request->validate([
             'nama_obat'   => 'required|string|max:255',
             'tipe'        => 'required|string|max:100',
@@ -101,7 +110,7 @@ class BatchController extends Controller
             'no_batch'    => 'required|string|unique:batches,no_batch',
             'jumlah'      => 'required|integer|min:1',
             'harga'       => 'required|integer|min:0',
-            'tgl_expired' => 'required|date|after:today',
+            'tgl_expired' => 'required|date|after_or_equal:today',
             'tgl_masuk'   => 'required|date',
             'supplier'    => 'nullable|string|max:255',
         ], [

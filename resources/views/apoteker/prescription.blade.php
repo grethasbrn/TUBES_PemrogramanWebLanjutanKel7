@@ -1,9 +1,6 @@
-@extends('layouts.dokter')
+@extends('layouts.apoteker')
 
 @section('content')
-
-{{-- Data pasien dari controller --}}
-<script id="pasien-data" type="application/json">{!! json_encode($pasienJson) !!}</script>
 
 <style>
 /* ─── Page Header ─── */
@@ -22,21 +19,11 @@
     color: var(--text);
     margin: 0;
 }
-.rx-header h2 span {
-    color: var(--purple);
-    font-style: italic;
-}
+.rx-header h2 span { color: var(--purple); font-style: italic; }
 
-/* ─── Search & Filter ─── */
-.rx-toolbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-.rx-search {
-    position: relative;
-}
+/* ─── Toolbar ─── */
+.rx-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.rx-search { position: relative; }
 .rx-search input {
     padding: 9px 12px 9px 36px;
     border-radius: 8px;
@@ -49,14 +36,7 @@
     width: 220px;
 }
 .rx-search input:focus { border-color: var(--purple); }
-.rx-search i {
-    position: absolute;
-    left: 11px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    font-size: 14px;
-}
+.rx-search i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; }
 .rx-filter select {
     padding: 9px 12px;
     border-radius: 8px;
@@ -70,13 +50,8 @@
 }
 .rx-filter select:focus { border-color: var(--purple); }
 
-/* ─── Stats Bar ─── */
-.rx-stats {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
+/* ─── Stats ─── */
+.rx-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
 .rx-stat {
     background: var(--cream);
     border: 1px solid var(--cream3);
@@ -86,48 +61,20 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-    min-width: 140px;
+    min-width: 130px;
 }
-.rx-stat-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-}
+.rx-stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 .rx-stat-icon.blue   { background: #e8f0fe; color: #1a73e8; }
 .rx-stat-icon.orange { background: #fff3e0; color: #f57c00; }
 .rx-stat-icon.green  { background: #e6f4ea; color: #34a853; }
 .rx-stat-icon.purple { background: #f3e8ff; color: var(--purple); }
-.rx-stat-info label {
-    display: block;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--text3);
-    font-weight: 500;
-}
-.rx-stat-info strong {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.2;
-}
+.rx-stat-icon.red    { background: #fce8e6; color: #d93025; }
+.rx-stat-info label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); font-weight: 500; }
+.rx-stat-info strong { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1.2; }
 
 /* ─── Table ─── */
-.rx-table-wrap {
-    background: #fff;
-    border: 1px solid var(--cream3);
-    border-radius: 12px;
-    overflow: hidden;
-}
-.rx-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
+.rx-table-wrap { background: #fff; border: 1px solid var(--cream3); border-radius: 12px; overflow: hidden; }
+.rx-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .rx-table thead th {
     background: var(--cream);
     padding: 12px 16px;
@@ -140,30 +87,18 @@
     border-bottom: 1px solid var(--cream3);
     white-space: nowrap;
 }
-.rx-table tbody tr {
-    border-bottom: 1px solid var(--cream3);
-    transition: background .15s;
-    cursor: pointer;
-}
+.rx-table tbody tr { border-bottom: 1px solid var(--cream3); transition: background .15s; cursor: pointer; }
 .rx-table tbody tr:last-child { border-bottom: none; }
 .rx-table tbody tr:hover { background: var(--cream); }
-.rx-table td {
-    padding: 13px 16px;
-    color: var(--text);
-    vertical-align: middle;
-}
+.rx-table td { padding: 13px 16px; color: var(--text); vertical-align: middle; }
 .rx-table td.muted { color: var(--text3); font-size: 12px; }
 
-.badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 500;
-}
-.badge-menunggu  { background: #fff3e0; color: #f57c00; }
-.badge-diperiksa { background: #e8f0fe; color: #1a73e8; }
-.badge-selesai   { background: #e6f4ea; color: #34a853; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge-baru      { background: #e8f0fe; color: #1a73e8; }
+.badge-validasi  { background: #fff3e0; color: #f57c00; }
+.badge-siap      { background: #e6f4ea; color: #34a853; }
+.badge-selesai   { background: #e6f4ea; color: #1e7e34; }
+.badge-ditolak   { background: #fce8e6; color: #d93025; }
 .badge-bpjs      { background: #f3e8ff; color: var(--purple); }
 .badge-mandiri   { background: #fce8e6; color: #d93025; }
 
@@ -180,17 +115,8 @@
     white-space: nowrap;
 }
 .action-btn:hover { opacity: .85; }
-.action-btn.outline {
-    background: none;
-    border: 1px solid var(--purple);
-    color: var(--purple);
-}
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text3);
-}
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
 .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
 .empty-state p { font-size: 14px; margin: 0; }
 
@@ -211,83 +137,46 @@
     border-radius: 16px;
     padding: 28px;
     width: 100%;
-    max-width: 620px;
+    max-width: 680px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 12px 32px rgba(0,0,0,0.18);
     position: relative;
 }
-.modal-close {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: var(--text3);
-    line-height: 1;
-}
-.modal h3 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 21px;
-    font-weight: 600;
-    color: var(--text);
-    margin: 0 0 20px;
-}
-.modal-section {
-    background: var(--cream);
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-}
-.modal-section-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    font-weight: 600;
-    color: var(--text3);
-    margin-bottom: 10px;
-}
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 20px;
-}
-.info-item label {
-    display: block;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--text3);
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-.info-item span {
-    font-size: 13px;
-    color: var(--text);
-    font-weight: 500;
-}
+.modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text3); line-height: 1; }
+.modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 600; color: var(--text); margin: 0 0 20px; }
+.modal-section { background: var(--cream); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.modal-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; color: var(--text3); margin-bottom: 10px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+.info-item label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); font-weight: 500; margin-bottom: 2px; }
+.info-item span { font-size: 13px; color: var(--text); font-weight: 500; }
 
-/* Obat rows */
-.obat-list { display: flex; flex-direction: column; gap: 10px; }
-.obat-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
-    gap: 8px;
-    align-items: end;
-}
-.obat-row .fg { margin-bottom: 0; }
-.fg { margin-bottom: 12px; }
-.fg label {
-    display: block;
-    font-size: 11px;
-    color: var(--text2);
-    margin-bottom: 5px;
-    font-weight: 500;
+/* Obat table di modal */
+.obat-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.obat-table th {
+    background: var(--cream3);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: .05em;
+    font-weight: 600;
+    color: var(--text2);
 }
+.obat-table td { padding: 8px 10px; border-bottom: 1px solid var(--cream3); }
+.obat-table tbody tr:last-child td { border-bottom: none; }
+
+/* Input obat apoteker */
+.obat-input { width: 70px; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--cream3); font-size: 12px; font-family: 'DM Sans', sans-serif; text-align: center; }
+.obat-input:focus { border-color: var(--purple); outline: none; }
+
+.stok-ok   { color: #34a853; font-size: 11px; }
+.stok-warn { color: #f57c00; font-size: 11px; }
+.stok-habis{ color: #d93025; font-size: 11px; }
+
+.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fg { margin-bottom: 0; }
+.fg label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
 .fg input, .fg select, .fg textarea {
     width: 100%;
     padding: 9px 12px;
@@ -301,62 +190,7 @@
     box-sizing: border-box;
 }
 .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--purple); }
-.fg textarea { resize: vertical; min-height: 70px; }
-.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-/* Stok info badge di bawah select obat */
-.stok-info {
-    font-size: 11px;
-    margin-top: 4px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    display: none;
-}
-.stok-info.ok     { background: #e6f4ea; color: #34a853; display: block; }
-.stok-info.habis  { background: #fce8e6; color: #d93025; display: block; }
-
-/* Loading obat */
-.obat-loading {
-    font-size: 12px;
-    color: var(--text3);
-    padding: 8px 0;
-    font-style: italic;
-}
-
-.btn-remove-obat {
-    background: #fce8e6;
-    color: #d93025;
-    border: none;
-    border-radius: 7px;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-bottom: 0;
-    align-self: flex-end;
-}
-.btn-add-obat {
-    background: none;
-    border: 1px dashed var(--purple);
-    color: var(--purple);
-    border-radius: 8px;
-    padding: 8px;
-    width: 100%;
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: background .15s;
-    margin-top: 4px;
-}
-.btn-add-obat:hover { background: #f3e8ff; }
-.btn-add-obat:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-}
+.fg textarea { resize: vertical; min-height: 60px; }
 
 .modal-footer {
     display: flex;
@@ -365,461 +199,441 @@
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid var(--cream3);
+    flex-wrap: wrap;
 }
-.btn {
-    padding: 9px 18px;
+.btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--cream3); background: var(--cream); color: var(--text); transition: all .15s; }
+.btn:hover { background: var(--cream3); }
+.btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+.btn-primary:hover { opacity: .88; }
+.btn-danger  { background: #fce8e6; color: #d93025; border-color: #f5c6cb; }
+.btn-danger:hover { background: #f5c6cb; }
+.btn-success { background: #e6f4ea; color: #1e7e34; border-color: #b7dfbb; }
+.btn-success:hover { background: #b7dfbb; }
+
+.no-resep-tag {
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--cream);
+    border: 1px solid var(--cream3);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+}
+
+.refresh-btn {
+    padding: 8px 14px;
     border-radius: 8px;
+    border: 1px solid var(--cream3);
+    background: var(--cream);
     font-size: 13px;
     font-family: 'DM Sans', sans-serif;
     cursor: pointer;
-    border: 1px solid var(--cream3);
-    background: var(--cream);
-    color: var(--text);
-    transition: all .15s;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .15s;
 }
-.btn:hover { background: var(--cream3); }
-.btn-primary {
-    background: var(--purple);
-    color: #fff;
-    border-color: var(--purple);
-}
-.btn-primary:hover { opacity: .88; }
-.btn-draft {
-    background: #fff3e0;
-    color: #f57c00;
-    border-color: #ffe0b2;
-}
+.refresh-btn:hover { background: var(--cream3); }
+.refresh-btn.loading i { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-{{-- ─── Page ─── --}}
+{{-- ─── Header ─── --}}
 <div class="rx-header">
-    <h2>Resep <span>Pasien</span></h2>
+    <h2>Resep <span>Masuk</span></h2>
     <div class="rx-toolbar">
         <div class="rx-search">
             <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" placeholder="Cari nama / No. RM…" oninput="filterTable()">
+            <input type="text" id="searchInput" placeholder="Cari nama / No. RM / No. Resep…" oninput="filterTable()">
         </div>
         <div class="rx-filter">
             <select id="filterStatus" onchange="filterTable()">
-                <option value="" selected>Semua Status</option>
-                <option value="Menunggu">Menunggu</option>
-                <option value="Diperiksa">Diperiksa</option>
+                <option value="">Semua Status</option>
+                <option value="baru">Baru</option>
+                <option value="validasi">Validasi</option>
+                <option value="siap">Siap</option>
+                <option value="selesai">Selesai</option>
+                <option value="ditolak">Ditolak</option>
             </select>
         </div>
         <div class="rx-filter">
             <select id="filterBayar" onchange="filterTable()">
-                <option value="" selected>Semua Pembayaran</option>
+                <option value="">Semua Pembayaran</option>
                 <option value="BPJS">BPJS</option>
                 <option value="Mandiri">Mandiri</option>
             </select>
         </div>
+        <button class="refresh-btn" id="refreshBtn" onclick="loadResep()">
+            <i class="bi bi-arrow-clockwise" id="refreshIcon"></i> Refresh
+        </button>
     </div>
 </div>
 
-{{-- Stats --}}
+{{-- ─── Stats ─── --}}
 <div class="rx-stats">
     <div class="rx-stat">
-        <div class="rx-stat-icon blue"><i class="bi bi-people"></i></div>
-        <div class="rx-stat-info">
-            <label>Total Pasien</label>
-            <strong id="statTotal">0</strong>
-        </div>
+        <div class="rx-stat-icon blue"><i class="bi bi-inbox"></i></div>
+        <div class="rx-stat-info"><label>Total Resep</label><strong id="statTotal">0</strong></div>
     </div>
     <div class="rx-stat">
         <div class="rx-stat-icon orange"><i class="bi bi-hourglass-split"></i></div>
-        <div class="rx-stat-info">
-            <label>Menunggu</label>
-            <strong id="statMenunggu">0</strong>
-        </div>
+        <div class="rx-stat-info"><label>Baru</label><strong id="statBaru">0</strong></div>
     </div>
     <div class="rx-stat">
-        <div class="rx-stat-icon purple"><i class="bi bi-activity"></i></div>
-        <div class="rx-stat-info">
-            <label>Diperiksa</label>
-            <strong id="statDiperiksa">0</strong>
-        </div>
+        <div class="rx-stat-icon purple"><i class="bi bi-clipboard-check"></i></div>
+        <div class="rx-stat-info"><label>Validasi</label><strong id="statValidasi">0</strong></div>
     </div>
     <div class="rx-stat">
         <div class="rx-stat-icon green"><i class="bi bi-check-circle"></i></div>
-        <div class="rx-stat-info">
-            <label>Selesai Hari Ini</label>
-            <strong id="statSelesai">0</strong>
-        </div>
+        <div class="rx-stat-info"><label>Siap / Selesai</label><strong id="statSiap">0</strong></div>
     </div>
 </div>
 
-{{-- Table --}}
+{{-- ─── Table ─── --}}
 <div class="rx-table-wrap">
     <table class="rx-table">
         <thead>
             <tr>
-                <th>No. RM</th>
+                <th>No. Resep</th>
                 <th>Nama Pasien</th>
-                <th>Usia / JK</th>
-                <th>Poli</th>
+                <th>No. RM</th>
                 <th>Pembayaran</th>
+                <th>Diagnosa</th>
+                <th>Tanggal</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
         </thead>
-        <tbody id="pasienTableBody">
-            <tr>
-                <td colspan="7">
-                    <div class="empty-state">
-                        <i class="bi bi-arrow-clockwise"></i>
-                        <p>Memuat data pasien…</p>
-                    </div>
-                </td>
-            </tr>
+        <tbody id="resepTableBody">
+            <tr><td colspan="8">
+                <div class="empty-state">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <p>Memuat data resep…</p>
+                </div>
+            </td></tr>
         </tbody>
     </table>
 </div>
 
-{{-- ─── Modal Tulis Resep ─── --}}
-<div class="modal-overlay" id="modalResep" onclick="closeResepModal()">
+{{-- ─── Modal Detail Resep ─── --}}
+<div class="modal-overlay" id="modalResep" onclick="closeModal()">
     <div class="modal" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeResepModal()">✕</button>
-        <h3>✍️ Tulis Resep</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h3>💊 Detail Resep &nbsp;<span class="no-resep-tag" id="mNoResep">-</span></h3>
 
         {{-- Info Pasien --}}
         <div class="modal-section">
             <div class="modal-section-title">Data Pasien</div>
             <div class="info-grid">
-                <div class="info-item"><label>Nama</label><span id="rPasienNama">-</span></div>
-                <div class="info-item"><label>No. RM</label><span id="rPasienRM">-</span></div>
-                <div class="info-item"><label>Usia</label><span id="rPasienUsia">-</span></div>
-                <div class="info-item"><label>Jenis Kelamin</label><span id="rPasienJK">-</span></div>
-                <div class="info-item"><label>Pembayaran</label><span id="rPasienBayar">-</span></div>
-                <div class="info-item"><label>Poli</label><span id="rPasienPoli">-</span></div>
+                <div class="info-item"><label>Nama</label><span id="mPasienNama">-</span></div>
+                <div class="info-item"><label>No. RM</label><span id="mPasienRM">-</span></div>
+                <div class="info-item"><label>Pembayaran</label><span id="mPasienBayar">-</span></div>
+                <div class="info-item"><label>Dokter</label><span id="mDokter">-</span></div>
             </div>
         </div>
 
-        {{-- Anamnesis --}}
+        {{-- Info Resep --}}
         <div class="modal-section">
-            <div class="modal-section-title">Anamnesis</div>
-            <div class="fr">
-                <div class="info-item"><label>Keluhan</label><span id="rKeluhan">-</span></div>
-                <div class="info-item"><label>Alergi</label><span id="rAlergi">-</span></div>
-            </div>
-            <div style="margin-top:8px" class="fr">
-                <div class="info-item"><label>BB / TB</label><span id="rBBTB">-</span></div>
-                <div class="info-item"><label>Tekanan Darah</label><span id="rTD">-</span></div>
+            <div class="modal-section-title">Informasi Resep</div>
+            <div class="info-grid">
+                <div class="info-item"><label>Diagnosa</label><span id="mDiagnosa">-</span></div>
+                <div class="info-item"><label>Tanggal Resep</label><span id="mTanggal">-</span></div>
+                <div class="info-item"><label>Catatan Dokter</label><span id="mCatatan">-</span></div>
+                <div class="info-item"><label>Tanggal Kontrol</label><span id="mKontrol">-</span></div>
             </div>
         </div>
 
-        {{-- Form Resep --}}
-        <div class="fg">
-            <label>Diagnosa *</label>
-            <input type="text" id="inputDiagnosa" placeholder="Contoh: Hipertensi Grade I">
+        {{-- Daftar Obat --}}
+        <div class="modal-section">
+            <div class="modal-section-title">Daftar Obat dari Dokter</div>
+            <table class="obat-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama Obat</th>
+                        <th>Dosis</th>
+                        <th>Jml Resep</th>
+                        <th>Stok</th>
+                        <th>Jml Diberikan</th>
+                    </tr>
+                </thead>
+                <tbody id="mObatList"></tbody>
+            </table>
         </div>
 
-        <div class="fg">
-            <label>Daftar Obat *</label>
-            <div id="obatLoadingInfo" class="obat-loading">
-                <i class="bi bi-arrow-clockwise"></i> Memuat daftar obat dari apotek…
-            </div>
-            <div class="obat-list" id="obatList">
-                {{-- diisi JS --}}
-            </div>
-            <button class="btn-add-obat" id="btnTambahObat" onclick="addObatRow()" disabled>
-                <i class="bi bi-plus-circle"></i> Tambah Obat
-            </button>
+        {{-- Status saat ini --}}
+        <div style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:12px; color:var(--text3)">Status saat ini:</span>
+            <span class="badge" id="mStatusBadge">-</span>
         </div>
 
-        <div class="fr">
-            <div class="fg">
-                <label>Catatan Dokter</label>
-                <textarea id="inputCatatan" placeholder="Instruksi tambahan untuk apoteker…"></textarea>
-            </div>
-            <div class="fg">
-                <label>Tanggal Kontrol</label>
-                <input type="date" id="inputKontrol">
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn" onclick="closeResepModal()">Batal</button>
-            <button class="btn btn-draft" onclick="submitResep('draft')">💾 Simpan Draft</button>
-            <button class="btn btn-primary" onclick="submitResep('baru')">📤 Kirim ke Apotek</button>
-        </div>
+        <div class="modal-footer" id="mFooter"></div>
     </div>
 </div>
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-// ─── Data ───────────────────────────────────────────────
-let allPasien = [];
-try {
-    allPasien = JSON.parse(document.getElementById('pasien-data').textContent) || [];
-} catch(e) {
-    console.error('Gagal parse data pasien:', e);
-    allPasien = [];
-}
+let allResep  = [];
+let activeResep = null;
 
-let activePasienId = null;
+// ─── Load Data ────────────────────────────────────────────
+async function loadResep() {
+    const btn  = document.getElementById('refreshBtn');
+    const icon = document.getElementById('refreshIcon');
+    btn.classList.add('loading');
 
-// ─── Daftar Obat dari Apoteker ───────────────────────────
-let obatOptions = []; // [{id, nama_obat, jumlah, satuan}]
-
-async function loadObatOptions() {
     try {
-        const res = await fetch('/dokter/api/obat');
-        if (!res.ok) throw new Error('Gagal fetch obat');
-        obatOptions = await res.json();
-
-        // Sembunyikan loading info, aktifkan tombol tambah
-        const info = document.getElementById('obatLoadingInfo');
-        if (info) info.style.display = 'none';
-
-        const btn = document.getElementById('btnTambahObat');
-        if (btn) btn.disabled = false;
-
+        const res  = await fetch('/apoteker/api/resep');
+        const data = await res.json();
+        const urutanStatus = { 'baru': 0, 'validasi': 1, 'siap': 2, 'selesai': 3, 'ditolak': 4 };
+        allResep = data.sort((a, b) => 
+            (urutanStatus[a.status] ?? 9) - (urutanStatus[b.status] ?? 9)
+        );
+        renderStats(allResep);
+        filterTable();
     } catch(e) {
-        console.error('Gagal load obat:', e);
-        const info = document.getElementById('obatLoadingInfo');
-        if (info) info.textContent = '⚠️ Gagal memuat daftar obat. Refresh halaman.';
+        console.error('Gagal load resep:', e);
+        document.getElementById('resepTableBody').innerHTML = `
+            <tr><td colspan="8">
+                <div class="empty-state">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <p>Gagal memuat data. <a href="#" onclick="loadResep()">Coba lagi</a></p>
+                </div>
+            </td></tr>`;
+    } finally {
+        btn.classList.remove('loading');
     }
 }
 
-// Build <option> HTML dari obatOptions
-function buildObatOptions() {
-    if (!obatOptions.length) return '<option value="">-- Obat tidak tersedia --</option>';
-    return '<option value="">-- Pilih Obat --</option>' +
-        obatOptions.map(o =>
-            `<option value="${o.nama_obat}" data-stok="${o.jumlah}" data-satuan="${o.satuan ?? ''}">`
-            + `${o.nama_obat}${o.satuan ? ' (' + o.satuan + ')' : ''} — Stok: ${o.jumlah}`
-            + `</option>`
-        ).join('');
-}
-
-// ─── Render Stats ────────────────────────────────────────
+// ─── Stats ────────────────────────────────────────────────
 function renderStats(data) {
-    document.getElementById('statTotal').textContent     = data.length;
-    document.getElementById('statMenunggu').textContent  = data.filter(p => p.status === 'Menunggu').length;
-    document.getElementById('statDiperiksa').textContent = data.filter(p => p.status === 'Diperiksa').length;
-    document.getElementById('statSelesai').textContent   = data.filter(p => p.status === 'Selesai').length;
+    document.getElementById('statTotal').textContent   = data.length;
+    document.getElementById('statBaru').textContent    = data.filter(r => r.status === 'baru').length;
+    document.getElementById('statValidasi').textContent= data.filter(r => r.status === 'validasi').length;
+    document.getElementById('statSiap').textContent    = data.filter(r => r.status === 'siap' || r.status === 'selesai').length;
 }
 
-// ─── Render Table ────────────────────────────────────────
+// ─── Table ────────────────────────────────────────────────
 function renderTable(data) {
-    const tbody = document.getElementById('pasienTableBody');
+    const tbody = document.getElementById('resepTableBody');
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="7">
+        tbody.innerHTML = `<tr><td colspan="8">
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
-                <p>Tidak ada pasien yang perlu diresepkan.</p>
+                <p>Belum ada resep masuk dari dokter.</p>
             </div></td></tr>`;
         return;
     }
 
-    tbody.innerHTML = data.map(p => `
-        <tr onclick="openResepModal('${p.id}')">
-            <td class="muted">${p.rm ?? '-'}</td>
-            <td><strong>${p.nama}</strong></td>
-            <td class="muted">${p.usia ?? '-'} thn / ${p.jk ?? '-'}</td>
-            <td>${p.poli ?? '-'}</td>
-            <td><span class="badge ${p.bayar === 'BPJS' ? 'badge-bpjs' : 'badge-mandiri'}">${p.bayar ?? '-'}</span></td>
-            <td><span class="badge ${badgeClass(p.status)}">${p.status}</span></td>
+    tbody.innerHTML = data.map(r => `
+        <tr onclick="openModal('${r.id}')">
+            <td><span class="no-resep-tag">${r.no_resep}</span></td>
+            <td><strong>${r.pasien}</strong></td>
+            <td class="muted">${r.rm}</td>
+            <td><span class="badge ${r.bayar === 'BPJS' ? 'badge-bpjs' : 'badge-mandiri'}">${r.bayar}</span></td>
+            <td class="muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.diagnosa}</td>
+            <td class="muted">${r.tanggal}</td>
+            <td><span class="badge badge-${r.status}">${labelStatus(r.status)}</span></td>
             <td>
-                <button class="action-btn" onclick="event.stopPropagation(); openResepModal('${p.id}')">
-                    <i class="bi bi-pencil-square"></i> Tulis Resep
+                <button class="action-btn" onclick="event.stopPropagation(); openModal('${r.id}')">
+                    <i class="bi bi-eye"></i> Proses
                 </button>
             </td>
         </tr>
     `).join('');
 }
 
-function badgeClass(status) {
-    const map = { 'Menunggu': 'badge-menunggu', 'Diperiksa': 'badge-diperiksa', 'Selesai': 'badge-selesai' };
-    return map[status] ?? 'badge-menunggu';
+function labelStatus(s) {
+    const map = { baru:'Baru', validasi:'Validasi', siap:'Siap', selesai:'Selesai', ditolak:'Ditolak' };
+    return map[s] ?? s;
 }
 
-// ─── Filter ──────────────────────────────────────────────
 function filterTable() {
     const q      = document.getElementById('searchInput').value.toLowerCase();
     const status = document.getElementById('filterStatus').value;
     const bayar  = document.getElementById('filterBayar').value;
 
-    const filtered = allPasien.filter(p => {
-        const matchQ      = !q      || p.nama.toLowerCase().includes(q) || (p.rm ?? '').toLowerCase().includes(q);
-        const matchStatus = !status || p.status === status;
-        const matchBayar  = !bayar  || p.bayar  === bayar;
-        return matchQ && matchStatus && matchBayar;
+    const filtered = allResep.filter(r => {
+        const matchQ  = !q || r.pasien.toLowerCase().includes(q)
+                           || r.rm.toLowerCase().includes(q)
+                           || r.no_resep.toLowerCase().includes(q);
+        const matchS  = !status || r.status === status;
+        const matchB  = !bayar  || r.bayar  === bayar;
+        return matchQ && matchS && matchB;
     });
 
     renderTable(filtered);
 }
 
-// ─── Modal Resep ──────────────────────────────────────────
-function openResepModal(id) {
-    const p = allPasien.find(x => x.id === id);
-    if (!p) return;
-    activePasienId = id;
+// ─── Modal ────────────────────────────────────────────────
+function openModal(id) {
+    const r = allResep.find(x => x.id === id);
+    if (!r) return;
+    activeResep = r;
 
-    document.getElementById('rPasienNama').textContent  = p.nama;
-    document.getElementById('rPasienRM').textContent    = p.rm ?? '-';
-    document.getElementById('rPasienUsia').textContent  = (p.usia ?? '-') + ' tahun';
-    document.getElementById('rPasienJK').textContent    = p.jk ?? '-';
-    document.getElementById('rPasienBayar').textContent = p.bayar ?? '-';
-    document.getElementById('rPasienPoli').textContent  = p.poli ?? '-';
-    document.getElementById('rKeluhan').textContent     = p.keluhan ?? '-';
-    document.getElementById('rAlergi').textContent      = p.alergi ?? '-';
-    document.getElementById('rBBTB').textContent        = `${p.bb ?? '-'} kg / ${p.tb ?? '-'} cm`;
-    document.getElementById('rTD').textContent          = p.td ?? '-';
+    document.getElementById('mNoResep').textContent    = r.no_resep;
+    document.getElementById('mPasienNama').textContent = r.pasien;
+    document.getElementById('mPasienRM').textContent   = r.rm;
+    document.getElementById('mPasienBayar').textContent= r.bayar;
+    document.getElementById('mDokter').textContent     = r.dokter ?? '-';
+    document.getElementById('mDiagnosa').textContent   = r.diagnosa;
+    document.getElementById('mTanggal').textContent    = r.tanggal;
+    document.getElementById('mCatatan').textContent    = r.catatan_dokter ?? '-';
+    document.getElementById('mKontrol').textContent    = r.tanggal_kontrol ?? '-';
 
-    // Reset form
-    document.getElementById('inputDiagnosa').value = '';
-    document.getElementById('inputCatatan').value  = '';
-    document.getElementById('inputKontrol').value  = '';
-    document.getElementById('obatList').innerHTML  = '';
-    obatCounter = 0;
-    addObatRow(); // Tambah 1 baris obat kosong
+    // Status badge
+    const sb = document.getElementById('mStatusBadge');
+    sb.textContent = labelStatus(r.status);
+    sb.className   = `badge badge-${r.status}`;
+
+    // Obat list
+    const tbody = document.getElementById('mObatList');
+    if (!r.obat || !r.obat.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color:var(--text3);padding:8px 10px">Tidak ada data obat.</td></tr>`;
+    } else {
+        tbody.innerHTML = r.obat.map((o, i) => {
+            const stok    = o.stok ?? 0;
+            const stokClass = stok > 30 ? 'stok-ok' : stok > 0 ? 'stok-warn' : 'stok-habis';
+            const stokLabel = stok > 30 ? `✓ ${stok}` : stok > 0 ? `⚠ ${stok}` : `✗ Habis`;
+            return `
+            <tr>
+                <td class="muted">${i+1}</td>
+                <td><strong>${o.nama}</strong></td>
+                <td class="muted">${o.dosis ?? '-'}</td>
+                <td>${o.jumlah ?? '-'}</td>
+                <td><span class="${stokClass}">${stokLabel}</span></td>
+                <td>
+                    <input type="number" class="obat-input" id="jml-diberikan-${i}"
+                        value="${o.jumlah ?? 1}" min="0" max="${stok}"
+                        ${r.status === 'selesai' || r.status === 'ditolak' ? 'disabled' : ''}>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Footer tombol aksi sesuai status
+    renderFooter(r.status);
 
     document.getElementById('modalResep').classList.add('open');
 }
 
-function closeResepModal() {
+function renderFooter(status) {
+    const footer = document.getElementById('mFooter');
+    let html = `<button class="btn" onclick="closeModal()">Tutup</button>`;
+
+    if (status === 'baru') {
+        html += `
+            <button class="btn btn-danger" onclick="updateStatus('ditolak')">
+                <i class="bi bi-x-circle"></i> Tolak
+            </button>
+            <button class="btn btn-primary" onclick="prosesValidasi()">
+                <i class="bi bi-clipboard-check"></i> Validasi & Input Obat
+            </button>`;
+    } else if (status === 'validasi') {
+        html += `
+            <button class="btn btn-danger" onclick="updateStatus('ditolak')">
+                <i class="bi bi-x-circle"></i> Tolak
+            </button>
+            <button class="btn btn-success" onclick="simpanObatDanSiap()">
+                <i class="bi bi-check2-circle"></i> Konfirmasi Siap
+            </button>`;
+    } else if (status === 'siap') {
+        html += `
+            <button class="btn btn-success" onclick="updateStatus('selesai')">
+                <i class="bi bi-bag-check"></i> Tandai Selesai
+            </button>`;
+    }
+
+    footer.innerHTML = html;
+}
+
+function closeModal() {
     document.getElementById('modalResep').classList.remove('open');
-    activePasienId = null;
+    activeResep = null;
 }
 
-// ─── Obat Rows (Dropdown dari DB) ────────────────────────
-let obatCounter = 0;
+// ─── Aksi ────────────────────────────────────────────────
+async function updateStatus(status) {
+    if (!activeResep) return;
 
-function addObatRow() {
-    const id  = obatCounter++;
-    const row = document.createElement('div');
-    row.className = 'obat-row';
-    row.id = `obat-row-${id}`;
-    row.innerHTML = `
-        <div class="fg" style="min-width:0">
-            ${id === 0 ? '<label>Nama Obat</label>' : '<label>&nbsp;</label>'}
-            <select id="obat-nama-${id}" onchange="onObatChange(${id})">
-                ${buildObatOptions()}
-            </select>
-            <div class="stok-info" id="obat-stok-${id}"></div>
-        </div>
-        <div class="fg">
-            ${id === 0 ? '<label>Dosis</label>' : '<label>&nbsp;</label>'}
-            <input type="text" placeholder="Contoh: 3x1" id="obat-dosis-${id}">
-        </div>
-        <div class="fg">
-            ${id === 0 ? '<label>Jumlah</label>' : '<label>&nbsp;</label>'}
-            <input type="number" placeholder="10" id="obat-jml-${id}" min="1">
-        </div>
-        <button class="btn-remove-obat" onclick="removeObatRow(${id})" title="Hapus">
-            <i class="bi bi-trash3"></i>
-        </button>
-    `;
-    document.getElementById('obatList').appendChild(row);
-}
-
-// Tampilkan info stok setelah obat dipilih
-function onObatChange(id) {
-    const sel      = document.getElementById(`obat-nama-${id}`);
-    const stokEl   = document.getElementById(`obat-stok-${id}`);
-    const selected = sel.options[sel.selectedIndex];
-
-    if (!sel.value) {
-        stokEl.className = 'stok-info';
-        stokEl.textContent = '';
-        return;
-    }
-
-    const stok = parseInt(selected.dataset.stok ?? 0);
-    if (stok > 0) {
-        stokEl.className = 'stok-info ok';
-        stokEl.textContent = `✓ Stok tersedia: ${stok}`;
-    } else {
-        stokEl.className = 'stok-info habis';
-        stokEl.textContent = `✗ Stok habis`;
-    }
-}
-
-function removeObatRow(id) {
-    const row = document.getElementById(`obat-row-${id}`);
-    if (row) row.remove();
-}
-
-function getObatList() {
-    const rows = document.getElementById('obatList').querySelectorAll('.obat-row');
-    const list = [];
-    rows.forEach(row => {
-        const id    = row.id.replace('obat-row-', '');
-        const sel   = document.getElementById(`obat-nama-${id}`);
-        const nama  = sel?.value?.trim();
-        const dosis = document.getElementById(`obat-dosis-${id}`)?.value?.trim();
-        const jml   = document.getElementById(`obat-jml-${id}`)?.value?.trim();
-
-        if (nama) {
-            // Validasi stok
-            const stok = parseInt(sel.options[sel.selectedIndex]?.dataset?.stok ?? 0);
-            list.push({
-                nama,
-                dosis  : dosis || '-',
-                jumlah : parseInt(jml) || 1,
-                stok,
-            });
-        }
-    });
-    return list;
-}
-
-// ─── Submit Resep ─────────────────────────────────────────
-async function submitResep(status) {
-    const diagnosa = document.getElementById('inputDiagnosa').value.trim();
-    const obatList = getObatList();
-
-    if (!diagnosa)        { alert('Diagnosa wajib diisi.'); return; }
-    if (!obatList.length) { alert('Tambahkan minimal satu obat.'); return; }
-
-    // Cek obat yang stoknya habis
-    const habis = obatList.filter(o => o.stok <= 0);
-    if (habis.length && status === 'baru') {
-        const namaHabis = habis.map(o => o.nama).join(', ');
-        if (!confirm(`Obat berikut stoknya habis: ${namaHabis}.\nTetap kirim ke apotek?`)) return;
-    }
-
-    const payload = {
-        pasien_id      : activePasienId,
-        diagnosa,
-        obat_list      : obatList,
-        catatan_dokter : document.getElementById('inputCatatan').value.trim(),
-        tanggal_kontrol: document.getElementById('inputKontrol').value || null,
-        status,
-    };
+    const label = { ditolak: 'menolak', selesai: 'menyelesaikan', validasi: 'memvalidasi', siap: 'mengkonfirmasi siap' };
+    if (!confirm(`Yakin ${label[status] ?? status} resep ini?`)) return;
 
     try {
-        const res = await fetch('/dokter/api/resep/store', {
+        const res = await fetch(`/apoteker/api/resep/${activeResep.id}/status`, {
             method : 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ status }),
         });
 
         const data = await res.json();
         if (data.success) {
-            closeResepModal();
-            if (status === 'baru') {
-                // Hapus pasien dari list lokal karena sudah selesai
-                allPasien = allPasien.filter(p => p.id !== activePasienId);
-            }
-            renderStats(allPasien);
+            // Update local data
+            const idx = allResep.findIndex(r => r.id === activeResep.id);
+            if (idx !== -1) allResep[idx].status = status;
+
+            activeResep.status = status;
+
+            // Update modal
+            const sb = document.getElementById('mStatusBadge');
+            sb.textContent = labelStatus(status);
+            sb.className   = `badge badge-${status}`;
+            renderFooter(status);
+
+            renderStats(allResep);
             filterTable();
-            showToast(status === 'baru'
-                ? `✅ Resep ${data.no_resep} berhasil dikirim ke apotek!`
-                : `💾 Resep disimpan sebagai draft.`
-            );
+            showToast(`✅ Status resep berhasil diubah ke: ${labelStatus(status)}`);
+
+            if (status === 'selesai' || status === 'ditolak') closeModal();
         } else {
-            alert('Gagal menyimpan resep.');
+            alert('Gagal mengubah status.');
         }
-    } catch(err) {
-        console.error(err);
+    } catch(e) {
+        console.error(e);
         alert('Terjadi kesalahan. Coba lagi.');
+    }
+}
+
+// Validasi: ubah status ke 'validasi'
+function prosesValidasi() {
+    updateStatus('validasi');
+}
+
+// Simpan jumlah obat yang diberikan lalu konfirmasi siap → buat invoice otomatis
+async function simpanObatDanSiap() {
+    if (!activeResep) return;
+
+    // Kumpulkan jumlah yang diberikan
+    const obatUpdated = (activeResep.obat ?? []).map((o, i) => {
+        const input = document.getElementById(`jml-diberikan-${i}`);
+        return { ...o, jumlah: parseInt(input?.value ?? o.jumlah) || 0 };
+    });
+
+    try {
+        // 1. Update obat list
+        const resObat = await fetch(`/apoteker/api/resep/${activeResep.id}/update-obat`, {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({ obat_list: obatUpdated }),
+        });
+
+        if (!resObat.ok) throw new Error('Gagal simpan obat');
+
+        // 2. Update status ke siap (ini yang trigger buat invoice)
+        await updateStatus('siap');
+
+    } catch(e) {
+        console.error(e);
+        alert('Terjadi kesalahan saat menyimpan. Coba lagi.');
     }
 }
 
@@ -829,25 +643,20 @@ function showToast(msg) {
     if (!t) {
         t = document.createElement('div');
         t.id = 'rx-toast';
-        t.style.cssText = `
-            position:fixed;bottom:24px;right:24px;background:#333;color:#fff;
+        t.style.cssText = `position:fixed;bottom:24px;right:24px;background:#333;color:#fff;
             padding:12px 20px;border-radius:10px;font-size:13px;font-family:'DM Sans',sans-serif;
-            z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.25);
-            transition:opacity .3s;
-        `;
+            z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .3s;`;
         document.body.appendChild(t);
     }
-    t.textContent = msg;
+    t.textContent   = msg;
     t.style.opacity = '1';
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
 
 // ─── Init ─────────────────────────────────────────────────
-// Load obat dari database apoteker, lalu render tabel
-loadObatOptions().then(() => {
-    renderStats(allPasien);
-    filterTable();
+document.addEventListener('DOMContentLoaded', function () {
+    loadResep();
 });
 </script>
-@endsection
+@endpush
