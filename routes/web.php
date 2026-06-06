@@ -103,6 +103,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // DATA PASIEN
     Route::get('/data', [PasienController::class, 'index'])->name('pasien.index');
     Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
+    Route::get('/pasien/cek-nik/{nik}', [PasienController::class, 'cekNik']);
     Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
     Route::post('/pasien/{id}/validasi', [PasienController::class, 'updateValidasi']);
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
