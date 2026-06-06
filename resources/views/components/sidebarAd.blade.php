@@ -151,15 +151,6 @@
     <span>Invoice</span>
   </a>
 
-  <a href="{{ url('admin/payment') }}"
-   class="nav-item {{ request()->is('admin/payment*') ? 'active' : '' }}">
-  <i class="bi bi-cash-stack nav-icon"></i>
-  <span>Payment</span>
-</a>
-
-
-
-
 
   <div class="nav-section">
     REPORT
