@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dokter;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -10,76 +11,105 @@ use Illuminate\Validation\Rule;
 class AdminDokterController extends Controller
 {
     /**
-     * Daftar semua akun dokter.
+     * Daftar semua dokter.
      */
     public function index()
     {
-        $dokters = User::where('role', 'dokter')->orderBy('poli')->get();
+        $dokters = Dokter::orderBy('nama')->get();
         return view('admin.dokter', compact('dokters'));
     }
 
     /**
-     * Simpan dokter baru.
+     * Simpan dokter baru → insert ke tabel dokters DAN users.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'poli'     => ['required', Rule::in(['Umum','Anak','Penyakit Dalam','Bedah','Gigi','Kebidanan','Mata','UGD'])],
+            'nama'         => 'required|string|max:100',
+            'spesialisasi' => 'required|string|max:100',
+            'no_telepon'   => 'required|string|max:20',
+            'email'        => 'required|email|unique:dokters,email|unique:users,email',
+            'password'     => 'required|string|min:6',
+            'status'       => 'required|in:Aktif,Tidak Aktif',
         ]);
 
+        // 1. Simpan ke tabel dokters (untuk tampilan manajemen)
+        Dokter::create([
+            'nama'         => $request->nama,
+            'spesialisasi' => $request->spesialisasi,
+            'no_telepon'   => $request->no_telepon,
+            'email'        => $request->email,
+            'status'       => $request->status,
+        ]);
+
+        // 2. Buat akun login di tabel users (untuk bisa login)
         User::create([
-            'name'     => $request->name,
+            'name'     => $request->nama,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => 'dokter',
-            'poli'     => $request->poli,
+            'poli'     => $request->spesialisasi,
         ]);
 
         return redirect()->route('admin.dokter.index')
-            ->with('success', "Akun dokter {$request->name} (Poli {$request->poli}) berhasil dibuat.");
+            ->with('success', "Dokter {$request->nama} berhasil ditambahkan dan akun login telah dibuat.");
     }
 
     /**
-     * Update data dokter.
+     * Update data dokter → update tabel dokters DAN users.
      */
     public function update(Request $request, $id)
     {
-        $dokter = User::where('role', 'dokter')->findOrFail($id);
+        $dokter = Dokter::findOrFail($id);
 
         $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($dokter->id)],
-            'password' => 'nullable|string|min:6',
-            'poli'     => ['required', Rule::in(['Umum','Anak','Penyakit Dalam','Bedah','Gigi','Kebidanan','Mata','UGD'])],
+            'nama'         => 'required|string|max:100',
+            'spesialisasi' => 'required|string|max:100',
+            'no_telepon'   => 'required|string|max:20',
+            'email'        => ['required', 'email', Rule::unique('dokters', 'email')->ignore($dokter->id)],
+            'password'     => 'nullable|string|min:6',
+            'status'       => 'required|in:Aktif,Tidak Aktif',
         ]);
 
-        $dokter->name  = $request->name;
-        $dokter->email = $request->email;
-        $dokter->poli  = $request->poli;
+        // 1. Update tabel dokters
+        $dokter->update([
+            'nama'         => $request->nama,
+            'spesialisasi' => $request->spesialisasi,
+            'no_telepon'   => $request->no_telepon,
+            'email'        => $request->email,
+            'status'       => $request->status,
+        ]);
 
-        if ($request->filled('password')) {
-            $dokter->password = Hash::make($request->password);
+        // 2. Update akun login di tabel users
+        $user = User::where('email', $dokter->email)->where('role', 'dokter')->first();
+        if ($user) {
+            $user->name  = $request->nama;
+            $user->email = $request->email;
+            $user->poli  = $request->spesialisasi;
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+            $user->save();
         }
 
-        $dokter->save();
-
         return redirect()->route('admin.dokter.index')
-            ->with('success', "Akun {$dokter->name} berhasil diperbarui.");
+            ->with('success', "Data {$dokter->nama} berhasil diperbarui.");
     }
 
     /**
-     * Hapus akun dokter.
+     * Hapus dokter → hapus dari tabel dokters DAN users.
      */
     public function destroy($id)
     {
-        $dokter = User::where('role', 'dokter')->findOrFail($id);
-        $nama   = $dokter->name;
+        $dokter = Dokter::findOrFail($id);
+        $nama   = $dokter->nama;
+
+        // Hapus akun login juga
+        User::where('email', $dokter->email)->where('role', 'dokter')->delete();
+
         $dokter->delete();
 
         return redirect()->route('admin.dokter.index')
-            ->with('success', "Akun {$nama} berhasil dihapus.");
+            ->with('success', "Dokter {$nama} berhasil dihapus.");
     }
 }

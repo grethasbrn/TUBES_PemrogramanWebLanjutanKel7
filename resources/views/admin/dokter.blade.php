@@ -17,6 +17,16 @@
     </div>
   @endif
 
+  @if($errors->any())
+    <div style="background:#fee2e2;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px">
+      <ul style="margin:0;padding-left:16px">
+        @foreach($errors->all() as $error)
+          <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+    </div>
+  @endif
+
   <div class="card">
     <div class="tbl-wrap">
       <table>
@@ -83,7 +93,12 @@
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Email</label>
-        <input name="email" type="email" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="email" type="email" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+      </div>
+      <!-- PASSWORD - wajib untuk akun login dokter -->
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;color:#555">Password <span style="color:#888;font-size:11px">(untuk login dokter)</span></label>
+        <input name="password" type="password" required minlength="6" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:13px;color:#555">Status</label>
@@ -120,7 +135,12 @@
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Email</label>
-        <input name="email" id="editEmail" type="email" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="email" id="editEmail" type="email" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+      </div>
+      <!-- PASSWORD OPSIONAL saat edit -->
+      <div style="margin-bottom:12px">
+        <label style="font-size:13px;color:#555">Password Baru <span style="color:#888;font-size:11px">(kosongkan jika tidak diubah)</span></label>
+        <input name="password" type="password" minlength="6" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
       <div style="margin-bottom:20px">
         <label style="font-size:13px;color:#555">Status</label>

@@ -17,6 +17,7 @@
     <button class="tab-btn" onclick="filterStatus('validasi',this)">Divalidasi</button>
     <button class="tab-btn" onclick="filterStatus('siap',this)">Siap Ambil</button>
     <button class="tab-btn" onclick="filterStatus('selesai',this)">Selesai</button>
+    <button class="tab-btn" onclick="filterStatus('ditolak',this)">Ditolak</button>
   </div>
 
   <div class="rx-layout" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
@@ -40,7 +41,7 @@
 @section('scripts')
 <script>
 let allResepStatus = @json($resepJson);
-let statusFilter   = 'semua';
+statusFilter   = 'semua';
 let selectedResepId = null;
 
 function loadStatusResep() {
@@ -140,8 +141,21 @@ function selectResepStatus(id) {
                 <div style="font-size:13px;color:#2e7d32;font-weight:600">📅 ${r.tanggal_kontrol}</div>
             </div>` : ''}
 
-            <div style="font-size:10px;color:#aaa;text-transform:uppercase;
-                        letter-spacing:.06em;margin-bottom:8px">Daftar Obat</div>
+            ${r.status === 'ditolak' ? `
+            <div style="background:#fce8e6;border-radius:10px;padding:12px;margin-bottom:14px">
+                <div style="font-size:10px;color:#aaa;text-transform:uppercase;
+                            letter-spacing:.06em;margin-bottom:6px">Alasan Penolakan</div>
+                <div style="font-size:13px;color:#c62828">${r.catatan_apoteker || 'Tidak ada keterangan'}</div>
+            </div>
+            <button onclick="kirimUlangResep('${r.id}')"
+                style="width:100%;padding:10px;background:#534AB7;color:#fff;border:none;
+                       border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;
+                       margin-bottom:14px;transition:opacity .15s;"
+                onmouseover="this.style.opacity='.85'"
+                onmouseout="this.style.opacity='1'">
+                ✏️ Edit & Kirim Ulang Resep
+            </button>` : ''}
+
             ${r.obat && r.obat.length ? r.obat.map(o => `
                 <div style="border:1px solid #eee;border-radius:8px;padding:10px 12px;
                             margin-bottom:6px;font-size:13px">
@@ -155,7 +169,16 @@ function selectResepStatus(id) {
     `;
 }
 
-// Init
+// ─── Kirim Ulang Resep ───────────────────────────────────
+function kirimUlangResep(id) {
+    const r = allResepStatus.find(x => x.id === id);
+    if (!r) return;
+
+    // Gunakan pasienId agar cocok dengan data allPasien di halaman prescription
+    window.location.href = `/dokter/prescription?open_pasien=${encodeURIComponent(r.pasienId)}`;
+}
+
+// ─── Init ────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     loadStatusResep();
     setInterval(loadStatusResep, 30000);

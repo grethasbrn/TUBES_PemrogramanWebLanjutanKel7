@@ -18,9 +18,9 @@ class PasienController extends Controller
 
         $pasienJson = $pasiens->map(function ($p) {
             $validasiBPJS = match($p->validasi) {
-                'Disetujui' => 'valid',
-                'Ditolak'   => 'invalid',
-                default     => 'pending',
+                'Valid', 'Disetujui'        => 'valid',
+                'Tidak Valid', 'Ditolak'    => 'invalid',
+                default                     => 'pending',
             };
 
             return [

@@ -96,9 +96,19 @@ class DokterController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $pasien = Pasien::findOrFail($id);
+
         $pasien->status = $request->status;
+
+        if ($request->status === 'Selesai') {
+            $pasien->validasi = 'Valid';
+        }
+
         $pasien->save();
-        return response()->json(['success' => true, 'status' => $pasien->status]);
+
+        return response()->json([
+            'success' => true,
+            'status' => $pasien->status
+        ]);
     }
 
     public function prescription()

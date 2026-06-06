@@ -548,5 +548,22 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPasien = pasienData.find(p => p.id === savedId);
       if (selectedPasien) pilihPasienResep(savedId);
     }
+    // Kirim ulang resep ditolak
+const resepUlang = sessionStorage.getItem('resepUlang');
+if (resepUlang && typeof pasienData !== 'undefined') {
+    sessionStorage.removeItem('resepUlang');
+    const r = JSON.parse(resepUlang);
+    selectedPasien = pasienData.find(p => p.rm === r.rm);
+    if (selectedPasien) {
+        // Isi ulang data dari resep lama
+        currentObatList = r.obat || [];
+        pilihPasienResep(selectedPasien.id);
+        setTimeout(() => {
+            const diagEl = document.getElementById('rDiagnosa');
+            if (diagEl) diagEl.value = r.diagnosa || '';
+        }, 100);
+        showToast('Resep ' + r.no_resep + ' siap diedit ulang', 'info');
+    }
+}
   }
 });

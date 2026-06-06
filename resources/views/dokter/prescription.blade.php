@@ -470,7 +470,6 @@ async function cekResepDitolak() {
         const res  = await fetch('/dokter/api/resep');
         const data = await res.json();
 
-        // Ambil hanya resep yang ditolak, group by pasienId (ambil yang terbaru)
         resepDitolakMap = {};
         data.filter(r => r.status === 'ditolak').forEach(r => {
             resepDitolakMap[r.pasienId] = r.alasan_tolak ?? 'Tidak ada keterangan.';
@@ -486,8 +485,22 @@ async function cekResepDitolak() {
             banner.style.display = 'none';
         }
 
-        // Re-render tabel supaya badge "Resep Ditolak" muncul
         filterTable();
+
+        // ─── Auto-open modal jika dari redirect kirim ulang ───────
+        const urlParams  = new URLSearchParams(window.location.search);
+        const openPasien = urlParams.get('open_pasien');
+        if (openPasien) {
+            const pasien = allPasien.find(p => p.id == openPasien);
+            if (pasien) {
+                openResepModal(pasien.id);
+            } else {
+                showToast('⚠️ Pasien tidak ditemukan di antrian. Mungkin sudah selesai.');
+            }
+            // Bersihkan URL supaya tidak auto-open lagi saat refresh
+            window.history.replaceState({}, '', '/dokter/prescription');
+        }
+
     } catch(e) {
         console.error('Gagal cek resep ditolak:', e);
     }
@@ -649,11 +662,9 @@ async function submitResep(status) {
             closeResepModal();
 
             if (status === 'baru') {
-                // Update status pasien jadi Selesai (jangan dihapus dari list)
                 const idx = allPasien.findIndex(p => p.id == activePasienId);
                 if (idx !== -1) allPasien[idx].status = 'Selesai';
 
-                // Hapus dari map ditolak karena sudah diresepkan ulang
                 delete resepDitolakMap[activePasienId];
             }
 
@@ -694,6 +705,6 @@ function showToast(msg) {
 // ─── Init ────────────────────────────────────────────────
 renderStats(allPasien);
 filterTable();
-cekResepDitolak();
+cekResepDitolak(); // auto-open modal dari URL parameter ditangani di dalam fungsi ini
 </script>
 @endsection
