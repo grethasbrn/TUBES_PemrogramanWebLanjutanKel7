@@ -208,4 +208,11 @@ class InvoiceController extends Controller
                 'obat'       => $inv->resep->obat_list ?? [],
             ]);
     }
+
+    public function payment()
+{
+    $payments = Invoice::orderBy('created_at', 'desc')->get();
+
+    return view('admin.payment', compact('payments'));
+}
 }
