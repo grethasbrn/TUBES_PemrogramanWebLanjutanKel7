@@ -65,7 +65,7 @@ class DokterController extends Controller
     private function queryPasienPoli()
     {
         $poli = $this->getPoliDokter();
-        $query = Pasien::query()->where('status_kirim', 'Terkirim');
+        $query = Pasien::query()->where('status_kirim', 'Sudah');
         if ($poli) $query->where('poli_tujuan', $poli);
         return $query;
     }
@@ -73,8 +73,8 @@ class DokterController extends Controller
     public function dashboard()
     {
         $today = Carbon::today();
-        $pasienHariIni = $this->queryPasienPoli()->whereIn('status', ['Menunggu', 'Diperiksa'])->count();
-        $antrian = $this->queryPasienPoli()->whereIn('status', ['Menunggu', 'Diperiksa'])->orderBy('created_at')->take(8)->get(['id', 'nama', 'no_rm', 'jenis', 'poli_tujuan', 'status', 'keluhan']);
+        $pasienHariIni = $this->queryPasienPoli()->whereDate('created_at', $today)->whereIn('status', ['Menunggu', 'Diperiksa'])->count();
+        $antrian = $this->queryPasienPoli()->whereDate('created_at', $today)->whereIn('status', ['Menunggu', 'Diperiksa'])->orderBy('created_at')->take(8)->get(['id', 'nama', 'no_rm', 'jenis', 'poli_tujuan', 'status', 'keluhan']);
         $resepTerbaru = Resep::with('pasien')->whereDate('created_at', $today)->latest()->take(5)->get();
         $antrianJson = $antrian->map(fn($p) => ['id' => (string)$p->id, 'nama' => $p->nama, 'rm' => $p->no_rm, 'bayar' => $p->jenis ?? 'BPJS', 'poli' => $p->poli_tujuan, 'status' => $p->status, 'keluhan' => $p->keluhan ?? '-']);
         $resepJson = $resepTerbaru->map(fn($r) => ['id' => (string)$r->id, 'pasien' => $r->pasien->nama ?? '-', 'rm' => $r->pasien->no_rm ?? '-', 'diagnosa' => $r->diagnosa, 'status' => $r->status]);

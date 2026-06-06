@@ -21,7 +21,7 @@ Route::prefix('apoteker')->middleware(['auth', 'role:apoteker'])->group(function
     Route::get('/dashboard', [BatchController::class, 'dashboard'])->name('apoteker.dashboard');
     Route::get('/stock', [BatchController::class, 'index'])->name('apoteker.stock');
     Route::get('/alerts', [BatchController::class, 'alerts'])->name('apoteker.alerts');
-    Route::get('/prescription', [ResepController::class, 'apotekerPrescription']);
+    Route::get('/prescription', [ResepController::class, 'apotekerPrescription'])->name('apoteker.prescription');
     Route::get('/invoice', [InvoiceController::class, 'apotekerIndex'])->name('apoteker.invoice');
     Route::get('/report', [ReportController::class, 'index'])->name('apoteker.report');
     Route::get('/api/report', [ReportController::class, 'apiStats']);
