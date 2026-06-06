@@ -10,12 +10,12 @@ use App\Http\Controllers\PasienController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\DokterController;
+use App\Http\Controllers\Admindoktercontroller as AdminDokterController;
 
 Route::get('/', function () { return view('login'); });
 Route::get('/login', function () { return view('login'); })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/logout', [AuthController::class, 'logout']);
 
 /*
 |--------------------------------------------------------------------------
@@ -115,11 +115,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua']);
     Route::post('/pasien/{id}/kirim', [PasienController::class, 'kirimKeDokter']);
 
-    // DOKTER
-    Route::get('/dokter', [DokterController::class, 'index'])->name('admin.dokter.index');
-    Route::post('/dokter', [DokterController::class, 'store'])->name('admin.dokter.store');
-    Route::put('/dokter/{id}', [DokterController::class, 'update'])->name('admin.dokter.update');
-    Route::delete('/dokter/{id}', [DokterController::class, 'destroy'])->name('admin.dokter.destroy');
+    // DOKTER — gunakan AdminDokterController (manajemen akun user dokter)
+    Route::get('/dokter', [AdminDokterController::class, 'index'])->name('admin.dokter.index');
+    Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');
+    Route::put('/dokter/{id}', [AdminDokterController::class, 'update'])->name('admin.dokter.update');
+    Route::delete('/dokter/{id}', [AdminDokterController::class, 'destroy'])->name('admin.dokter.destroy');
 
     // INVOICE
     Route::get('/invoice', [InvoiceController::class, 'index'])->name('invoice.index');
@@ -127,6 +127,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/invoice/{id}/download', [InvoiceController::class, 'downloadPdf'])->name('invoice.download');
     Route::post('/invoice/store', [InvoiceController::class, 'store'])->name('invoice.store');
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
+    Route::post('/invoice/{id}/bpjs-selesai', [InvoiceController::class, 'selesaikanBpjs'])->name('invoice.bpjs');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
 
     // PAYMENT

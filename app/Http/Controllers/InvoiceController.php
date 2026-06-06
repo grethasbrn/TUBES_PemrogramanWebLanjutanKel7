@@ -2,16 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Batch;
 use App\Models\Invoice;
 use App\Models\Resep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
-    /**
-     * Invoice untuk ADMIN
-     */
+    // ─── Helper: hitung dan buat invoice dari resep ────────────────────────
+    private function buatInvoiceDariResep(Resep $resep): Invoice
+    {
+        $pasien  = $resep->pasien;
+        $isBPJS  = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
+        $obatList = $resep->obat_list ?? [];
+
+        $subtotal = collect($obatList)->sum(function ($item) use ($isBPJS) {
+            if ($isBPJS) return 0;
+            $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
+                '%' . strtolower($item['nama'] ?? '') . '%'
+            ])->where('jumlah', '>', 0)->first();
+            return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
+        });
+
+        $ppn   = $isBPJS ? 0 : round($subtotal * 0.11);
+        $total = $isBPJS ? 0 : ($subtotal + $ppn);
+
+        return Invoice::create([
+            'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
+            'resep_id'      => $resep->id,
+            'no_rm'         => $pasien->no_rm ?? '-',
+            'nama'          => $pasien->nama   ?? '-',
+            'jenis'         => $pasien->jenis  ?? 'Mandiri',
+            'status'        => 'masuk',
+            'subtotal'      => $subtotal,
+            'ppn'           => $ppn,
+            'total_tagihan' => $total,
+        ]);
+    }
+
+    // ─── Helper: kurangi stok obat berdasarkan obat_list resep ─────────────
+    private function kurangiStok(Resep $resep): void
+    {
+        foreach ($resep->obat_list ?? [] as $item) {
+            $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
+                '%' . strtolower($item['nama'] ?? '') . '%'
+            ])->where('jumlah', '>', 0)->first();
+
+            if (!$batch) {
+                throw new \Exception("Obat {$item['nama']} tidak ditemukan di stok");
+            }
+
+            $qty = (int) ($item['jumlah'] ?? 0);
+            if ($batch->jumlah < $qty) {
+                throw new \Exception("Stok {$item['nama']} tidak cukup (sisa: {$batch->jumlah})");
+            }
+
+            $batch->jumlah -= $qty;
+            $batch->save();
+        }
+    }
+
+    // ─── Admin: daftar semua invoice ───────────────────────────────────────
     public function index(Request $request)
     {
         $invoices = Invoice::with('resep')->orderBy('created_at', 'desc')->get();
@@ -24,9 +77,7 @@ class InvoiceController extends Controller
         return view('admin.invoice', compact('invoices', 'selectedInvoice'));
     }
 
-    /**
-     * Halaman invoice untuk APOTEKER — tampilkan daftar resep masuk
-     */
+    // ─── Apoteker: daftar resep masuk ─────────────────────────────────────
     public function apotekerIndex(Request $request)
     {
         $reseps = Resep::with('pasien')
@@ -42,54 +93,29 @@ class InvoiceController extends Controller
         return view('apoteker.invoice', compact('reseps', 'selectedResep'));
     }
 
-    /**
-     * Kirim invoice dari form apoteker (update obat + ubah status ke siap)
-     */
+    // ─── Apoteker: kirim invoice dari resep ───────────────────────────────
     public function kirimDariResep(Request $request, $id)
     {
         $resep = Resep::with('pasien')->findOrFail($id);
 
-        // Simpan obat list yang sudah diedit apoteker
-        $obatList = collect($request->obat ?? [])->filter(fn($o) => !empty($o['nama']))->values()->toArray();
+        $obatList = collect($request->obat ?? [])
+            ->filter(fn($o) => !empty($o['nama']))
+            ->values()
+            ->toArray();
+
         $resep->obat_list = $obatList;
+        $resep->status    = 'siap';
         $resep->save();
 
-        // Ubah status ke siap → trigger buat invoice otomatis di updateStatus
-        $resep->status = 'siap';
-        $resep->save();
-
-        // Buat invoice jika belum ada
         if (!Invoice::where('resep_id', $resep->id)->exists()) {
-            $pasien = $resep->pasien;
-            $isBPJS = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
-
-            $subtotal = collect($obatList)->sum(function ($item) use ($isBPJS) {
-                if ($isBPJS) return 0;
-                $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
-                    '%' . strtolower($item['nama'] ?? '') . '%'
-                ])->where('jumlah', '>', 0)->first();
-                return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
-            });
-
-            $ppn = $isBPJS ? 0 : round($subtotal * 0.11);
-
-            Invoice::create([
-                'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
-                'resep_id'      => $resep->id,
-                'no_rm'         => $pasien->no_rm ?? '-',
-                'nama'          => $pasien->nama  ?? '-',
-                'jenis'         => $pasien->jenis ?? 'Mandiri',
-                'status'        => 'masuk',
-                'subtotal'      => $subtotal,
-                'ppn'           => $ppn,
-                'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
-            ]);
+            $this->buatInvoiceDariResep($resep);
         }
 
         return redirect()->route('apoteker.invoice')
             ->with('success', 'Invoice berhasil dikirim ke admin!');
     }
 
+    // ─── Admin: buat invoice manual ───────────────────────────────────────
     public function store(Request $request)
     {
         $resep = Resep::with('pasien')->findOrFail($request->resep_id);
@@ -98,36 +124,15 @@ class InvoiceController extends Controller
             return redirect()->back()->with('error', 'Invoice untuk resep ini sudah ada.');
         }
 
-        $pasien  = $resep->pasien;
-        $isBPJS  = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
-
-        $subtotal = collect($resep->obat_list)->sum(function ($item) use ($isBPJS) {
-            if ($isBPJS) return 0;
-            $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
-                '%' . strtolower($item['nama'] ?? '') . '%'
-            ])->where('jumlah', '>', 0)->first();
-            return ($item['jumlah'] ?? 0) * ($batch ? (float) $batch->harga : 0);
-        });
-
-        $ppn = $isBPJS ? 0 : round($subtotal * 0.11);
-
-        Invoice::create([
-            'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
-            'resep_id'      => $resep->id,
-            'no_rm'         => $pasien->no_rm ?? '-',
-            'nama'          => $pasien->nama ?? '-',
-            'jenis'         => $pasien->jenis ?? 'Mandiri',
-            'status'        => 'masuk',
-            'subtotal'      => $subtotal,
-            'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
-        ]);
+        $this->buatInvoiceDariResep($resep);
 
         return redirect()->route('invoice.index')->with('success', 'Invoice berhasil dibuat.');
     }
 
+    // ─── Admin: proses bayar (termasuk BPJS — stok tetap dikurangi) ───────
     public function bayar(Request $request, $id)
     {
-        return \DB::transaction(function () use ($request, $id) {
+        return DB::transaction(function () use ($request, $id) {
 
             $invoice = Invoice::with('resep')->findOrFail($id);
 
@@ -137,33 +142,48 @@ class InvoiceController extends Controller
 
             $resep = $invoice->resep;
 
-            foreach ($resep->obat_list as $item) {
-                $batch = \App\Models\Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
-                    '%' . strtolower($item['nama'] ?? '') . '%'
-                ])->where('jumlah', '>', 0)->first();
-
-                if (!$batch) {
-                    throw new \Exception("Obat {$item['nama']} tidak ditemukan di stok");
-                }
-
-                if ($batch->jumlah < ($item['jumlah'] ?? 0)) {
-                    throw new \Exception("Stok {$item['nama']} tidak cukup");
-                }
-
-                $batch->jumlah -= $item['jumlah'];
-                $batch->save();
-            }
+            // Kurangi stok — berlaku untuk BPJS maupun Mandiri
+            $this->kurangiStok($resep);
 
             $invoice->update([
                 'status'        => 'Lunas',
                 'diproses_oleh' => auth()->id(),
-                'no_referensi'  => $request->no_referensi ?? 'REF-' . time()
+                'no_referensi'  => $request->no_referensi ?? 'REF-' . time(),
             ]);
 
             $resep->status = 'selesai';
             $resep->save();
 
             return redirect()->back()->with('success', 'Pembayaran berhasil & stok dikurangi!');
+        });
+    }
+
+    // ─── BPJS: selesaikan tanpa bayar (stok tetap dikurangi) ──────────────
+    public function selesaikanBpjs(Request $request, $id)
+    {
+        return DB::transaction(function () use ($id) {
+
+            $invoice = Invoice::with('resep')->findOrFail($id);
+
+            if ($invoice->jenis !== 'BPJS') {
+                return redirect()->back()->with('error', 'Hanya untuk pasien BPJS.');
+            }
+
+            if (strtolower($invoice->status) === 'lunas') {
+                return redirect()->back()->with('info', 'Invoice sudah diselesaikan');
+            }
+
+            $this->kurangiStok($invoice->resep);
+
+            $invoice->update([
+                'status'        => 'Lunas',
+                'diproses_oleh' => auth()->id(),
+                'no_referensi'  => 'BPJS-' . now()->format('YmdHis'),
+            ]);
+
+            $invoice->resep->update(['status' => 'selesai']);
+
+            return redirect()->back()->with('success', 'Resep BPJS selesai & stok dikurangi!');
         });
     }
 
@@ -210,9 +230,8 @@ class InvoiceController extends Controller
     }
 
     public function payment()
-{
-    $payments = Invoice::orderBy('created_at', 'desc')->get();
-
-    return view('admin.payment', compact('payments'));
-}
+    {
+        $payments = Invoice::orderBy('created_at', 'desc')->get();
+        return view('admin.payment', compact('payments'));
+    }
 }
