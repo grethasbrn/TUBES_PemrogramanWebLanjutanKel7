@@ -473,7 +473,7 @@ function renderResepPreview() {
         : `<div style="color:var(--text3,#aaa);font-size:13px;padding:8px 0">Belum ada obat</div>`
       }
       <div style="border-top:1px solid var(--cream3,#eee);margin-top:12px;padding-top:10px;font-size:12px;color:var(--text3,#aaa)">
-        Dr. Tirta · ${new Date().toLocaleDateString('id-ID')}
+        ${document.querySelector('meta[name="dokter-name"]')?.content || 'Dokter'} · ${new Date().toLocaleDateString('id-ID')}
       </div>
     </div>`;
 }

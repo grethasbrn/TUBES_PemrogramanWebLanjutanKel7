@@ -64,7 +64,7 @@
 </div>
 
 <!-- Modal Tambah -->
-<div id="modalTambah" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center">
+<div id="modalTambah" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center; margin-top: 50px;">
   <div style="background:#fff;border-radius:12px;padding:28px;width:480px;max-width:95vw">
     <div style="font-size:16px;font-weight:700;margin-bottom:20px">Tambah Dokter</div>
     <form method="POST" action="{{ url('admin/dokter') }}">

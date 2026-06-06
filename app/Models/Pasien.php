@@ -20,25 +20,12 @@ class Pasien extends Model
         'pekerjaan',
         'jenis',           // BPJS atau Mandiri
         'no_bpjs',
-        'poli_tujuan',
-        'jenis_kunjungan',
-        'status',
-        'validasi',
-        'status_kirim', 
-        'dokter', 
-        'keluhan',
-        'riwayat_penyakit',
-        // Kolom medis baru untuk dokter
-        'berat_badan',
-        'tinggi_badan',
-        'tekanan_darah',
-        'alergi',
     ];
 
-    // Relasi: satu pasien bisa punya banyak resep
-    public function reseps()
+    // Relasi ke kunjungan
+    public function kunjungans()
     {
-        return $this->hasMany(Resep::class);
+        return $this->hasMany(Kunjungan::class);
     }
 
     // Helper: hitung usia dari tgl_lahir
