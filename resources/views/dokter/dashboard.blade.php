@@ -2,26 +2,50 @@
 
 @section('content')
 <div class="page-section active dashboard-page" id="sec-dashboard">
+
   <div class="page-header hero-dashboard">
+
     <div>
-      <div class="hero-badge">💊 Pharmbee Dashboard</div>
-      <div class="page-title">Dashboard</div>
-      <div class="page-sub">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</div>
+
+      <div class="page-title">
+        Dashboard
+      </div>
+
+      <div class="page-sub">
+        {{ now()->locale('id')->translatedFormat('l, d F Y') }}
+      </div>
+
+
       <p class="hero-text">
-        Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>.
+
+        Selamat datang kembali, 
+        <strong>{{ auth()->user()->name }}</strong>.
+
         @if(auth()->user()->poli)
-          Anda mengelola pasien <strong>Poli {{ auth()->user()->poli }}</strong>.
+
+          Anda mengelola pasien 
+          <strong>Poli {{ auth()->user()->poli }}</strong>.
+
         @else
+
           Kelola pasien dan resep hari ini dengan mudah.
+
         @endif
+
       </p>
+
     </div>
 
-    <button class="btn btn-primary btn-resep" onclick="showSection('buat-resep')">
-      ✍️ Buat Resep Baru
-    </button>
-  </div>
 
+    <button 
+      class="btn btn-primary btn-resep" 
+      onclick="showSection('buat-resep')"
+    >
+      Buat Resep Baru
+    </button>
+
+
+  </div>
   <div class="metrics">
     <div class="metric pretty-card">
       <div class="metric-icon">👥</div>

@@ -72,7 +72,6 @@
 
 
 
-
 <!-- SIDEBAR -->
 <div class="sidebar">
 
@@ -83,12 +82,10 @@
       Menu
     </div>
 
-
     <button 
       type="button"
       class="sidebar-toggle"
-      onclick="toggleSidebar()"
-    >
+      onclick="toggleSidebar()">
       ☰
     </button>
 
@@ -96,63 +93,73 @@
 
 
 
-
-
   <a href="{{ url('admin/dashboard') }}"
      class="nav-item {{ request()->is('admin/dashboard*') ? 'active' : '' }}">
-
     <i class="bi bi-grid-1x2 nav-icon"></i>
     <span>Dashboard</span>
-
   </a>
-
-
 
 
 
   <a href="{{ url('admin/data') }}"
      class="nav-item {{ request()->is('admin/data*') ? 'active' : '' }}">
-
     <i class="bi bi-person-vcard nav-icon"></i>
     <span>Data Pasien</span>
-
   </a>
 
 
 
-
-
-
-  <a href="{{ url('admin/invoice') }}"
-     class="nav-item {{ request()->is('admin/invoice*') ? 'active' : '' }}">
-
-    <i class="bi bi-activity nav-icon"></i>
-    <span>Invoice</span>
-
+  <a href="{{ url('admin/queue') }}"
+     class="nav-item {{ request()->is('admin/queue*') ? 'active' : '' }}">
+    <i class="bi bi-calendar2-plus nav-icon"></i>
+    <span>Queue</span>
   </a>
 
 
+
+  <a href="{{ url('admin/dokter') }}"
+     class="nav-item {{ request()->is('admin/dokter*') ? 'active' : '' }}">
+    <i class="bi bi-person nav-icon"></i>
+    <span>Manajemen Dokter</span>
+  </a>
 
 
 
 
 
   <div class="nav-section">
-    LAPORAN
+    PATIENT
   </div>
 
 
+
+  <a href="{{ url('admin/invoice') }}"
+     class="nav-item {{ request()->is('admin/invoice*') ? 'active' : '' }}">
+    <i class="bi bi-receipt nav-icon"></i>
+    <span>Invoice</span>
+  </a>
+
+  <a href="{{ url('admin/payment') }}"
+   class="nav-item {{ request()->is('admin/payment*') ? 'active' : '' }}">
+  <i class="bi bi-cash-stack nav-icon"></i>
+  <span>Payment</span>
+</a>
+
+
+
+
+
+  <div class="nav-section">
+    REPORT
+  </div>
 
 
 
   <a href="{{ url('admin/report') }}"
      class="nav-item {{ request()->is('admin/report*') ? 'active' : '' }}">
-
-    <i class="bi bi-clock-history nav-icon"></i>
-    <span>Laporan</span>
-
+    <i class="bi bi-graph-up nav-icon"></i>
+    <span>Report</span>
   </a>
-
 
 
 </div>
@@ -161,34 +168,24 @@
 
 
 
-
-
-
-
 <script>
-
 
 function updateDateTime(){
 
     const now = new Date();
 
-
     const tanggal = now.toLocaleDateString('id-ID',{
-
         weekday:'long',
         day:'numeric',
         month:'long',
         year:'numeric'
-
     });
 
 
     const jam = now.toLocaleTimeString('id-ID',{
-
         hour:'2-digit',
         minute:'2-digit',
         second:'2-digit'
-
     });
 
 
@@ -196,8 +193,6 @@ function updateDateTime(){
       `${tanggal} • ${jam}`;
 
 }
-
-
 
 
 
@@ -212,15 +207,11 @@ function toggleProfileMenu(){
 
 
 
-
-
 function toggleSidebar(){
 
     document.body.classList.toggle('sidebar-close');
 
 }
-
-
 
 
 
