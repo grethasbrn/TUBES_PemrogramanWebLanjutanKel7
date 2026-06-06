@@ -21,25 +21,21 @@
       @endphp
 
       <div class="custom-dropdown">
-          <div class="dropdown-selected">
-              Juni 2026
-              <span>▼</span>
-          </div>
-          <div class="dropdown-options">
-              @foreach($months as $val => $label)
-                  <div class="dropdown-option" data-value="{{ $val }}">
-                      {{ $label }}
-                  </div>
-              @endforeach
-          </div>
-          <input type="hidden" id="reportMonth" value="2026-05">
+        <div class="dropdown-selected">Juni 2026 <span>▼</span></div>
+        <div class="dropdown-options">
+          @foreach($months as $val => $label)
+            <div class="dropdown-option" data-value="{{ $val }}">{{ $label }}</div>
+          @endforeach
         </div>
+        <input type="hidden" id="reportMonth" value="2026-06">
+      </div>
+
       <button class="btn btn-teal" onclick="exportPDF()">⬇ Export PDF</button>
     </div>
   </div>
 
   {{-- Metrics --}}
-  <div class="metrics" style="margin-bottom:14px" id="metricsRow">
+  <div class="metrics" style="margin-bottom:14px">
     <div class="metric">
       <div class="metric-label">Total Resep</div>
       <div class="metric-val" id="m-totalResep">—</div>
@@ -58,19 +54,16 @@
     <div class="metric">
       <div class="metric-label">Obat Terlaris</div>
       <div class="metric-val" id="m-topObat">—</div>
-      <div class="metric-sub" id="m-topObatSub">jenis obat bulan ini</div>
+      <div class="metric-sub">jenis obat bulan ini</div>
     </div>
   </div>
 
   {{-- Charts --}}
   <div class="grid22">
-    {{-- Top 10 Obat Terlaris --}}
     <div class="card">
       <div class="card-title">10 Obat Terlaris</div>
       <div id="topDrugsChart" style="margin-top:12px"></div>
     </div>
-
-    {{-- Pendapatan per Minggu --}}
     <div class="card">
       <div class="card-title">Pendapatan per Minggu</div>
       <canvas id="chartPendapatan" height="220" style="margin-top:12px"></canvas>
@@ -81,13 +74,12 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ── Dropdown ─────────────────────────────────────────────
 document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
-
     const selected = dropdown.querySelector('.dropdown-selected');
-    const options = dropdown.querySelector('.dropdown-options');
-    const hidden = dropdown.querySelector('input[type="hidden"]');
+    const options  = dropdown.querySelector('.dropdown-options');
+    const hidden   = dropdown.querySelector('input[type="hidden"]');
 
     selected.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -95,47 +87,20 @@ document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
     });
 
     dropdown.querySelectorAll('.dropdown-option').forEach(option => {
-
         option.addEventListener('click', () => {
-
-            selected.innerHTML =
-                option.textContent + '<span>▼</span>';
-
+            selected.innerHTML = option.textContent + ' <span>▼</span>';
             hidden.value = option.dataset.value;
-
             options.classList.remove('show');
-
-            if(hidden.id === 'reportMonth'){
-                loadReport();
-            }
-
+            if (hidden.id === 'reportMonth') loadReport();
         });
-
     });
-
 });
 
 document.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown-options').forEach(opt => {
-        opt.classList.remove('show');
-    });
+    document.querySelectorAll('.dropdown-options').forEach(opt => opt.classList.remove('show'));
 });
 
-option.addEventListener('click', () => {
-
-    selected.innerHTML =
-        option.textContent + '<span>▼</span>';
-
-    hidden.value = option.dataset.value;
-
-    options.classList.remove('show');
-
-    if(hidden.id === 'reportMonth'){
-        loadReport();
-    }
-
-});
-
+// ── Load Report ───────────────────────────────────────────
 let chartInstance = null;
 
 async function loadReport() {
@@ -146,39 +111,30 @@ async function loadReport() {
         const res  = await fetch(`/apoteker/api/report?month=${month}&year=${year}`);
         const data = await res.json();
 
-        // ── Metrics ──
-        document.getElementById('m-totalResep').textContent    = data.totalResep;
-        document.getElementById('m-resepSelesai').textContent  = data.resepSelesai;
-        document.getElementById('m-topObat').textContent       = data.topObat.length;
+        // Metrics
+        document.getElementById('m-totalResep').textContent   = data.totalResep;
+        document.getElementById('m-resepSelesai').textContent = data.resepSelesai;
+        document.getElementById('m-topObat').textContent      = data.topObat.length;
 
-        // Pendapatan format
         const pend = data.totalPendapatan;
         document.getElementById('m-pendapatan').textContent =
             pend >= 1000000
                 ? 'Rp ' + (pend / 1000000).toFixed(1) + 'jt'
                 : 'Rp ' + Number(pend).toLocaleString('id-ID');
 
-        // % perubahan resep
-        const pctR = data.pctResep;
         const elPctR = document.getElementById('m-pctResep');
-        elPctR.textContent = (pctR >= 0 ? '+' : '') + pctR + '% vs bulan lalu';
-        elPctR.className   = 'metric-sub ' + (pctR >= 0 ? 'up' : 'down');
+        elPctR.textContent = (data.pctResep >= 0 ? '+' : '') + data.pctResep + '% vs bulan lalu';
+        elPctR.className   = 'metric-sub ' + (data.pctResep >= 0 ? 'up' : 'dn');
 
-        // completion rate
-        document.getElementById('m-completion').textContent =
-            data.completionRate + '% completion';
-        document.getElementById('m-completion').className = 'metric-sub up';
+        const elComp = document.getElementById('m-completion');
+        elComp.textContent = data.completionRate + '% completion';
+        elComp.className   = 'metric-sub up';
 
-        // % perubahan pendapatan
-        const pctP = data.pctPendapatan;
         const elPctP = document.getElementById('m-pctPendapatan');
-        elPctP.textContent = (pctP >= 0 ? '+' : '') + pctP + '% vs bulan lalu';
-        elPctP.className   = 'metric-sub ' + (pctP >= 0 ? 'up' : 'down');
+        elPctP.textContent = (data.pctPendapatan >= 0 ? '+' : '') + data.pctPendapatan + '% vs bulan lalu';
+        elPctP.className   = 'metric-sub ' + (data.pctPendapatan >= 0 ? 'up' : 'dn');
 
-        // ── Top Obat Bar Chart ──
         renderTopObat(data.topObat);
-
-        // ── Pendapatan per Minggu ──
         renderChartPendapatan(data.pendapatanMinggu);
 
     } catch (err) {
@@ -186,13 +142,13 @@ async function loadReport() {
     }
 }
 
+// ── Top Obat ──────────────────────────────────────────────
 function renderTopObat(topObat) {
     const container = document.getElementById('topDrugsChart');
     if (!topObat.length) {
         container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px">Belum ada data</div>';
         return;
     }
-
     const max = topObat[0]?.qty || 1;
     container.innerHTML = topObat.map(o => {
         const pct = Math.round((o.qty / max) * 100);
@@ -210,6 +166,7 @@ function renderTopObat(topObat) {
     }).join('');
 }
 
+// ── Chart Pendapatan ──────────────────────────────────────
 function renderChartPendapatan(weeks) {
     const ctx = document.getElementById('chartPendapatan').getContext('2d');
     if (chartInstance) chartInstance.destroy();
@@ -253,9 +210,7 @@ function renderChartPendapatan(weeks) {
     });
 }
 
-function exportPDF() {
-    window.print();
-}
+function exportPDF() { window.print(); }
 
 document.addEventListener('DOMContentLoaded', loadReport);
 </script>
