@@ -181,18 +181,23 @@ class ResepController extends Controller
      */
     public function prescription()
     {
+        $dokter = auth()->user();
+        $poli   = $dokter->poli; // ambil poli dari user yang login
+
         $pasienJson = Pasien::select(
             'id','nama','no_rm','jenis','poli_tujuan',
             'tgl_lahir','jenis_kelamin','keluhan',
             'alergi','berat_badan','tinggi_badan','tekanan_darah'
         )
         ->whereIn('status', ['Diperiksa','Menunggu'])
+        ->where('status_kirim', 'Sudah')
+        ->when($poli, fn($q) => $q->where('poli_tujuan', $poli)) // filter poli
         ->get();
 
         $obatJson = Batch::where('jumlah', '>', 0)
             ->where(function ($q) {
                 $q->whereNull('tgl_expired')
-                  ->orWhere('tgl_expired', '>', now());
+                ->orWhere('tgl_expired', '>', now());
             })
             ->select('id','nama_obat','tipe','kategori','jumlah','harga','harga_bpjs')
             ->orderBy('nama_obat')
@@ -208,7 +213,6 @@ class ResepController extends Controller
 
         return view('dokter.prescription', compact('pasienJson', 'obatJson'));
     }
-
     /**
      * Halaman prescription untuk APOTEKER — tampilkan resep masuk dari dokter
      */
