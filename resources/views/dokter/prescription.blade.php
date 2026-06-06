@@ -20,7 +20,7 @@
 ])) !!}
 </script>
 
-<script id="obat-data"   type="application/json">{!! json_encode($obatJson)  !!}</script>
+<script id="obat-data" type="application/json">{!! json_encode($obatJson) !!}</script>
 
 <style>
 .rx-header {
@@ -212,7 +212,29 @@
 .btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
 .btn-primary:hover { opacity: .88; }
 .btn-draft { background: #fff3e0; color: #f57c00; border-color: #ffe0b2; }
+
+/* ─── Banner Tolak ─── */
+.banner-tolak {
+    background: #fce8e6;
+    border: 1px solid #f5c6cb;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.banner-tolak i { color: #d93025; font-size: 20px; flex-shrink: 0; }
+.banner-tolak strong { color: #d93025; font-size: 13px; display: block; }
+.banner-tolak p { margin: 3px 0 0; font-size: 12px; color: #c0392b; }
+
+/* ─── Row ditolak highlight ─── */
+.row-ditolak td { background: #fff8f8 !important; }
+.badge-ditolak-resep { background: #fce8e6; color: #d93025; }
 </style>
+
+{{-- ─── Header ─── --}}
 <div class="rx-header">
     <h2>Resep <span>Pasien</span></h2>
     <div class="rx-toolbar">
@@ -237,6 +259,16 @@
     </div>
 </div>
 
+{{-- ─── Banner Resep Ditolak ─── --}}
+<div class="banner-tolak" id="bannerTolak" style="display:none">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div>
+        <strong>Ada resep yang ditolak apoteker</strong>
+        <p id="bannerTolakDetail"></p>
+    </div>
+</div>
+
+{{-- ─── Stats ─── --}}
 <div class="rx-stats">
     <div class="rx-stat">
         <div class="rx-stat-icon blue"><i class="bi bi-people"></i></div>
@@ -256,6 +288,7 @@
     </div>
 </div>
 
+{{-- ─── Table ─── --}}
 <div class="rx-table-wrap">
     <table class="rx-table">
         <thead>
@@ -280,10 +313,20 @@
     </table>
 </div>
 
+{{-- ─── Modal Tulis Resep ─── --}}
 <div class="modal-overlay" id="modalResep" onclick="closeResepModal()">
     <div class="modal" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeResepModal()">✕</button>
         <h3>✍️ Tulis Resep</h3>
+
+        {{-- Notif resep sebelumnya ditolak --}}
+        <div id="notifTolakModal" style="display:none; background:#fce8e6; border:1px solid #f5c6cb;
+            border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+            <strong style="color:#d93025; font-size:13px;">
+                <i class="bi bi-exclamation-circle"></i> Resep sebelumnya ditolak apoteker
+            </strong>
+            <p id="notifTolakAlasan" style="margin:4px 0 0; font-size:12px; color:#c0392b;"></p>
+        </div>
 
         <div class="modal-section">
             <div class="modal-section-title">Data Pasien</div>
@@ -345,21 +388,22 @@
 
 @section('scripts')
 <script>
-// ─── Data ───────────────────────────────────────────────
+// ─── Data ────────────────────────────────────────────────
 let allPasien = [];
 try {
     allPasien = JSON.parse(document.getElementById('pasien-data').textContent) || [];
 } catch(e) { allPasien = []; }
 
-// ✅ Data obat dari database
 let allObat = [];
 try {
     allObat = JSON.parse(document.getElementById('obat-data').textContent) || [];
 } catch(e) { allObat = []; }
 
-let activePasienId = null;
+let activePasienId  = null;
+// Map pasienId → alasan tolak dari resep terakhir yang ditolak
+let resepDitolakMap = {};
 
-// ─── Stats ──────────────────────────────────────────────
+// ─── Stats ───────────────────────────────────────────────
 function renderStats(data) {
     document.getElementById('statTotal').textContent     = data.length;
     document.getElementById('statMenunggu').textContent  = data.filter(p => p.status === 'Menunggu').length;
@@ -367,7 +411,7 @@ function renderStats(data) {
     document.getElementById('statSelesai').textContent   = data.filter(p => p.status === 'Selesai').length;
 }
 
-// ─── Table ──────────────────────────────────────────────
+// ─── Table ───────────────────────────────────────────────
 function renderTable(data) {
     const tbody = document.getElementById('pasienTableBody');
     if (!data.length) {
@@ -378,10 +422,18 @@ function renderTable(data) {
             </div></td></tr>`;
         return;
     }
-    tbody.innerHTML = data.map(p => `
-        <tr onclick="openResepModal('${p.id}')">
+    tbody.innerHTML = data.map(p => {
+        const ditolak   = resepDitolakMap[p.id];
+        const rowClass  = ditolak ? 'row-ditolak' : '';
+        const tolakBadge = ditolak
+            ? `<span class="badge badge-ditolak-resep" style="margin-left:6px">
+                <i class="bi bi-exclamation-circle"></i> Resep Ditolak
+               </span>`
+            : '';
+        return `
+        <tr class="${rowClass}" onclick="openResepModal('${p.id}')">
             <td class="muted">${p.rm ?? '-'}</td>
-            <td><strong>${p.nama}</strong></td>
+            <td><strong>${p.nama}</strong>${tolakBadge}</td>
             <td class="muted">${p.usia ?? '-'} thn / ${p.jk ?? '-'}</td>
             <td>${p.poli ?? '-'}</td>
             <td><span class="badge ${p.bayar === 'BPJS' ? 'badge-bpjs' : 'badge-mandiri'}">${p.bayar ?? '-'}</span></td>
@@ -391,8 +443,8 @@ function renderTable(data) {
                     <i class="bi bi-pencil-square"></i> Tulis Resep
                 </button>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 function badgeClass(s) {
@@ -412,7 +464,36 @@ function filterTable() {
     renderTable(filtered);
 }
 
-// ─── Modal ──────────────────────────────────────────────
+// ─── Cek Resep Ditolak ───────────────────────────────────
+async function cekResepDitolak() {
+    try {
+        const res  = await fetch('/dokter/api/resep');
+        const data = await res.json();
+
+        // Ambil hanya resep yang ditolak, group by pasienId (ambil yang terbaru)
+        resepDitolakMap = {};
+        data.filter(r => r.status === 'ditolak').forEach(r => {
+            resepDitolakMap[r.pasienId] = r.alasan_tolak ?? 'Tidak ada keterangan.';
+        });
+
+        const jumlah = Object.keys(resepDitolakMap).length;
+        const banner = document.getElementById('bannerTolak');
+        if (jumlah > 0) {
+            document.getElementById('bannerTolakDetail').textContent =
+                `${jumlah} resep ditolak. Pasien sudah dikembalikan ke antrian — silakan tulis ulang resep.`;
+            banner.style.display = 'flex';
+        } else {
+            banner.style.display = 'none';
+        }
+
+        // Re-render tabel supaya badge "Resep Ditolak" muncul
+        filterTable();
+    } catch(e) {
+        console.error('Gagal cek resep ditolak:', e);
+    }
+}
+
+// ─── Modal ───────────────────────────────────────────────
 function openResepModal(id) {
     const p = allPasien.find(x => x.id == id);
     if (!p) return;
@@ -429,6 +510,16 @@ function openResepModal(id) {
     document.getElementById('rBBTB').textContent        = `${p.bb ?? '-'} kg / ${p.tb ?? '-'} cm`;
     document.getElementById('rTD').textContent          = p.td ?? '-';
 
+    // Tampilkan notif jika ada resep ditolak untuk pasien ini
+    const alasanTolak = resepDitolakMap[id];
+    const notif = document.getElementById('notifTolakModal');
+    if (alasanTolak) {
+        document.getElementById('notifTolakAlasan').textContent = 'Alasan: ' + alasanTolak;
+        notif.style.display = 'block';
+    } else {
+        notif.style.display = 'none';
+    }
+
     document.getElementById('inputDiagnosa').value = '';
     document.getElementById('inputCatatan').value  = '';
     document.getElementById('inputKontrol').value  = '';
@@ -444,7 +535,7 @@ function closeResepModal() {
     activePasienId = null;
 }
 
-// ─── Obat Rows (✅ dropdown dari database) ───────────────
+// ─── Obat Rows ───────────────────────────────────────────
 let obatCounter = 0;
 
 function addObatRow() {
@@ -453,12 +544,8 @@ function addObatRow() {
     row.className = 'obat-row';
     row.id = `obat-row-${id}`;
 
-    // Filter obat sesuai jenis pasien
     const pasien     = allPasien.find(x => x.id === activePasienId);
     const jenisBayar = pasien?.bayar ?? 'Mandiri';
-
-    // Pasien BPJS hanya obat kategori bpjs
-    // Pasien Mandiri semua obat
     const obatTersedia = jenisBayar === 'BPJS'
         ? allObat.filter(o => o.kategori === 'bpjs')
         : allObat;
@@ -500,10 +587,7 @@ function onObatChange(id) {
     const infoEl   = document.getElementById(`obat-stok-info-${id}`);
     const jmlInput = document.getElementById(`obat-jml-${id}`);
 
-    if (!sel.value) {
-        infoEl.textContent = '';
-        return;
-    }
+    if (!sel.value) { infoEl.textContent = ''; return; }
 
     jmlInput.max = stok;
     if (stok === 0) {
@@ -533,7 +617,7 @@ function getObatList() {
     return list;
 }
 
-// ─── Submit ─────────────────────────────────────────────
+// ─── Submit ──────────────────────────────────────────────
 async function submitResep(status) {
     const diagnosa = document.getElementById('inputDiagnosa').value.trim();
     const obatList = getObatList();
@@ -563,11 +647,20 @@ async function submitResep(status) {
         const data = await res.json();
         if (data.success) {
             closeResepModal();
+
             if (status === 'baru') {
-                allPasien = allPasien.filter(p => p.id !== activePasienId);
+                // Update status pasien jadi Selesai (jangan dihapus dari list)
+                const idx = allPasien.findIndex(p => p.id == activePasienId);
+                if (idx !== -1) allPasien[idx].status = 'Selesai';
+
+                // Hapus dari map ditolak karena sudah diresepkan ulang
+                delete resepDitolakMap[activePasienId];
             }
+
             renderStats(allPasien);
             filterTable();
+            cekResepDitolak();
+
             showToast(status === 'baru'
                 ? `✅ Resep ${data.no_resep} berhasil dikirim ke apotek!`
                 : `💾 Resep disimpan sebagai draft.`
@@ -592,8 +685,8 @@ function showToast(msg) {
             z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .3s;`;
         document.body.appendChild(t);
     }
-    t.textContent    = msg;
-    t.style.opacity  = '1';
+    t.textContent   = msg;
+    t.style.opacity = '1';
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
@@ -601,5 +694,6 @@ function showToast(msg) {
 // ─── Init ────────────────────────────────────────────────
 renderStats(allPasien);
 filterTable();
+cekResepDitolak();
 </script>
 @endsection

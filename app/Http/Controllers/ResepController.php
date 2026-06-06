@@ -77,17 +77,18 @@ class ResepController extends Controller
                 })->toArray();
 
                 return [
-                    'id'       => (string) $r->id,
-                    'pasienId' => (string) $r->pasien_id,
-                    'no_resep' => $r->no_resep ?? '-',
-                    'pasien'   => $r->pasien->nama ?? '-',
-                    'rm'       => $r->pasien->no_rm ?? '-',
-                    'dokter'   => $r->pasien->dokter ?? '-',
-                    'bayar'    => $r->pasien->jenis ?? 'Mandiri',
-                    'diagnosa' => $r->diagnosa ?? '-',
-                    'tanggal'  => $r->created_at->toDateString(),
-                    'status'   => $r->status ?? 'baru',
-                    'obat'     => $obatList,
+                    'id'           => (string) $r->id,
+                    'pasienId'     => (string) $r->pasien_id,
+                    'no_resep'     => $r->no_resep ?? '-',
+                    'pasien'       => $r->pasien->nama ?? '-',
+                    'rm'           => $r->pasien->no_rm ?? '-',
+                    'dokter'       => $r->pasien->dokter ?? '-',
+                    'bayar'        => $r->pasien->jenis ?? 'Mandiri',
+                    'diagnosa'     => $r->diagnosa ?? '-',
+                    'tanggal'      => $r->created_at->toDateString(),
+                    'status'       => $r->status ?? 'baru',
+                    'alasan_tolak' => $r->alasan_tolak ?? null, // ← untuk notif dokter
+                    'obat'         => $obatList,
                 ];
             });
 
@@ -135,6 +136,7 @@ class ResepController extends Controller
                     'tanggal_kontrol' => $r->tanggal_kontrol?->format('d/m/Y') ?? '-',
                     'tanggal'         => $r->created_at->toDateString(),
                     'status'          => $r->status ?? 'baru',
+                    'alasan_tolak'    => $r->alasan_tolak ?? null,
                     'obat'            => $obatList,
                 ];
             });
@@ -148,17 +150,26 @@ class ResepController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:draft,baru,validasi,siap,selesai,ditolak',
+            'status'       => 'required|in:draft,baru,validasi,siap,selesai,ditolak',
+            'alasan_tolak' => 'nullable|string',
         ]);
 
         $resep = Resep::with('pasien')->findOrFail($id);
         $resep->status = $request->status;
+
+        if ($request->status === 'ditolak') {
+            $resep->alasan_tolak = $request->alasan_tolak;
+            if ($resep->pasien) {
+                $resep->pasien->status = 'Diperiksa';
+                $resep->pasien->save();
+            }
+        }
+
         $resep->save();
 
-        // Auto buat invoice saat status = siap, delegasi ke InvoiceController helper
+        // Auto buat invoice saat status = siap
         if ($request->status === 'siap' && !Invoice::where('resep_id', $id)->exists()) {
             $invoiceController = new InvoiceController();
-            // Panggil via reflection agar bisa akses private method
             $method = new \ReflectionMethod(InvoiceController::class, 'buatInvoiceDariResep');
             $method->setAccessible(true);
             $method->invoke($invoiceController, $resep);
@@ -182,7 +193,7 @@ class ResepController extends Controller
     public function prescription()
     {
         $dokter = auth()->user();
-        $poli   = $dokter->poli; // ambil poli dari user yang login
+        $poli   = $dokter->poli;
 
         $pasienJson = Pasien::select(
             'id','nama','no_rm','jenis','poli_tujuan',
@@ -191,7 +202,7 @@ class ResepController extends Controller
         )
         ->whereIn('status', ['Diperiksa','Menunggu'])
         ->where('status_kirim', 'Sudah')
-        ->when($poli, fn($q) => $q->where('poli_tujuan', $poli)) // filter poli
+        ->when($poli, fn($q) => $q->where('poli_tujuan', $poli))
         ->get();
 
         $obatJson = Batch::where('jumlah', '>', 0)
@@ -213,6 +224,7 @@ class ResepController extends Controller
 
         return view('dokter.prescription', compact('pasienJson', 'obatJson'));
     }
+
     /**
      * Halaman prescription untuk APOTEKER — tampilkan resep masuk dari dokter
      */

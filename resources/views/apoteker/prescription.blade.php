@@ -190,7 +190,7 @@
     box-sizing: border-box;
 }
 .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--purple); }
-.fg textarea { resize: vertical; min-height: 60px; }
+.fg textarea { resize: vertical; min-height: 80px; }
 
 .modal-footer {
     display: flex;
@@ -237,6 +237,20 @@
 .refresh-btn:hover { background: var(--cream3); }
 .refresh-btn.loading i { animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Modal Tolak ─── */
+.modal-tolak-body {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+.alasan-error {
+    font-size: 12px;
+    color: #d93025;
+    margin-top: 6px;
+    display: none;
+}
 </style>
 
 {{-- ─── Header ─── --}}
@@ -362,6 +376,12 @@
             </table>
         </div>
 
+        {{-- Alasan Tolak (hanya muncul jika status ditolak) --}}
+        <div class="modal-section" id="mSeksiAlasan" style="display:none; border-left: 3px solid #d93025;">
+            <div class="modal-section-title" style="color:#d93025">Alasan Penolakan</div>
+            <p id="mAlasanTolak" style="font-size:13px; color:var(--text); margin:0;"></p>
+        </div>
+
         {{-- Status saat ini --}}
         <div style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
             <span style="font-size:12px; color:var(--text3)">Status saat ini:</span>
@@ -369,6 +389,30 @@
         </div>
 
         <div class="modal-footer" id="mFooter"></div>
+    </div>
+</div>
+
+{{-- ─── Modal Alasan Tolak ─── --}}
+<div class="modal-overlay" id="modalTolak" onclick="closeTolakModal()">
+    <div class="modal" style="max-width:420px" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeTolakModal()">✕</button>
+        <h3>❌ Tolak Resep</h3>
+        <p class="modal-tolak-body">
+            Masukkan alasan penolakan resep ini. Pasien akan dikembalikan ke antrian dokter untuk mendapatkan resep baru.
+        </p>
+        <div class="fg">
+            <label>Alasan Penolakan <span style="color:#d93025">*</span></label>
+            <textarea id="inputAlasanTolak" rows="4"
+                placeholder="Contoh: Dosis tidak sesuai, kombinasi obat berbahaya, obat tidak tersedia di sistem…"
+                oninput="document.getElementById('alasanError').style.display='none'"></textarea>
+            <span class="alasan-error" id="alasanError">Alasan penolakan tidak boleh kosong.</span>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeTolakModal()">Batal</button>
+            <button class="btn btn-danger" onclick="konfirmasiTolak()">
+                <i class="bi bi-x-circle"></i> Tolak Resep
+            </button>
+        </div>
     </div>
 </div>
 
@@ -389,7 +433,7 @@ async function loadResep() {
         const res  = await fetch('/apoteker/api/resep');
         const data = await res.json();
         const urutanStatus = { 'baru': 0, 'validasi': 1, 'siap': 2, 'selesai': 3, 'ditolak': 4 };
-        allResep = data.sort((a, b) => 
+        allResep = data.sort((a, b) =>
             (urutanStatus[a.status] ?? 9) - (urutanStatus[b.status] ?? 9)
         );
         renderStats(allResep);
@@ -410,10 +454,10 @@ async function loadResep() {
 
 // ─── Stats ────────────────────────────────────────────────
 function renderStats(data) {
-    document.getElementById('statTotal').textContent   = data.length;
-    document.getElementById('statBaru').textContent    = data.filter(r => r.status === 'baru').length;
-    document.getElementById('statValidasi').textContent= data.filter(r => r.status === 'validasi').length;
-    document.getElementById('statSiap').textContent    = data.filter(r => r.status === 'siap' || r.status === 'selesai').length;
+    document.getElementById('statTotal').textContent    = data.length;
+    document.getElementById('statBaru').textContent     = data.filter(r => r.status === 'baru').length;
+    document.getElementById('statValidasi').textContent = data.filter(r => r.status === 'validasi').length;
+    document.getElementById('statSiap').textContent     = data.filter(r => r.status === 'siap' || r.status === 'selesai').length;
 }
 
 // ─── Table ────────────────────────────────────────────────
@@ -457,32 +501,41 @@ function filterTable() {
     const bayar  = document.getElementById('filterBayar').value;
 
     const filtered = allResep.filter(r => {
-        const matchQ  = !q || r.pasien.toLowerCase().includes(q)
-                           || r.rm.toLowerCase().includes(q)
-                           || r.no_resep.toLowerCase().includes(q);
-        const matchS  = !status || r.status === status;
-        const matchB  = !bayar  || r.bayar  === bayar;
+        const matchQ = !q || r.pasien.toLowerCase().includes(q)
+                          || r.rm.toLowerCase().includes(q)
+                          || r.no_resep.toLowerCase().includes(q);
+        const matchS = !status || r.status === status;
+        const matchB = !bayar  || r.bayar  === bayar;
         return matchQ && matchS && matchB;
     });
 
     renderTable(filtered);
 }
 
-// ─── Modal ────────────────────────────────────────────────
+// ─── Modal Detail ─────────────────────────────────────────
 function openModal(id) {
     const r = allResep.find(x => x.id === id);
     if (!r) return;
     activeResep = r;
 
-    document.getElementById('mNoResep').textContent    = r.no_resep;
-    document.getElementById('mPasienNama').textContent = r.pasien;
-    document.getElementById('mPasienRM').textContent   = r.rm;
-    document.getElementById('mPasienBayar').textContent= r.bayar;
-    document.getElementById('mDokter').textContent     = r.dokter ?? '-';
-    document.getElementById('mDiagnosa').textContent   = r.diagnosa;
-    document.getElementById('mTanggal').textContent    = r.tanggal;
-    document.getElementById('mCatatan').textContent    = r.catatan_dokter ?? '-';
-    document.getElementById('mKontrol').textContent    = r.tanggal_kontrol ?? '-';
+    document.getElementById('mNoResep').textContent     = r.no_resep;
+    document.getElementById('mPasienNama').textContent  = r.pasien;
+    document.getElementById('mPasienRM').textContent    = r.rm;
+    document.getElementById('mPasienBayar').textContent = r.bayar;
+    document.getElementById('mDokter').textContent      = r.dokter ?? '-';
+    document.getElementById('mDiagnosa').textContent    = r.diagnosa;
+    document.getElementById('mTanggal').textContent     = r.tanggal;
+    document.getElementById('mCatatan').textContent     = r.catatan_dokter ?? '-';
+    document.getElementById('mKontrol').textContent     = r.tanggal_kontrol ?? '-';
+
+    // Tampilkan alasan tolak jika ada
+    const seksiAlasan = document.getElementById('mSeksiAlasan');
+    if (r.status === 'ditolak' && r.alasan_tolak) {
+        document.getElementById('mAlasanTolak').textContent = r.alasan_tolak;
+        seksiAlasan.style.display = 'block';
+    } else {
+        seksiAlasan.style.display = 'none';
+    }
 
     // Status badge
     const sb = document.getElementById('mStatusBadge');
@@ -495,7 +548,7 @@ function openModal(id) {
         tbody.innerHTML = `<tr><td colspan="6" style="color:var(--text3);padding:8px 10px">Tidak ada data obat.</td></tr>`;
     } else {
         tbody.innerHTML = r.obat.map((o, i) => {
-            const stok    = o.stok ?? 0;
+            const stok      = o.stok ?? 0;
             const stokClass = stok > 30 ? 'stok-ok' : stok > 0 ? 'stok-warn' : 'stok-habis';
             const stokLabel = stok > 30 ? `✓ ${stok}` : stok > 0 ? `⚠ ${stok}` : `✗ Habis`;
             return `
@@ -514,9 +567,7 @@ function openModal(id) {
         }).join('');
     }
 
-    // Footer tombol aksi sesuai status
     renderFooter(r.status);
-
     document.getElementById('modalResep').classList.add('open');
 }
 
@@ -526,7 +577,7 @@ function renderFooter(status) {
 
     if (status === 'baru') {
         html += `
-            <button class="btn btn-danger" onclick="updateStatus('ditolak')">
+            <button class="btn btn-danger" onclick="bukaTolakModal()">
                 <i class="bi bi-x-circle"></i> Tolak
             </button>
             <button class="btn btn-primary" onclick="prosesValidasi()">
@@ -534,7 +585,7 @@ function renderFooter(status) {
             </button>`;
     } else if (status === 'validasi') {
         html += `
-            <button class="btn btn-danger" onclick="updateStatus('ditolak')">
+            <button class="btn btn-danger" onclick="bukaTolakModal()">
                 <i class="bi bi-x-circle"></i> Tolak
             </button>
             <button class="btn btn-success" onclick="simpanObatDanSiap()">
@@ -555,11 +606,66 @@ function closeModal() {
     activeResep = null;
 }
 
-// ─── Aksi ────────────────────────────────────────────────
+// ─── Modal Tolak ─────────────────────────────────────────
+function bukaTolakModal() {
+    document.getElementById('inputAlasanTolak').value = '';
+    document.getElementById('alasanError').style.display = 'none';
+    document.getElementById('modalTolak').classList.add('open');
+}
+
+function closeTolakModal() {
+    document.getElementById('modalTolak').classList.remove('open');
+}
+
+async function konfirmasiTolak() {
+    const alasan = document.getElementById('inputAlasanTolak').value.trim();
+    if (!alasan) {
+        document.getElementById('alasanError').style.display = 'block';
+        return;
+    }
+
+    closeTolakModal();
+    if (!activeResep) return;
+
+    try {
+        const res = await fetch(`/apoteker/api/resep/${activeResep.id}/status`, {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({ status: 'ditolak', alasan_tolak: alasan }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            // Update data lokal
+            const idx = allResep.findIndex(r => r.id === activeResep.id);
+            if (idx !== -1) {
+                allResep[idx].status      = 'ditolak';
+                allResep[idx].alasan_tolak = alasan;
+            }
+            activeResep.status       = 'ditolak';
+            activeResep.alasan_tolak = alasan;
+
+            renderStats(allResep);
+            filterTable();
+            showToast('✅ Resep ditolak. Pasien dikembalikan ke antrian dokter.');
+            closeModal();
+        } else {
+            alert('Gagal menolak resep.');
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Terjadi kesalahan. Coba lagi.');
+    }
+}
+
+// ─── Aksi Lainnya ────────────────────────────────────────
 async function updateStatus(status) {
     if (!activeResep) return;
 
-    const label = { ditolak: 'menolak', selesai: 'menyelesaikan', validasi: 'memvalidasi', siap: 'mengkonfirmasi siap' };
+    const label = { selesai: 'menyelesaikan', validasi: 'memvalidasi', siap: 'mengkonfirmasi siap' };
     if (!confirm(`Yakin ${label[status] ?? status} resep ini?`)) return;
 
     try {
@@ -574,13 +680,10 @@ async function updateStatus(status) {
 
         const data = await res.json();
         if (data.success) {
-            // Update local data
             const idx = allResep.findIndex(r => r.id === activeResep.id);
             if (idx !== -1) allResep[idx].status = status;
-
             activeResep.status = status;
 
-            // Update modal
             const sb = document.getElementById('mStatusBadge');
             sb.textContent = labelStatus(status);
             sb.className   = `badge badge-${status}`;
@@ -590,7 +693,7 @@ async function updateStatus(status) {
             filterTable();
             showToast(`✅ Status resep berhasil diubah ke: ${labelStatus(status)}`);
 
-            if (status === 'selesai' || status === 'ditolak') closeModal();
+            if (status === 'selesai') closeModal();
         } else {
             alert('Gagal mengubah status.');
         }
@@ -600,23 +703,19 @@ async function updateStatus(status) {
     }
 }
 
-// Validasi: ubah status ke 'validasi'
 function prosesValidasi() {
     updateStatus('validasi');
 }
 
-// Simpan jumlah obat yang diberikan lalu konfirmasi siap → buat invoice otomatis
 async function simpanObatDanSiap() {
     if (!activeResep) return;
 
-    // Kumpulkan jumlah yang diberikan
     const obatUpdated = (activeResep.obat ?? []).map((o, i) => {
         const input = document.getElementById(`jml-diberikan-${i}`);
         return { ...o, jumlah: parseInt(input?.value ?? o.jumlah) || 0 };
     });
 
     try {
-        // 1. Update obat list
         const resObat = await fetch(`/apoteker/api/resep/${activeResep.id}/update-obat`, {
             method : 'POST',
             headers: {
@@ -627,8 +726,6 @@ async function simpanObatDanSiap() {
         });
 
         if (!resObat.ok) throw new Error('Gagal simpan obat');
-
-        // 2. Update status ke siap (ini yang trigger buat invoice)
         await updateStatus('siap');
 
     } catch(e) {
