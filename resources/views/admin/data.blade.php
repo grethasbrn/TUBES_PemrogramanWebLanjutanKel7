@@ -746,30 +746,37 @@ function ubahValidasi(id, status){
   const p = pasienData.find(x => x.id == id);
   if(!p) return;
 
-  // Menggunakan fallback jika tag meta CSRF di layout utama Anda tidak ditemukan
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+  // Ambil CSRF token dengan cara yang lebih aman
+  let csrfToken = document.querySelector('meta[name="csrf-token"]');
+  if (!csrfToken) {
+    // Jika meta tag tidak ada, buat dari input hidden
+    csrfToken = document.querySelector('input[name="_token"]');
+  }
+  const token = csrfToken ? csrfToken.getAttribute('content') || csrfToken.value : '';
 
-  fetch(`/admin/pasien/${id}/validasi`, {
+  fetch('/admin/pasien/' + id + '/validasi', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': csrfToken
+      'X-CSRF-TOKEN': token,
+      'Accept': 'application/json'
     },
     body: JSON.stringify({ validasi: status })
   })
-  .then(res => {
-    if(!res.ok) throw new Error("HTTP error " + res.status);
-    return res.json();
-  })
-  .then(() => {
-    p.validasiBPJS = status;
-    renderValidasiList(validasiFilter);
-    if(Number(currentValidasiId) === Number(id)) selectValidasi(id);
-    showToast(`${p.nama}: ${status === 'valid' ? '✅ Valid' : '❌ Tidak Valid'}`, status === 'valid' ? 'success' : 'danger');
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      p.validasiBPJS = status;
+      renderValidasiList(validasiFilter);
+      if(Number(currentValidasiId) === Number(id)) selectValidasi(id);
+      showToast(`${p.nama}: ${status === 'valid' ? '✅ Valid' : '❌ Tidak Valid'}`, status === 'valid' ? 'success' : 'danger');
+    } else {
+      showToast(data.message || 'Gagal menyimpan validasi', 'danger');
+    }
   })
   .catch((err) => {
-    console.error(err);
-    showToast('Gagal menyimpan validasi. Periksa Route/Controller Anda.', 'danger');
+    console.error('Error:', err);
+    showToast('Gagal menyimpan validasi. Periksa koneksi atau refresh halaman.', 'danger');
   });
 }
 
