@@ -65,7 +65,7 @@ class DokterController extends Controller
     private function queryPasienPoli()
     {
         $poli = $this->getPoliDokter();
-        $query = Pasien::query()->where('status_kirim', 'Sudah');
+        $query = Pasien::query()->where('status_kirim', 'Terkirim');
         if ($poli) $query->where('poli_tujuan', $poli);
         return $query;
     }
@@ -104,7 +104,7 @@ class DokterController extends Controller
     public function prescription()
     {
         $pasiens = $this->queryPasienPoli()->whereNotIn('status', ['Selesai'])->orderBy('created_at')->get();
-        $pasienJson = $pasiens->map(fn($p) => ['id' => (string)$p->id, 'nama' => $p->nama, 'rm' => $p->no_rm, 'usia' => $p->usia, 'jk' => $p->jenis_kelamin ?? '-', 'bayar' => $p->jenis, 'poli' => $p->poli_tujuan, 'status' => $p->status, 'keluhan' => $p->keluhan ?? '-', 'riwayat' => $p->riwayat_penyakit ?? '-', 'alergi' => $p->alergi ?? '-', 'bb' => $p->berat_badan, 'tb' => $p->tinggi_badan, 'td' => $p->tekanan_darah ?? '-']);
+        $pasienJson = $pasiens->map(fn($p) => ['id' => (string)$p->id, 'nama' => $p->nama, 'rm' => $p->no_rm, 'usia' => $p->usia, 'jk' => $p->jenis_kelamin ?? '-', 'bayar' => $p->jenis, 'poli' => $p->poli_tujuan, 'status' => $p->status, 'keluhan' => $p->keluhan ?? '-', 'riwayat' => $p->riwayat_penyakit ?? '-', 'alergi' => $p->alergi ?? '-', 'bb' => $p->berat_badan, 'tb' => $p->tinggi_badan, 'td' => $p->tekanan_darah ?? '-'])->values();
         $obatList = Batch::where('jumlah', '>', 0)->where(fn($q) => $q->whereNull('tgl_expired')->orWhere('tgl_expired', '>', now()))->orderBy('nama_obat')->get(['id', 'nama_obat', 'tipe', 'kategori', 'harga', 'jumlah']);
         $obatJson = $obatList->map(fn($o) => ['id' => $o->id, 'nama' => $o->nama_obat, 'tipe' => $o->tipe, 'kategori' => $o->kategori, 'harga' => $o->harga, 'stok' => $o->jumlah]);
         return view('dokter.prescription', compact('pasienJson', 'obatJson'));

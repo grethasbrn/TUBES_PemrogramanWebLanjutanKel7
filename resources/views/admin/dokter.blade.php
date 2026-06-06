@@ -64,7 +64,7 @@
 </div>
 
 <!-- Modal Tambah -->
-<div id="modalTambah" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center; margin-top: 50px;">
+<div id="modalTambah" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center;margin-top:50px;">
   <div style="background:#fff;border-radius:12px;padding:28px;width:480px;max-width:95vw">
     <div style="font-size:16px;font-weight:700;margin-bottom:20px">Tambah Dokter</div>
     <form method="POST" action="{{ url('admin/dokter') }}">
@@ -75,17 +75,7 @@
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Spesialisasi / Poli</label>
-        <select name="spesialisasi" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
-          <option value="">-- Pilih Poli --</option>
-           <option value="Umum">Umum</option>
-          <option value="Bedah">Bedah</option>
-          <option value="Anak">Anak</option>
-          <option value="Penyakit Dalam">Penyakit Dalam</option>
-          <option value="Kebidanan">Kebidanan</option>
-          <option value="Mata">Mata</option>
-          <option value="UGD">UGD</option>
-          <option value="Gigi">Gigi</option>
-          </select>
+        <input name="spesialisasi" required placeholder="Contoh: Sp.PD, Sp.A, Umum..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">No. Telepon</label>
@@ -122,17 +112,7 @@
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Spesialisasi / Poli</label>
-        <select name="spesialisasi" id="editSpesialisasi" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
-          <option value="">-- Pilih Poli --</option>
-          <option value="Umum">Umum</option>
-          <option value="Bedah">Bedah</option>
-          <option value="Anak">Anak</option>
-          <option value="Penyakit Dalam">Penyakit Dalam</option>
-          <option value="Kebidanan">Kebidanan</option>
-          <option value="Mata">Mata</option>
-          <option value="UGD">UGD</option>
-          <option value="Gigi">Gigi</option>
-        </select>
+        <input name="spesialisasi" id="editSpesialisasi" required placeholder="Contoh: Sp.PD, Sp.A, Umum..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">No. Telepon</label>

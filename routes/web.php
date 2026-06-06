@@ -70,7 +70,7 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
 
     Route::get('/dashboard', [DokterController::class, 'dashboard']);
     Route::get('/data', [DokterController::class, 'data']);
-    Route::get('/prescription', [ResepController::class, 'prescription']);
+    Route::get('/prescription', [DokterController::class, 'prescription']);
     Route::get('/status', [DokterController::class, 'status']);
     Route::get('/history', [DokterController::class, 'history']);
 
