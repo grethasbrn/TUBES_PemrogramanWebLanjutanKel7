@@ -159,26 +159,9 @@
 
 
 
-
-  <a class="nav-item {{ request()->is('apoteker/invoice*') ? 'active' : '' }}"
-     href="{{ url('apoteker/invoice') }}">
-
-    <i class="bi bi-receipt nav-icon"></i>
-    <span>Invoice</span>
-
-  </a>
-
-
-
-
-
-
-
   <div class="nav-section">
     LAPORAN
   </div>
-
-
 
 
 
