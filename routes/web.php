@@ -31,6 +31,7 @@ Route::prefix('apoteker')->middleware(['auth', 'role:apoteker'])->group(function
     Route::post('/api/resep/store', [ResepController::class, 'store']);
     Route::get('/api/invoice', [InvoiceController::class, 'apiIndex']);
     Route::get('/api/stok', function () { return response()->json(\App\Models\Batch::select('nama_obat', 'harga', 'harga_bpjs', 'jumlah')->get()); });
+    Route::get('/api/dashboard', [BatchController::class, 'apiDashboard']);
     Route::get('/api/obat/search', function (\Illuminate\Http\Request $request) {
         $q = $request->get('q', '');
         return response()->json(\App\Models\Batch::where('nama_obat', 'LIKE', "%{$q}%")->where('jumlah', '>', 0)->where(fn($query) => $query->whereNull('tgl_expired')->orWhere('tgl_expired', '>', now()))->select('nama_obat as nama', 'jumlah as stok', 'harga')->orderBy('nama_obat')->limit(10)->get());

@@ -39,7 +39,82 @@ class BatchController extends Controller
         ));
     }
 
-    // ✅ METHOD BARU
+    // ── API untuk widget dashboard ──────────────────────
+    public function apiDashboard()
+    {
+        // Resep 7 hari terakhir
+        $resep7hari = collect(range(6, 0))->map(function ($daysAgo) {
+            $date = Carbon::today()->subDays($daysAgo);
+            return [
+                'tanggal' => $date->format('d/m'),
+                'jumlah'  => Resep::whereDate('created_at', $date)->count(),
+            ];
+        });
+
+        // Alert aktif
+        $alerts = collect();
+
+        $expired = Batch::where('tgl_expired', '<', Carbon::today())->get();
+        foreach ($expired as $b) {
+            $alerts->push([
+                'icon'  => '🔴',
+                'pesan' => "{$b->nama_obat} sudah expired",
+                'sub'   => 'Expired: ' . Carbon::parse($b->tgl_expired)->format('d/m/Y'),
+            ]);
+        }
+
+        $mendekati = Batch::whereBetween('tgl_expired', [
+            Carbon::today(), Carbon::today()->addDays(90)
+        ])->get();
+        foreach ($mendekati as $b) {
+            $alerts->push([
+                'icon'  => '🟡',
+                'pesan' => "{$b->nama_obat} mendekati expired",
+                'sub'   => 'Expired: ' . Carbon::parse($b->tgl_expired)->format('d/m/Y'),
+            ]);
+        }
+
+        $kritis = Batch::where('jumlah', '<=', 10)->where('jumlah', '>', 0)->get();
+        foreach ($kritis as $b) {
+            $alerts->push([
+                'icon'  => '🟠',
+                'pesan' => "{$b->nama_obat} stok kritis",
+                'sub'   => "Sisa: {$b->jumlah} unit",
+            ]);
+        }
+
+        // Aktivitas terbaru (resep terbaru)
+        $aktivitas = Resep::with('pasien')->latest()->take(8)->get()->map(function ($r) {
+            $statusMap = [
+                'baru'     => '📥 Resep baru masuk',
+                'validasi' => '✅ Resep divalidasi',
+                'siap'     => '💊 Resep siap diambil',
+                'selesai'  => '🎉 Resep selesai',
+                'ditolak'  => '❌ Resep ditolak',
+                'draft'    => '📝 Resep draft',
+            ];
+            return [
+                'icon'  => '📋',
+                'pesan' => ($statusMap[$r->status] ?? 'Resep') . ' — ' . ($r->pasien->nama ?? '-'),
+                'waktu' => $r->created_at->diffForHumans(),
+            ];
+        });
+
+        // Distribusi tipe obat
+        $distribusiTipe = Batch::selectRaw('tipe, COUNT(*) as jumlah')
+            ->whereNotNull('tipe')
+            ->groupBy('tipe')
+            ->get()
+            ->map(fn($b) => ['tipe' => $b->tipe, 'jumlah' => $b->jumlah]);
+
+        return response()->json([
+            'resep7hari'     => $resep7hari,
+            'alerts'         => $alerts->values(),
+            'aktivitas'      => $aktivitas,
+            'distribusiTipe' => $distribusiTipe,
+        ]);
+    }
+
     public function alerts()
     {
         $sudahExpired = Batch::where('tgl_expired', '<', Carbon::today())->get();
@@ -104,17 +179,6 @@ class BatchController extends Controller
             'tgl_expired' => 'required|date|after:today',
             'tgl_masuk'   => 'required|date',
             'supplier'    => 'nullable|string|max:255',
-        ], [
-            'nama_obat.required'   => 'Nama obat wajib diisi.',
-            'tipe.required'        => 'Tipe obat wajib diisi.',
-            'kategori.required'    => 'Kategori obat wajib dipilih.',
-            'no_batch.required'    => 'No batch wajib diisi.',
-            'no_batch.unique'      => 'No batch sudah digunakan.',
-            'jumlah.required'      => 'Jumlah wajib diisi.',
-            'harga.required'       => 'Harga wajib diisi.',
-            'tgl_expired.required' => 'Tanggal expired wajib diisi.',
-            'tgl_expired.after'    => 'Tanggal expired harus setelah hari ini.',
-            'tgl_masuk.required'   => 'Tanggal masuk wajib diisi.',
         ]);
 
         Batch::create([
@@ -130,14 +194,12 @@ class BatchController extends Controller
             'supplier'    => $request->supplier,
         ]);
 
-        return redirect()->route('batch.index')
-            ->with('success', 'Batch obat berhasil ditambahkan!');
+        return redirect()->route('batch.index')->with('success', 'Batch obat berhasil ditambahkan!');
     }
 
     public function destroy(Batch $batch)
     {
         $batch->delete();
-        return redirect()->route('batch.index')
-            ->with('success', 'Batch obat berhasil dihapus.');
+        return redirect()->route('batch.index')->with('success', 'Batch obat berhasil dihapus.');
     }
 }
