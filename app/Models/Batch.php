@@ -38,12 +38,14 @@ class Batch extends Model
     // Cek apakah mendekati expired (dalam 90 hari)
     public function getMendekatiExpiredAttribute(): bool
     {
+        if (!$this->tgl_expired) return false;
         return $this->tgl_expired->diffInDays(now()) <= 90 && $this->tgl_expired->isFuture();
     }
 
     // Cek apakah sudah expired
     public function getSudahExpiredAttribute(): bool
     {
+        if (!$this->tgl_expired) return false;
         return $this->tgl_expired->isPast();
     }
     

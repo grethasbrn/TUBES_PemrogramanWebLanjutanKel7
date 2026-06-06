@@ -21,88 +21,88 @@ class ReportController extends Controller
 
         $prevMonth = Carbon::create($year, $month, 1)->subMonth();
 
-        // Total resep bulan ini
         $totalResep = Resep::whereMonth('created_at', $month)
                            ->whereYear('created_at', $year)
                            ->count();
 
-        // Total resep bulan lalu
         $totalResepLalu = Resep::whereMonth('created_at', $prevMonth->month)
                                ->whereYear('created_at', $prevMonth->year)
                                ->count();
 
-        // Resep selesai bulan ini
         $resepSelesai = Resep::whereMonth('created_at', $month)
                              ->whereYear('created_at', $year)
                              ->where('status', 'selesai')
                              ->count();
 
-        // Completion rate
         $completionRate = $totalResep > 0
             ? round(($resepSelesai / $totalResep) * 100, 1)
             : 0;
 
-        // % perubahan resep
         $pctResep = $totalResepLalu > 0
             ? round((($totalResep - $totalResepLalu) / $totalResepLalu) * 100, 1)
             : 0;
 
-        // Ambil SEMUA resep bulan ini (tidak hanya selesai)
+        // Preload SEMUA batch obat sekali saja — hindari N+1 query
+        $semuaBatch = Batch::all()->keyBy(fn($b) => strtolower($b->nama_obat));
+
+        $cariHarga = function (string $namaObat) use ($semuaBatch): float {
+            $key = strtolower($namaObat);
+            // Cari exact match dulu, fallback ke contains match
+            if ($semuaBatch->has($key)) {
+                return (float) $semuaBatch[$key]->harga;
+            }
+            $found = $semuaBatch->first(fn($b) => str_contains(strtolower($b->nama_obat), $key));
+            return $found ? (float) $found->harga : 0;
+        };
+
+        $hitungPendapatan = function ($reseps) use ($cariHarga): float {
+            $total = 0;
+            foreach ($reseps as $r) {
+                foreach ($r->obat_list ?? [] as $obat) {
+                    $namaObat = $obat['nama'] ?? '';
+                    $qty      = intval($obat['qty'] ?? 1);
+                    $harga    = floatval($obat['harga'] ?? 0) ?: $cariHarga($namaObat);
+                    $total   += $harga * $qty;
+                }
+            }
+            return $total;
+        };
+
         $resepsBulanIni = Resep::whereMonth('created_at', $month)
                                ->whereYear('created_at', $year)
                                ->whereNotIn('status', ['ditolak', 'draft'])
                                ->get();
 
-        $totalPendapatan = 0;
-        $obatCount = [];
+        $totalPendapatan = $hitungPendapatan($resepsBulanIni);
 
+        $obatCount = [];
         foreach ($resepsBulanIni as $r) {
             foreach ($r->obat_list ?? [] as $obat) {
                 $namaObat = $obat['nama'] ?? '';
                 $qty      = intval($obat['qty'] ?? 1);
-
-                $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%' . strtolower($namaObat) . '%'])
-                              ->first();
-                $harga = $batch ? floatval($batch->harga) : floatval($obat['harga'] ?? 0);
-
-                $totalPendapatan += $harga * $qty;
-
                 if ($namaObat) {
                     $obatCount[$namaObat] = ($obatCount[$namaObat] ?? 0) + $qty;
                 }
             }
         }
 
-        // Pendapatan bulan lalu
         $resepsBulanLalu = Resep::whereMonth('created_at', $prevMonth->month)
                                 ->whereYear('created_at', $prevMonth->year)
                                 ->whereNotIn('status', ['ditolak', 'draft'])
                                 ->get();
 
-        $pendapatanLalu = 0;
-        foreach ($resepsBulanLalu as $r) {
-            foreach ($r->obat_list ?? [] as $obat) {
-                $namaObat = $obat['nama'] ?? '';
-                $qty      = intval($obat['qty'] ?? 1);
-                $batch    = Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%' . strtolower($namaObat) . '%'])->first();
-                $harga    = $batch ? floatval($batch->harga) : floatval($obat['harga'] ?? 0);
-                $pendapatanLalu += $harga * $qty;
-            }
-        }
+        $pendapatanLalu  = $hitungPendapatan($resepsBulanLalu);
 
         $pctPendapatan = $pendapatanLalu > 0
             ? round((($totalPendapatan - $pendapatanLalu) / $pendapatanLalu) * 100, 1)
             : 0;
 
-        // Top 10 obat terlaris
         arsort($obatCount);
-        $topObat    = array_slice($obatCount, 0, 10, true);
         $topObatArr = [];
-        foreach ($topObat as $nama => $qty) {
+        foreach (array_slice($obatCount, 0, 10, true) as $nama => $qty) {
             $topObatArr[] = ['nama' => $nama, 'qty' => $qty];
         }
 
-        // Pendapatan per minggu
         $weeks       = [];
         $daysInMonth = Carbon::create($year, $month)->daysInMonth;
 
@@ -116,18 +116,7 @@ class ReportController extends Controller
                                  ->whereNotIn('status', ['ditolak', 'draft'])
                                  ->get();
 
-            $pendapatanMinggu = 0;
-            foreach ($resepsMinggu as $r) {
-                foreach ($r->obat_list ?? [] as $obat) {
-                    $namaObat = $obat['nama'] ?? '';
-                    $qty      = intval($obat['qty'] ?? 1);
-                    $batch    = Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%' . strtolower($namaObat) . '%'])->first();
-                    $harga    = $batch ? floatval($batch->harga) : floatval($obat['harga'] ?? 0);
-                    $pendapatanMinggu += $harga * $qty;
-                }
-            }
-
-            $weeks[] = ['label' => 'W' . $w, 'pendapatan' => $pendapatanMinggu];
+            $weeks[] = ['label' => 'W' . $w, 'pendapatan' => $hitungPendapatan($resepsMinggu)];
         }
 
         return response()->json([

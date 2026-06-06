@@ -77,11 +77,21 @@ class PasienController extends Controller
     */
     public function create()
     {
-        $today = date('dmy'); 
-        $countToday = Pasien::whereDate('created_at', today())->count();
-        $noRm = 'RM-' . $today . '-' . str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
-
+        $noRm = $this->generateNoRm();
         return view('admin.create-pasien', compact('noRm'));
+    }
+
+    // Generate no_rm secara aman (thread-safe)
+    private function generateNoRm(): string
+    {
+        return \DB::transaction(function () {
+            $today = date('dmy');
+            // lockForUpdate mencegah dua request baca count yang sama bersamaan
+            $countToday = Pasien::whereDate('created_at', today())
+                ->lockForUpdate()
+                ->count();
+            return 'RM-' . $today . '-' . str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+        });
     }
 
     /*
@@ -144,9 +154,7 @@ class PasienController extends Controller
             return redirect()->route('pasien.index')->with('success', 
                 'Data pasien ' . $existingPasien->nama . ' berhasil diperbarui');
         } else {
-            $today = date('dmy');
-            $countToday = Pasien::whereDate('created_at', today())->count();
-            $noRm = 'RM-' . $today . '-' . str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
+            $noRm = $this->generateNoRm();
             
             Pasien::create([
                 'no_rm'            => $noRm,

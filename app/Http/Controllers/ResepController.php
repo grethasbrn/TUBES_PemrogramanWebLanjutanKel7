@@ -147,11 +147,6 @@ class ResepController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        \Log::info('MASUK UPDATE STATUS', [
-            'id'     => $id,
-            'status' => $request->status
-        ]);
-
         $request->validate([
             'status' => 'required|in:draft,baru,validasi,siap,selesai,ditolak',
         ]);
@@ -160,51 +155,13 @@ class ResepController extends Controller
         $resep->status = $request->status;
         $resep->save();
 
-        // Auto buat invoice saat apoteker konfirmasi siap
+        // Auto buat invoice saat status = siap, delegasi ke InvoiceController helper
         if ($request->status === 'siap' && !Invoice::where('resep_id', $id)->exists()) {
-
-            \Log::info('MASUK BUAT INVOICE', ['resep_id' => $id]);
-
-            $pasien = $resep->pasien;
-            $isBPJS = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
-
-            $obatList = collect($resep->obat_list)->map(function ($item) use ($resep) {
-                $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', ['%' . strtolower($item['nama']) . '%'])
-                    ->where('jumlah', '>', 0)
-                    ->where(function ($q) {
-                        $q->whereNull('tgl_expired')
-                          ->orWhere('tgl_expired', '>', now());
-                    })
-                    ->first();
-
-                $jenisPasien = $resep->pasien->jenis ?? 'Mandiri';
-                $item['harga'] = $batch
-                    ? ($jenisPasien === 'BPJS' ? 0 : (float) $batch->harga)
-                    : 0;
-                return $item;
-            })->toArray();
-
-            $resep->obat_list = $obatList;
-            $resep->save();
-
-            $subtotal = collect($obatList)->sum(function ($item) use ($isBPJS) {
-                if ($isBPJS) return 0;
-                return ($item['jumlah'] ?? 0) * ($item['harga'] ?? 0);
-            });
-
-            $ppn = $isBPJS ? 0 : round($subtotal * 0.11);
-
-            Invoice::create([
-                'no_invoice'    => 'INV-' . now()->format('Ymd') . '-' . str_pad($resep->id, 4, '0', STR_PAD_LEFT),
-                'resep_id'      => $resep->id,
-                'no_rm'         => $pasien->no_rm ?? '-',
-                'nama'          => $pasien->nama  ?? '-',
-                'jenis'         => $pasien->jenis ?? 'Mandiri',
-                'status'        => 'masuk',
-                'subtotal'      => $subtotal,
-                'ppn'           => $ppn,
-                'total_tagihan' => $isBPJS ? 0 : ($subtotal + $ppn),
-            ]);
+            $invoiceController = new InvoiceController();
+            // Panggil via reflection agar bisa akses private method
+            $method = new \ReflectionMethod(InvoiceController::class, 'buatInvoiceDariResep');
+            $method->setAccessible(true);
+            $method->invoke($invoiceController, $resep);
         }
 
         return response()->json(['success' => true, 'status' => $resep->status]);

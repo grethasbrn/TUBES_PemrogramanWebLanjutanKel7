@@ -138,14 +138,27 @@
                         </div>
 
                         @if($inv->status !== 'Lunas')
-                            <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
-                                @csrf
-                                <div style="display: flex; gap: 8px; margin-top: 20px;">
-                                    <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border:none; width:350px">
-                                        Proses Pembayaran
-                                    </button>
-                                </div>
-                            </form>
+                            @if($isBPJS)
+                                {{-- BPJS: tidak bayar tunai, tapi stok tetap dikurangi --}}
+                                <form action="{{ route('invoice.bpjs', $inv->id) }}" method="POST" onsubmit="return confirm('Selesaikan resep BPJS? Stok obat akan dikurangi.')">
+                                    @csrf
+                                    <div style="display: flex; gap: 8px; margin-top: 20px;">
+                                        <button type="submit" style="background: #0F6E56; color: white; padding: 12px; text-align: center; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border:none; width:350px">
+                                            ✅ Selesaikan (BPJS — Tanpa Bayar)
+                                        </button>
+                                    </div>
+                                </form>
+                            @else
+                                {{-- Mandiri: proses pembayaran normal --}}
+                                <form action="{{ route('invoice.bayar', $inv->id) }}" method="POST" onsubmit="return confirm('Proses pembayaran sekarang?')">
+                                    @csrf
+                                    <div style="display: flex; gap: 8px; margin-top: 20px;">
+                                        <button type="submit" style="background: #A63D33; color: white; padding: 12px; text-align: center; text-decoration: none; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; border:none; width:350px">
+                                            Proses Pembayaran
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
                         @else
                             <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
                                 <div class="alert-banner" style="background: #e6f4ea; color: #1e7e34; border: 1px solid #c3e6cb; text-align:center; padding:12px; border-radius: 8px; margin-bottom: 0;">

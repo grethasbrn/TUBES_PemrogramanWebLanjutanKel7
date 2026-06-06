@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,19 +19,30 @@ class Pasien extends Model
         'alamat',
         'no_telepon',
         'pekerjaan',
-        'jenis',           // BPJS atau Mandiri
+        'jenis',
         'no_bpjs',
+        'poli_tujuan',
+        'jenis_kunjungan',
+        'keluhan',
+        'riwayat_penyakit',
+        'berat_badan',
+        'tinggi_badan',
+        'tekanan_darah',
+        'alergi',
+        'status',
+        'validasi',
+        'status_kirim',
     ];
 
-    // Relasi ke kunjungan
-    public function kunjungans()
+    // Relasi ke resep
+    public function reseps()
     {
-        return $this->hasMany(Kunjungan::class);
+        return $this->hasMany(Resep::class);
     }
 
     // Helper: hitung usia dari tgl_lahir
-    public function getUsiaAttribute()
+    public function getUsiaAttribute(): int
     {
-        return \Carbon\Carbon::parse($this->tgl_lahir)->age;
+        return Carbon::parse($this->tgl_lahir)->age;
     }
 }
