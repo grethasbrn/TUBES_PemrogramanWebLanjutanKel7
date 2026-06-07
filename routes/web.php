@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\Admindoktercontroller as AdminDokterController;
+use App\Http\Controllers\KunjunganController;
 
 Route::get('/', function () { return view('login'); });
 Route::get('/login', function () { return view('login'); })->name('login');
@@ -76,7 +77,11 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
 
     // API routes
     Route::get('/api/pasien', [DokterController::class, 'apiPasien']);
-    Route::post('/api/pasien/{id}/status', [DokterController::class, 'updateStatus']);
+
+    // ← UBAH: dulu /api/pasien/{id}/status sekarang pakai kunjungan_id
+    Route::post('/api/kunjungan/{id}/status', [DokterController::class, 'updateStatus'])
+         ->name('dokter.kunjungan.status');
+
     Route::get('/api/resep', [ResepController::class, 'index']);
     Route::post('/api/resep/store', [ResepController::class, 'store']);
     Route::get('/api/obat', function () {
@@ -100,22 +105,38 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/api/stats', [DashboardController::class, 'stats']);
 
-    // DATA PASIEN
+    // DATA PASIEN — tetap ada untuk lihat master data & edit
     Route::get('/data', [PasienController::class, 'index'])->name('pasien.index');
-    Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
-    Route::get('/pasien/cek-nik/{nik}', [PasienController::class, 'cekNik']);
-    Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
-    Route::post('/pasien/{id}/validasi', [PasienController::class, 'updateValidasi']);
     Route::get('/pasien/{id}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
     Route::put('/pasien/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::delete('/pasien/{id}', [PasienController::class, 'destroy'])->name('pasien.destroy');
 
-    // QUEUE
-    Route::get('/queue', [PasienController::class, 'queue'])->name('pasien.queue');
-    Route::post('/pasien/kirim-semua', [PasienController::class, 'kirimSemua']);
-    Route::post('/pasien/{id}/kirim', [PasienController::class, 'kirimKeDokter']);
+    // ← UBAH: create & store pasien sekarang lewat KunjunganController
+    Route::get('/pasien/create', [KunjunganController::class, 'create'])->name('pasien.create');
+    Route::post('/pasien', [KunjunganController::class, 'store'])->name('pasien.store');
 
-    // DOKTER — gunakan AdminDokterController (manajemen akun user dokter)
+    // ← UBAH: cek NIK sekarang lewat KunjunganController
+    Route::get('/pasien/cek-nik/{nik}', [KunjunganController::class, 'cekNik'])
+         ->name('pasien.cekNik');
+
+    // ← UBAH: validasi sekarang lewat KunjunganController (validasi kunjungan, bukan pasien)
+    Route::post('/kunjungan/{id}/validasi', [KunjunganController::class, 'updateValidasi'])
+         ->name('kunjungan.updateValidasi');
+
+    // ← BARU: dropdown dokter by poli (AJAX)
+    Route::get('/kunjungan/dokter-by-poli', [KunjunganController::class, 'dokterByPoli'])
+         ->name('kunjungan.dokterByPoli');
+
+    // ← UBAH: queue sekarang menampilkan kunjungan, bukan antrian pasien lama
+    Route::get('/queue', [KunjunganController::class, 'queue'])->name('kunjungan.queue');
+
+    // ← UBAH: kirim ke dokter sekarang lewat KunjunganController
+    Route::post('/kunjungan/kirim-semua', [KunjunganController::class, 'kirimSemua'])
+         ->name('kunjungan.kirimSemua');
+    Route::post('/kunjungan/{id}/kirim', [KunjunganController::class, 'kirimKeDokter'])
+         ->name('kunjungan.kirim');
+
+    // DOKTER — AdminDokterController (manajemen akun user dokter)
     Route::get('/dokter', [AdminDokterController::class, 'index'])->name('admin.dokter.index');
     Route::post('/dokter', [AdminDokterController::class, 'store'])->name('admin.dokter.store');
     Route::put('/dokter/{id}', [AdminDokterController::class, 'update'])->name('admin.dokter.update');
@@ -129,9 +150,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/invoice/{id}/bayar', [InvoiceController::class, 'bayar'])->name('invoice.bayar');
     Route::post('/invoice/{id}/bpjs-selesai', [InvoiceController::class, 'selesaikanBpjs'])->name('invoice.bpjs');
     Route::post('/invoice/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoice.status');
-
-    // PAYMENT
-    Route::get('/payment', [InvoiceController::class, 'payment'])->name('payment.index');
 
     // REPORT
     Route::get('/report', [AdminReportController::class, 'index'])->name('admin.report.index');

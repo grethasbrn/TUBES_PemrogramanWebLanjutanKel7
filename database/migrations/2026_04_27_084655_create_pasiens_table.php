@@ -15,9 +15,6 @@ return new class extends Migration
             $table->string('nik', 16)->unique();
             $table->date('tgl_lahir');
             $table->enum('jenis', ['BPJS', 'Mandiri']);
-            $table->string('poli_tujuan');
-            $table->enum('status', ['Menunggu', 'Diperiksa', 'Selesai'])->default('Menunggu');
-            $table->string('validasi')->default('Menunggu');
             $table->timestamps();
         });
     }

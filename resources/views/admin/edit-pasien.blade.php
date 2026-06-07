@@ -132,7 +132,7 @@
             class="form-input @error('poli_tujuan') is-error @enderror">
             <option value="" disabled>— Pilih Poli —</option>
             @foreach(['Umum','Anak','Penyakit Dalam','Bedah','Gigi','Kebidanan','Mata','UGD'] as $poli)
-              <option value="{{ $poli }}" {{ old('poli_tujuan', $pasien->poli_tujuan) == $poli ? 'selected' : '' }}>
+              <option value="{{ $poli }}" {{ old('poli_tujuan', $pasien->kunjunganTerakhir?->poli_tujuan)== $poli ? 'selected' : '' }}>
                 {{ $poli }}
               </option>
             @endforeach
@@ -144,9 +144,9 @@
           <label>Jenis Kunjungan</label>
           <select name="jenis_kunjungan"
             class="form-input @error('jenis_kunjungan') is-error @enderror">
-            <option value="Rawat Jalan" {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'Rawat Jalan' ? 'selected' : '' }}>Rawat Jalan</option>
-            <option value="Rawat Inap"  {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'Rawat Inap'  ? 'selected' : '' }}>Rawat Inap</option>
-            <option value="UGD"         {{ old('jenis_kunjungan', $pasien->jenis_kunjungan) == 'UGD'         ? 'selected' : '' }}>UGD</option>
+            <option value="Rawat Jalan" {{ old('jenis_kunjungan', $pasien->kunjunganTerakhir?->jenis_kunjungan) == 'Rawat Jalan' ? 'selected' : '' }}>Rawat Jalan</option>
+            <option value="Rawat Inap"  {{ old('jenis_kunjungan', $pasien->kunjunganTerakhir?->jenis_kunjungan) == 'Rawat Inap'  ? 'selected' : '' }}>Rawat Inap</option>
+            <option value="UGD"         {{ old('jenis_kunjungan', $pasien->kunjunganTerakhir?->jenis_kunjungan) == 'UGD'         ? 'selected' : '' }}>UGD</option>
           </select>
           @error('jenis_kunjungan')<span class="form-error">{{ $message }}</span>@enderror
         </div>
@@ -156,9 +156,9 @@
           <select name="status"
             class="form-input @error('status') is-error @enderror">
             <option value="" disabled>— Pilih Status —</option>
-            <option value="Menunggu"  {{ old('status', $pasien->status) == 'Menunggu'  ? 'selected' : '' }}>Menunggu</option>
-            <option value="Diperiksa" {{ old('status', $pasien->status) == 'Diperiksa' ? 'selected' : '' }}>Diperiksa</option>
-            <option value="Selesai"   {{ old('status', $pasien->status) == 'Selesai'   ? 'selected' : '' }}>Selesai</option>
+            <option value="Menunggu"  {{ old('status', $pasien->kunjunganTerakhir?->status) == 'Menunggu'  ? 'selected' : '' }}>Menunggu</option>
+            <option value="Diperiksa" {{ old('status', $pasien->kunjunganTerakhir?->status) == 'Diperiksa' ? 'selected' : '' }}>Diperiksa</option>
+            <option value="Selesai"   {{ old('status', $pasien->kunjunganTerakhir?->status) == 'Selesai'   ? 'selected' : '' }}>Selesai</option>
           </select>
           @error('status')<span class="form-error">{{ $message }}</span>@enderror
         </div>
@@ -167,7 +167,7 @@
           <label>Keluhan Utama</label>
           <textarea name="keluhan" rows="2"
             class="form-input @error('keluhan') is-error @enderror"
-            placeholder="Keluhan yang dirasakan pasien...">{{ old('keluhan', $pasien->keluhan) }}</textarea>
+            placeholder="Keluhan yang dirasakan pasien...">{{ old('keluhan', $pasien->kunjunganTerakhir?->keluhan) }}</textarea>
           @error('keluhan')<span class="form-error">{{ $message }}</span>@enderror
         </div>
 

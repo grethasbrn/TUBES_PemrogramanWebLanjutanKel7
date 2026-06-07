@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pasien;
+use App\Models\Kunjungan;
 
 class PasienController extends Controller
 {
@@ -17,10 +18,13 @@ class PasienController extends Controller
         $pasiens = Pasien::all();
 
         $pasienJson = $pasiens->map(function ($p) {
-            $validasiBPJS = match($p->validasi) {
-                'Valid', 'Disetujui'        => 'valid',
-                'Tidak Valid', 'Ditolak'    => 'invalid',
-                default                     => 'pending',
+
+            $kunjungan = $p->kunjungans()->latest()->first();
+
+            $validasiBPJS = match($kunjungan?->validasi) {
+                'Valid', 'Disetujui'     => 'valid',
+                'Tidak Valid', 'Ditolak' => 'invalid',
+                default                  => 'pending',
             };
 
             return [
@@ -32,9 +36,11 @@ class PasienController extends Controller
                 'jk'           => $p->jenis_kelamin ?? '-',
                 'jenisBayar'   => $p->jenis,
                 'noBPJS'       => $p->no_bpjs ?? '',
-                'validasi'     => $p->validasi,
+                'kunjungan_id' => $kunjungan?->id, 
+                'validasi'     => $kunjungan?->validasi ?? 'Menunggu',
+                'statusKirim'  => $kunjungan?->status_kirim ?? 'Belum',
+
                 'validasiBPJS' => $validasiBPJS,
-                'statusKirim'  => $p->status_kirim,
             ];
         });
 
@@ -48,22 +54,23 @@ class PasienController extends Controller
     */
     public function queue()
     {
-        $belumDikirim = Pasien::where('status_kirim', 'Belum')
+        $belumDikirim = Kunjungan::where('status_kirim', 'Belum')
             ->orderBy('created_at')
             ->get();
 
-        $sudahDikirim = Pasien::where('status_kirim', 'Terkirim')
+        $sudahDikirim = Kunjungan::where('status_kirim', 'Terkirim')
             ->orderBy('updated_at', 'desc')
             ->get();
 
         $belumDikirimJson = $belumDikirim->map(function($p) {
             return [
-                'id'          => $p->id,
-                'rm'          => $p->no_rm,
-                'nama'        => $p->nama,
-                'poli'        => $p->poli_tujuan,
-                'jenis'       => $p->jenis,
-                'status_kirim'=> $p->status_kirim,
+                'id'           => $p->id,
+                'rm'           => $p->pasien->no_rm,
+                'nama'         => $p->pasien->nama,
+                'jenis'        => $p->pasien->jenis,
+                'poli'         => $p->poli_tujuan,
+                'validasi'     => $p->validasi, // TAMBAHKAN INI
+                'status_kirim' => $p->status_kirim,
             ];
         });
 
@@ -131,15 +138,7 @@ class PasienController extends Controller
         
         if ($existingPasien) {
             $existingPasien->update([
-                'poli_tujuan'      => $request->poli_tujuan,
-                'jenis_kunjungan'  => $request->jenis_kunjungan ?? 'Rawat Jalan',
-                'keluhan'          => $request->keluhan,
-                'riwayat_penyakit' => $request->riwayat_penyakit,
-                'berat_badan'      => $request->berat_badan,
-                'tinggi_badan'     => $request->tinggi_badan,
-                'tekanan_darah'    => $request->tekanan_darah,
                 'alergi'           => $request->alergi ?? '-',
-                'status'           => $request->status,
                 'nama'             => $request->nama,
                 'tgl_lahir'        => $request->tgl_lahir,
                 'jenis_kelamin'    => $request->jenis_kelamin,
@@ -150,13 +149,28 @@ class PasienController extends Controller
                 'no_bpjs'          => $request->jenis === 'BPJS' ? $request->no_bpjs : null,
                 'updated_at'       => now(),
             ]);
+
+            Kunjungan::create([
+                'pasien_id'         => $existingPasien->id,
+                'no_kunjungan'      => Kunjungan::generateNoKunjungan(),
+                'poli_tujuan'       => $request->poli_tujuan,
+                'jenis_kunjungan'   => $request->jenis_kunjungan ?? 'Rawat Jalan',
+                'keluhan'           => $request->keluhan,
+                'riwayat_penyakit'  => $request->riwayat_penyakit,
+                'berat_badan'       => $request->berat_badan,
+                'tinggi_badan'      => $request->tinggi_badan,
+                'tekanan_darah'     => $request->tekanan_darah,
+                'status'            => 'Menunggu',
+                'validasi'          => 'Menunggu',
+                'status_kirim'      => 'Belum',
+            ]);
             
             return redirect()->route('pasien.index')->with('success', 
                 'Data pasien ' . $existingPasien->nama . ' berhasil diperbarui');
         } else {
             $noRm = $this->generateNoRm();
             
-            Pasien::create([
+            $pasien = Pasien::create([
                 'no_rm'            => $noRm,
                 'nama'             => $request->nama,
                 'nik'              => $request->nik,
@@ -164,20 +178,25 @@ class PasienController extends Controller
                 'jenis_kelamin'    => $request->jenis_kelamin,
                 'jenis'            => $request->jenis,
                 'no_bpjs'          => $request->jenis === 'BPJS' ? $request->no_bpjs : null,
-                'poli_tujuan'      => $request->poli_tujuan,
-                'jenis_kunjungan'  => $request->jenis_kunjungan ?? 'Rawat Jalan',
-                'keluhan'          => $request->keluhan,
-                'riwayat_penyakit' => $request->riwayat_penyakit,
-                'berat_badan'      => $request->berat_badan,
-                'tinggi_badan'     => $request->tinggi_badan,
-                'tekanan_darah'    => $request->tekanan_darah,
-                'alergi'           => $request->alergi ?? '-',
-                'status'           => $request->status,
                 'alamat'           => $request->alamat,
                 'no_telepon'       => $request->no_telepon,
                 'pekerjaan'        => $request->pekerjaan,
-                'validasi'         => 'Menunggu',
-                'status_kirim'     => 'Belum',
+                'alergi'           => $request->alergi ?? '-',
+            ]);
+
+            Kunjungan::create([
+                'pasien_id'         => $pasien->id,
+                'no_kunjungan'      => Kunjungan::generateNoKunjungan(),
+                'poli_tujuan'       => $request->poli_tujuan,
+                'jenis_kunjungan'   => $request->jenis_kunjungan ?? 'Rawat Jalan',
+                'keluhan'           => $request->keluhan,
+                'riwayat_penyakit'  => $request->riwayat_penyakit,
+                'berat_badan'       => $request->berat_badan,
+                'tinggi_badan'      => $request->tinggi_badan,
+                'tekanan_darah'     => $request->tekanan_darah,
+                'status'            => 'Menunggu',
+                'validasi'          => 'Menunggu',
+                'status_kirim'      => 'Belum',
             ]);
             
             return redirect()->route('pasien.index')->with('success', 'Pasien baru berhasil ditambahkan');
@@ -232,19 +251,25 @@ class PasienController extends Controller
             'jenis_kelamin'    => $request->jenis_kelamin,
             'jenis'            => $request->jenis,
             'no_bpjs'          => $request->jenis === 'BPJS' ? $request->no_bpjs : null,
-            'poli_tujuan'      => $request->poli_tujuan,
-            'status'           => $request->status,
             'alamat'           => $request->alamat,
             'no_telepon'       => $request->no_telepon,
             'pekerjaan'        => $request->pekerjaan,
-            'jenis_kunjungan'  => $request->jenis_kunjungan ?? 'Rawat Jalan',
-            'keluhan'          => $request->keluhan,
-            'riwayat_penyakit' => $request->riwayat_penyakit,
-            'berat_badan'      => $request->berat_badan,
-            'tinggi_badan'     => $request->tinggi_badan,
-            'tekanan_darah'    => $request->tekanan_darah,
             'alergi'           => $request->alergi ?? '-',
         ]);
+
+        $kunjungan = $pasien->kunjungans()->latest()->first();
+        if ($kunjungan) {
+            $kunjungan->update([
+                'poli_tujuan'      => $request->poli_tujuan,
+                'status'           => $request->status,
+                'jenis_kunjungan'  => $request->jenis_kunjungan ?? 'Rawat Jalan',
+                'keluhan'          => $request->keluhan,
+                'riwayat_penyakit' => $request->riwayat_penyakit,
+                'berat_badan'      => $request->berat_badan,
+                'tinggi_badan'     => $request->tinggi_badan,
+                'tekanan_darah'    => $request->tekanan_darah,
+            ]);
+        }
 
         return redirect()->route('pasien.index')->with('success', 'Data pasien berhasil diupdate');
     }
@@ -282,13 +307,6 @@ class PasienController extends Controller
                     'pekerjaan'     => $pasien->pekerjaan,
                     'jenis'         => $pasien->jenis,
                     'no_bpjs'       => $pasien->no_bpjs,
-                    'poli_tujuan'   => $pasien->poli_tujuan,
-                    'jenis_kunjungan' => $pasien->jenis_kunjungan,
-                    'riwayat_penyakit' => $pasien->riwayat_penyakit,
-                    'keluhan'       => $pasien->keluhan,
-                    'berat_badan'   => $pasien->berat_badan,
-                    'tinggi_badan'  => $pasien->tinggi_badan,
-                    'tekanan_darah' => $pasien->tekanan_darah,
                     'alergi'        => $pasien->alergi,
                     'no_rm'         => $pasien->no_rm,
                 ]
@@ -306,41 +324,53 @@ class PasienController extends Controller
     public function updateValidasi(Request $request, $id)
     {
         try {
+
             $pasien = Pasien::findOrFail($id);
-            
+
+            $kunjungan = $pasien->kunjungans()
+                ->latest()
+                ->first();
+
+            if (!$kunjungan) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data kunjungan tidak ditemukan'
+                ], 404);
+            }
+
             $inputValidasi = $request->input('validasi');
-            
-            $statusDatabase = match($inputValidasi) {
+
+            $statusDatabase = match ($inputValidasi) {
                 'valid'   => 'Valid',
                 'invalid' => 'Tidak Valid',
                 default   => 'Menunggu'
             };
 
-            if ($request->has('jenisBayar')) {
-                $pasien->jenis = $request->input('jenisBayar');
-                $pasien->no_bpjs = null;
-                $statusDatabase = 'Valid';
-            }
-
-            if ($pasien->jenis === 'BPJS' && $statusDatabase === 'Valid' && empty($pasien->no_bpjs)) {
+            if (
+                $pasien->jenis === 'BPJS' &&
+                $statusDatabase === 'Valid' &&
+                empty($pasien->no_bpjs)
+            ) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No BPJS belum diisi, tidak bisa disetujui'
+                    'message' => 'No BPJS belum diisi'
                 ], 422);
             }
 
-            $pasien->validasi = $statusDatabase;
-            $pasien->save();
+            $kunjungan->update([
+                'validasi' => $statusDatabase
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Status validasi berhasil diperbarui menjadi ' . $statusDatabase
+                'message' => 'Status validasi berhasil diperbarui'
             ]);
-            
+
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -354,21 +384,23 @@ class PasienController extends Controller
     {
         $pasien = Pasien::findOrFail($id);
 
-        if ($pasien->validasi !== 'Valid') {
+        $kunjungan = $pasien->kunjungans() ->latest() ->first();
+
+        if ($kunjungan->validasi !== 'Valid') {
             return response()->json([
                 'success' => false,
                 'message' => 'Pasien belum divalidasi.'
             ], 422);
         }
 
-        if ($pasien->status_kirim === 'Terkirim') {
+        if ($kunjungan->status_kirim === 'Terkirim') {
             return response()->json([
                 'success' => false,
                 'message' => 'Pasien sudah dikirim sebelumnya.'
             ], 422);
         }
 
-        $pasien->update([
+        $kunjungan->update([
             'status_kirim' => 'Terkirim',
             'status'       => 'Menunggu',
         ]);
@@ -386,12 +418,12 @@ class PasienController extends Controller
     */
     public function kirimSemua(Request $request)
     {
-        $jumlah = Pasien::where('validasi', 'Valid')
-                        ->where('status_kirim', 'Belum')
-                        ->update([
-                            'status_kirim' => 'Terkirim',
-                            'status'       => 'Diperiksa',
-                        ]);
+        $jumlah = Kunjungan::where('validasi', 'Valid')
+            ->where('status_kirim', 'Belum')
+            ->update([
+                'status_kirim' => 'Terkirim',
+                'status' => 'Diperiksa',
+        ]);
 
         return response()->json([
             'success' => true,

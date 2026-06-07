@@ -153,20 +153,20 @@
               </span>
             </td>
             <td>
-              <span class="poli-chip">{{ $p->poli_tujuan }}</span>
+              <span class="poli-chip">{{ $p->kunjunganTerakhir?->poli_tujuan ?? '-' }}</span>
             </td>
             <td>
-              <span class="badge status-badge {{ $p->status == 'Selesai' ? 'b-selesai' : ($p->status == 'Diperiksa' ? 'b-siap' : 'b-warn') }}">
-                @if($p->status == 'Menunggu') ⏳
-                @elseif($p->status == 'Diperiksa') 🔵
+              <span class="badge status-badge {{ $p->kunjunganTerakhir?->status == 'Selesai' ? 'b-selesai' : ($p->kunjunganTerakhir?->status == 'Diperiksa' ? 'b-siap' : 'b-warn') }}">
+                @if($p->kunjunganTerakhir?->status == 'Menunggu')⏳
+                @elseif($p->kunjunganTerakhir?->status == 'Diperiksa') 🔵
                 @else ✅
                 @endif
-                {{ $p->status }}
+                {{ $p->kunjunganTerakhir?->status ?? '-' }}
               </span>
             </td>
             <td>
-              <span class="badge {{ $p->validasi == 'Valid' ? 'b-valid' : ($p->validasi == 'Tidak Valid' ? 'b-invalid' : 'b-pending') }}">
-                {{ $p->validasi }}
+              <span class="badge {{ $p->kunjunganTerakhir?->validasi == 'Valid' ? 'b-valid' : ($p->kunjunganTerakhir?->validasi == 'Tidak Valid' ? 'b-invalid' : 'b-pending') }}">
+                {{ $p->kunjunganTerakhir?->validasi ?? '-' }}
               </span>
             </td>
             <td>
@@ -657,7 +657,7 @@ function renderValidasiList(f){
     let currentStatus = (p.validasiBPJS || 'pending').toLowerCase();
     return `
     <div class="validasi-row ${Number(currentValidasiId) === Number(p.id) ? 'selected' : ''}" id="vrow-${p.id}">
-      <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="selectValidasi(${p.id})">
+      <div style="display:flex;align-items:center;gap:12px;flex:1" onclick="selectValidasi(${p.kunjungan_id})">
         <div class="v-avatar">${p.nama ? p.nama.charAt(0).toUpperCase() : '?'}</div>
         <div>
           <div class="v-name">${p.nama}</div>
@@ -667,8 +667,8 @@ function renderValidasiList(f){
       <div style="display:flex;align-items:center;gap:8px">
         ${badgeValidasi(p.validasiBPJS)}
         ${currentStatus === 'pending' ? `
-          <button class="btn-valid-ok" title="Valid" onclick="ubahValidasi(${p.id}, 'valid')">✓</button>
-          <button class="btn-valid-no" title="Tidak Valid" onclick="ubahValidasi(${p.id}, 'invalid')">✕</button>
+          <button class="btn-valid-ok" title="Valid" onclick="ubahValidasi(${p.kunjungan_id}, 'valid')">✓</button>
+          <button class="btn-valid-no" title="Tidak Valid" onclick="ubahValidasi(${p.kunjungan_id}, 'invalid')">✕</button>
         ` : ''}
       </div>
     </div>`;
@@ -679,7 +679,7 @@ function renderValidasiList(f){
 function selectValidasi(id){
   currentValidasiId = id;
   // Menggunakan '==' (bukan ===) agar toleran terhadap perbedaan tipe data string/number
-  const p = pasienData.find(x => x.id == id); 
+  const p = pasienData.find(x => x.kunjungan_id == id);
   if(!p) return;
 
   document.querySelectorAll('.validasi-row').forEach(r => r.classList.remove('selected'));
@@ -729,21 +729,21 @@ function selectValidasi(id){
       ${currentStatus === 'pending' ? `
         <div style="font-size:12px;color:#A8998A;margin-bottom:12px">Konfirmasi status kepesertaan pasien:</div>
         <div class="vaction-row">
-          <button class="vbtn-ok" onclick="ubahValidasi(${p.id}, 'valid')">✓ Konfirmasi Valid</button>
-          <button class="vbtn-no" onclick="ubahValidasi(${p.id}, 'invalid')">✕ Tidak Valid</button>
+          <button class="vbtn-ok" onclick="ubahValidasi(${p.kunjungan_id}, 'valid')">✓ Konfirmasi Valid</button>
+          <button class="vbtn-no" onclick="ubahValidasi(${p.kunjungan_id}, 'invalid')">✕ Tidak Valid</button>
         </div>` : ''}
 
       ${currentStatus === 'invalid' ? `
         <div class="vaction-row">
-          <button class="vbtn-amber" onclick="ubahValidasi(${p.id}, 'valid')">🔄 Ubah ke Valid</button>
-          <button class="vbtn-outline" onclick="ubahJenisBayar(${p.id})">Beralih ke Mandiri</button>
+          <button class="vbtn-amber" onclick="ubahValidasi(${p.kunjungan_id}, 'valid')">🔄 Ubah ke Valid</button>
+          <button class="vbtn-outline" onclick="ubahJenisBayar(${p.kunjungan_id})">Beralih ke Mandiri</button>
         </div>` : ''}
     </div>`;
 }
 
 /* ===== UBAH VALIDASI (ke server) ===== */
 function ubahValidasi(id, status){
-  const p = pasienData.find(x => x.id == id);
+  const p = pasienData.find(x => x.kunjungan_id == id);
   if(!p) return;
 
   // Ambil CSRF token dengan cara yang lebih aman
@@ -754,7 +754,7 @@ function ubahValidasi(id, status){
   }
   const token = csrfToken ? csrfToken.getAttribute('content') || csrfToken.value : '';
 
-  fetch('/admin/pasien/' + id + '/validasi', {
+  fetch('/admin/kunjungan/' + id + '/validasi', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -782,12 +782,12 @@ function ubahValidasi(id, status){
 
 /* ===== UBAH JENIS BAYAR ===== */
 function ubahJenisBayar(id){
-  const p = pasienData.find(x => x.id == id);
+  const p = pasienData.find(x => x.kunjungan_id == id);
   if(!p) return;
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-  fetch(`/admin/pasien/${id}/validasi`, {
+  fetch(`/admin/kunjungan/${id}/validasi`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

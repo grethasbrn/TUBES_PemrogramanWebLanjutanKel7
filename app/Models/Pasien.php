@@ -21,17 +21,7 @@ class Pasien extends Model
         'pekerjaan',
         'jenis',
         'no_bpjs',
-        'poli_tujuan',
-        'jenis_kunjungan',
-        'keluhan',
-        'riwayat_penyakit',
-        'berat_badan',
-        'tinggi_badan',
-        'tekanan_darah',
         'alergi',
-        'status',
-        'validasi',
-        'status_kirim',
     ];
 
     // Relasi ke resep
@@ -44,5 +34,10 @@ class Pasien extends Model
     public function getUsiaAttribute(): int
     {
         return Carbon::parse($this->tgl_lahir)->age;
+    }
+
+    public function kunjungans()
+    {
+        return $this->hasMany(Kunjungan::class);
     }
 }
