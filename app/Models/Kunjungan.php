@@ -52,10 +52,20 @@ class Kunjungan extends Model
     {
         return \DB::transaction(function () {
             $today = date('dmy');
-            $count = self::whereDate('created_at', today())
+
+            $last = self::whereDate('created_at', today())
+                ->where('no_kunjungan', 'like', "KNJ-$today-%")
+                ->orderByDesc('no_kunjungan')
                 ->lockForUpdate()
-                ->count();
-            return 'KNJ-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+                ->first();
+
+            $lastNumber = 0;
+
+            if ($last) {
+                $lastNumber = (int) substr($last->no_kunjungan, -3);
+            }
+
+            return 'KNJ-' . $today . '-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         });
     }
 }

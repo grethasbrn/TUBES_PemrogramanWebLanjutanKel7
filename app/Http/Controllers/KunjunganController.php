@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class KunjunganController extends Controller
 {
-    // ─── Halaman form daftar kunjungan baru ───────────────────────────────
     public function create()
     {
-        // Dropdown poli: ambil dari dokter yang aktif
         $polis = Dokter::where('status', 'Aktif')
             ->select('spesialisasi')
             ->distinct()
@@ -23,8 +21,6 @@ class KunjunganController extends Controller
         return view('admin.create-kunjungan', compact('polis'));
     }
 
-    // ─── AJAX: cari pasien by NIK ─────────────────────────────────────────
-    // Dipakai di form kunjungan — jika NIK ditemukan, isi otomatis data pasien
     public function cekNik($nik)
     {
         $pasien = Pasien::where('nik', $nik)->first();
@@ -51,7 +47,6 @@ class KunjunganController extends Controller
         return response()->json(['found' => false]);
     }
 
-    // ─── AJAX: ambil dokter aktif by poli ─────────────────────────────────
     public function dokterByPoli(Request $request)
     {
         $dokters = Dokter::where('status', 'Aktif')
@@ -63,7 +58,6 @@ class KunjunganController extends Controller
         return response()->json($dokters);
     }
 
-    // ─── Simpan kunjungan baru ────────────────────────────────────────────
     public function store(Request $request)
     {
         $rules = [
@@ -78,7 +72,6 @@ class KunjunganController extends Controller
             'tekanan_darah'    => 'nullable|string|max:20',
         ];
 
-        // Validasi tambahan untuk pasien BARU (NIK tidak ditemukan)
         if (!Pasien::where('nik', $request->nik)->exists()) {
             $rules = array_merge($rules, [
                 'nama'          => 'required|string|max:255',
@@ -100,11 +93,9 @@ class KunjunganController extends Controller
 
         return DB::transaction(function () use ($request) {
 
-            // 1. Cari atau buat pasien
             $pasien = Pasien::where('nik', $request->nik)->first();
 
             if (!$pasien) {
-                // Pasien baru → buat record master
                 $pasien = Pasien::create([
                     'no_rm'         => $this->generateNoRm(),
                     'nama'          => $request->nama,
@@ -117,23 +108,20 @@ class KunjunganController extends Controller
                     'jenis'         => $request->jenis,
                     'no_bpjs'       => $request->jenis === 'BPJS' ? $request->no_bpjs : null,
                     'alergi'        => $request->alergi ?? '-',
-                    // status kunjungan TIDAK disimpan di sini
                 ]);
             } else {
-                // Pasien lama → update data master yang mungkin berubah
                 $pasien->update([
-                    'jenis'   => $request->jenis ?? $pasien->jenis,
-                    'no_bpjs' => ($request->jenis ?? $pasien->jenis) === 'BPJS'
-                                    ? ($request->no_bpjs ?? $pasien->no_bpjs)
-                                    : null,
-                    'alergi'      => $request->alergi ?? $pasien->alergi,
-                    'alamat'      => $request->alamat ?? $pasien->alamat,
-                    'no_telepon'  => $request->no_telepon ?? $pasien->no_telepon,
-                    'pekerjaan'   => $request->pekerjaan ?? $pasien->pekerjaan,
+                    'jenis'      => $request->jenis ?? $pasien->jenis,
+                    'no_bpjs'    => ($request->jenis ?? $pasien->jenis) === 'BPJS'
+                                        ? ($request->no_bpjs ?? $pasien->no_bpjs)
+                                        : null,
+                    'alergi'     => $request->alergi     ?? $pasien->alergi,
+                    'alamat'     => $request->alamat      ?? $pasien->alamat,
+                    'no_telepon' => $request->no_telepon ?? $pasien->no_telepon,
+                    'pekerjaan'  => $request->pekerjaan  ?? $pasien->pekerjaan,
                 ]);
             }
 
-            // 2. Buat record kunjungan baru (episode berobat)
             $kunjungan = Kunjungan::create([
                 'pasien_id'        => $pasien->id,
                 'dokter_id'        => $request->dokter_id,
@@ -155,7 +143,6 @@ class KunjunganController extends Controller
         });
     }
 
-    // ─── Halaman antrian kunjungan (gantikan pasien.queue) ───────────────
     public function queue()
     {
         $belumDikirim = Kunjungan::with(['pasien', 'dokter'])
@@ -175,9 +162,9 @@ class KunjunganController extends Controller
             'no_kunjungan' => $k->no_kunjungan,
             'pasien_id'    => $k->pasien_id,
             'rm'           => $k->pasien->no_rm ?? '-',
-            'nama'         => $k->pasien->nama ?? '-',
+            'nama'         => $k->pasien->nama  ?? '-',
             'poli'         => $k->poli_tujuan,
-            'dokter'       => $k->dokter->nama ?? '-',
+            'dokter'       => $k->dokter->nama  ?? '-',
             'jenis'        => $k->pasien->jenis ?? '-',
             'validasi'     => $k->validasi,
             'status_kirim' => $k->status_kirim,
@@ -188,7 +175,6 @@ class KunjunganController extends Controller
         ));
     }
 
-    // ─── Update validasi kunjungan ────────────────────────────────────────
     public function updateValidasi(Request $request, $id)
     {
         try {
@@ -200,7 +186,6 @@ class KunjunganController extends Controller
                 default   => 'Menunggu',
             };
 
-            // Cek BPJS harus punya no_bpjs sebelum divalidasi
             if ($kunjungan->pasien->jenis === 'BPJS'
                 && $statusDb === 'Valid'
                 && empty($kunjungan->pasien->no_bpjs))
@@ -227,7 +212,6 @@ class KunjunganController extends Controller
         }
     }
 
-    // ─── Kirim 1 kunjungan ke dokter ─────────────────────────────────────
     public function kirimKeDokter($id)
     {
         $kunjungan = Kunjungan::findOrFail($id);
@@ -258,7 +242,6 @@ class KunjunganController extends Controller
         ]);
     }
 
-    // ─── Kirim semua yang sudah valid ke dokter ───────────────────────────
     public function kirimSemua()
     {
         $jumlah = Kunjungan::where('validasi', 'Valid')
@@ -277,14 +260,13 @@ class KunjunganController extends Controller
         ]);
     }
 
-    // ─── Update status kunjungan (dari dokter) ────────────────────────────
     public function updateStatus(Request $request, $id)
     {
         $kunjungan = Kunjungan::findOrFail($id);
         $kunjungan->status = $request->status;
 
         if ($request->status === 'Selesai') {
-            $kunjungan->validasi = 'Valid'; // pastikan tetap valid
+            $kunjungan->validasi = 'Valid';
         }
 
         $kunjungan->save();
@@ -295,15 +277,15 @@ class KunjunganController extends Controller
         ]);
     }
 
-    // ─── Private helper ───────────────────────────────────────────────────
+    // ✅ FIX: Hapus nested DB::transaction di generateNoRm
+    // Bug lama: method ini membuka transaction sendiri padahal sudah dipanggil
+    //           dari dalam store() yang juga pakai DB::transaction — potensi deadlock
     private function generateNoRm(): string
     {
-        return DB::transaction(function () {
-            $today = date('dmy');
-            $count = Pasien::whereDate('created_at', today())
-                ->lockForUpdate()
-                ->count();
-            return 'RM-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
-        });
+        $today = date('dmy');
+        $count = Pasien::whereDate('created_at', today())
+            ->lockForUpdate()   // lockForUpdate tetap berfungsi dalam transaksi parent
+            ->count();
+        return 'RM-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
     }
 }

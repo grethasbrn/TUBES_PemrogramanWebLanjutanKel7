@@ -11,11 +11,14 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
-    // ─── Helper: hitung dan buat invoice dari resep ────────────────────────
-    private function buatInvoiceDariResep(Resep $resep): Invoice
+    /**
+     * ✅ FIX: Ubah dari private → public
+     * Bug lama: private sehingga ResepController terpaksa pakai ReflectionMethod (anti-pattern)
+     */
+    public function buatInvoiceDariResep(Resep $resep): Invoice
     {
-        $pasien  = $resep->pasien;
-        $isBPJS  = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
+        $pasien   = $resep->pasien;
+        $isBPJS   = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
         $obatList = $resep->obat_list ?? [];
 
         $subtotal = collect($obatList)->sum(function ($item) use ($isBPJS) {
@@ -42,13 +45,22 @@ class InvoiceController extends Controller
         ]);
     }
 
-    // ─── Helper: kurangi stok obat berdasarkan obat_list resep ─────────────
+    /**
+     * ✅ FIX: kurangiStok — tambah guard agar tidak bisa dipanggil dua kali
+     * Bug lama: tidak ada flag pencegah double-deduct stok
+     */
     private function kurangiStok(Resep $resep): void
     {
+        // Guard: cek flag stok_dikurangi — hanya kurangi sekali
+        // Catatan: tambahkan kolom ini via migration (lihat instruksi di bawah)
+        if ($resep->stok_dikurangi) {
+            throw new \Exception("Stok untuk resep {$resep->no_resep} sudah pernah dikurangi.");
+        }
+
         foreach ($resep->obat_list ?? [] as $item) {
             $batch = Batch::whereRaw('LOWER(nama_obat) LIKE ?', [
                 '%' . strtolower($item['nama'] ?? '') . '%'
-            ])->where('jumlah', '>', 0)->first();
+            ])->where('jumlah', '>', 0)->lockForUpdate()->first();
 
             if (!$batch) {
                 throw new \Exception("Obat {$item['nama']} tidak ditemukan di stok");
@@ -62,6 +74,10 @@ class InvoiceController extends Controller
             $batch->jumlah -= $qty;
             $batch->save();
         }
+
+        // Tandai bahwa stok sudah dikurangi
+        $resep->stok_dikurangi = true;
+        $resep->save();
     }
 
     // ─── Admin: daftar semua invoice ───────────────────────────────────────
@@ -129,7 +145,7 @@ class InvoiceController extends Controller
         return redirect()->route('invoice.index')->with('success', 'Invoice berhasil dibuat.');
     }
 
-    // ─── Admin: proses bayar (termasuk BPJS — stok tetap dikurangi) ───────
+    // ─── Admin: proses bayar ───────────────────────────────────────────────
     public function bayar(Request $request, $id)
     {
         return DB::transaction(function () use ($request, $id) {
@@ -141,9 +157,7 @@ class InvoiceController extends Controller
             }
 
             $resep = $invoice->resep;
-
-            // Kurangi stok — berlaku untuk BPJS maupun Mandiri
-            $this->kurangiStok($resep);
+            $this->kurangiStok($resep);  // sudah ada guard double-deduct di dalam
 
             $invoice->update([
                 'status'        => 'Lunas',
@@ -158,7 +172,7 @@ class InvoiceController extends Controller
         });
     }
 
-    // ─── BPJS: selesaikan tanpa bayar (stok tetap dikurangi) ──────────────
+    // ─── BPJS: selesaikan tanpa bayar ─────────────────────────────────────
     public function selesaikanBpjs(Request $request, $id)
     {
         return DB::transaction(function () use ($id) {
