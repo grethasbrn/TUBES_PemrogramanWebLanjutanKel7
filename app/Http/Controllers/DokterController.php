@@ -46,7 +46,12 @@ class DokterController extends Controller
             ->take(8)
             ->get();
 
-        $resepTerbaru = Resep::with('pasien')
+        $dokter = $this->getDokter();
+
+        $resepTerbaru = Resep::with('kunjungan.pasien')
+            ->whereHas('kunjungan', function ($q) use ($dokter) {
+                $q->where('dokter_id', $dokter->id);
+            })
             ->whereDate('created_at', $today)
             ->latest()
             ->take(5)
@@ -64,8 +69,8 @@ class DokterController extends Controller
 
         $resepJson = $resepTerbaru->map(fn($r) => [
             'id'      => (string) $r->id,
-            'pasien'  => $r->pasien->nama ?? '-',
-            'rm'      => $r->pasien->no_rm ?? '-',
+            'pasien'  => $r->kunjungan->pasien->nama ?? '-',
+            'rm'      => $r->kunjungan->pasien->no_rm ?? '-',
             'diagnosa'=> $r->diagnosa,
             'status'  => $r->status,
         ]);
@@ -151,10 +156,14 @@ class DokterController extends Controller
     {
         $dokter = $this->getDokter();
 
-        $reseps = Resep::with('kunjungan.pasien')
+        $resepTerbaru = Resep::with('kunjungan.pasien')
             ->when($dokter, fn($q) => $q->whereHas('kunjungan', fn($q2) =>
                 $q2->where('dokter_id', $dokter->id)
             ))
+            ->whereDate('created_at', $today)
+            ->latest()
+            ->take(5)
+            ->get()
             ->whereNotIn('status', ['draft'])
             ->latest()
             ->get();

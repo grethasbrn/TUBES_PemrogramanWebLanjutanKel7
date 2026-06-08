@@ -36,8 +36,15 @@ class Pasien extends Model
         return Carbon::parse($this->tgl_lahir)->age;
     }
 
+    // Semua kunjungan
     public function kunjungans()
     {
-        return $this->hasMany(Kunjungan::class);
+        return $this->hasMany(Kunjungan::class, 'pasien_id');
+    }
+
+    // Kunjungan paling terakhir (untuk blade)
+    public function kunjunganTerakhir()
+    {
+        return $this->hasOne(Kunjungan::class, 'pasien_id')->latestOfMany();
     }
 }

@@ -34,7 +34,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div>
-        <div class="pstat-num" style="color:#e65100">{{ $pasiens->where('status','Menunggu')->count() }}</div>
+        <div class="pstat-num" style="color:#e65100"> {{ $pasiens->filter(fn($p) => $p->kunjunganTerakhir?->status === 'Menunggu')->count() }}</div>
         <div class="pstat-label">Menunggu</div>
       </div>
     </div>
@@ -43,7 +43,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
       <div>
-        <div class="pstat-num" style="color:#1565c0">{{ $pasiens->where('status','Diperiksa')->count() }}</div>
+        <div class="pstat-num" style="color:#1565c0"> {{ $pasiens->filter(fn($p) => $p->kunjunganTerakhir?->status === 'Diperiksa')->count() }}</div>
         <div class="pstat-label">Diperiksa</div>
       </div>
     </div>
@@ -52,7 +52,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       </div>
       <div>
-        <div class="pstat-num" style="color:#2e7d32">{{ $pasiens->where('status','Selesai')->count() }}</div>
+        <div class="pstat-num" style="color:#2e7d32"> {{ $pasiens->filter(fn($p) => $p->kunjunganTerakhir?->status === 'Selesai')->count() }}</div>
         <div class="pstat-label">Selesai</div>
       </div>
     </div>

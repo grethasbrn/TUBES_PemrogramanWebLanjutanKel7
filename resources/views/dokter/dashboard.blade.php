@@ -94,9 +94,9 @@
         @forelse($antrian as $p)
           <div class="antrian-item" onclick="selectPasien('{{ $p->id }}')">
             <div class="patient-left">
-              <div class="avatar-mini">{{ strtoupper(substr($p->nama, 0, 1)) }}</div>
+              <div class="avatar-mini">{{ strtoupper(substr($p->pasien->nama, 0, 1)) }}</div>
               <div>
-                <div class="antrian-nama">{{ $p->nama }}</div>
+                <div class="antrian-nama">{{ $p->pasien->nama }}</div>
                 <div class="antrian-rm">{{ $p->no_rm }}</div>
               </div>
             </div>
@@ -130,7 +130,7 @@
             <div class="patient-left">
               <div class="avatar-mini">💊</div>
               <div>
-                <div class="antrian-nama">{{ $r->pasien->nama ?? '-' }}</div>
+                <div class="antrian-nama">{{ $r->kunjungan->pasien->nama ?? '-' }}</div>
                 <div class="antrian-rm">{{ $r->no_resep }}</div>
               </div>
             </div>

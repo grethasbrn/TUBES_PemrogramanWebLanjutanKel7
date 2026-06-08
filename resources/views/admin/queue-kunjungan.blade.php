@@ -275,13 +275,8 @@ function renderTable() {
       </td>
       <td style="text-align:center">
         <div class="aksi-group">
-          ${!sudahValid ? `
-            <button class="btn-validasi btn-valid-ok" onclick="ubahValidasi(${k.id}, 'valid')" title="Validasi">✓ Valid</button>
-            <button class="btn-validasi btn-valid-no" onclick="ubahValidasi(${k.id}, 'invalid')" title="Tolak">✕</button>
-          ` : ''}
           <button class="btn-kirim-dokter" id="btn-kirim-${k.id}"
-            onclick="kirimKunjungan(${k.id})"
-            ${!sudahValid ? 'disabled title="Validasi dulu sebelum kirim"' : ''}>
+            onclick="kirimKunjungan(${k.id})">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="22" y1="2" x2="11" y2="13"/>
               <polygon points="22 2 15 22 11 13 2 9 22 2"/>

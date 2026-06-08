@@ -639,49 +639,37 @@ async function submitResep(status) {
     if (!obatList.length) { alert('Pilih minimal satu obat.'); return; }
 
     const payload = {
-        pasien_id      : activePasienId,
+        kunjungan_id    : activePasienId,
         diagnosa,
-        obat_list      : obatList,
-        catatan_dokter : document.getElementById('inputCatatan').value.trim(),
-        tanggal_kontrol: document.getElementById('inputKontrol').value || null,
+        obat_list       : obatList,
+        catatan_dokter  : document.getElementById('inputCatatan').value.trim(),
+        tanggal_kontrol : document.getElementById('inputKontrol').value || null,
         status,
     };
 
     try {
         const res = await fetch('/dokter/api/resep/store', {
-            method : 'POST',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        const data = await res.json(); // ← hanya dibaca SEKALI di sini
+
         if (data.success) {
             closeResepModal();
-
-            if (status === 'baru') {
-                const idx = allPasien.findIndex(p => p.id == activePasienId);
-                if (idx !== -1) allPasien[idx].status = 'Selesai';
-
-                delete resepDitolakMap[activePasienId];
-            }
-
-            renderStats(allPasien);
-            filterTable();
-            cekResepDitolak();
-
-            showToast(status === 'baru'
-                ? `✅ Resep ${data.no_resep} berhasil dikirim ke apotek!`
-                : `💾 Resep disimpan sebagai draft.`
-            );
+            showToast('✅ Resep ' + (status === 'draft' ? 'disimpan sebagai draft' : 'berhasil dikirim ke apotek') + '!');
+            setTimeout(() => window.location.reload(), 1500);
         } else {
-            alert('Gagal menyimpan resep.');
+            alert(data.message ?? 'Gagal menyimpan resep.');
         }
-    } catch(err) {
+
+    } catch (err) {
         console.error(err);
-        alert('Terjadi kesalahan. Coba lagi.');
+        alert('Terjadi kesalahan: ' + err.message);
     }
 }
 
