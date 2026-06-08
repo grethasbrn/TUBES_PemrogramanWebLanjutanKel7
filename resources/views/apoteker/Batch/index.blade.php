@@ -55,12 +55,6 @@
             <input type="text" name="no_batch" value="{{ old('no_batch') }}" placeholder="Contoh: BT-2026-001" required>
           </div>
         </div>
-        <div class="fg">
-          <label>No. Batch</label>
-          <input type="text" name="no_batch" 
-            value="{{ old('no_batch', $nextNoBatch) }}" {{-- ✅ otomatis terisi --}}
-            placeholder="Contoh: BCH-0001" required>
-        </div>
 
         <div class="fg">
           <label>Kategori Obat</label>

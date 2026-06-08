@@ -18,7 +18,11 @@ class KunjunganController extends Controller
             ->orderBy('spesialisasi')
             ->pluck('spesialisasi');
 
-        return view('admin.create-kunjungan', compact('polis'));
+        // Generate no RM sementara untuk ditampilkan di form
+        // Akan di-generate ulang saat store() jika pasien baru
+        $noRm = $this->generateNoRm();
+
+        return view('admin.create-kunjungan', compact('polis', 'noRm'));
     }
 
     public function cekNik($nik)
@@ -277,14 +281,11 @@ class KunjunganController extends Controller
         ]);
     }
 
-    // ✅ FIX: Hapus nested DB::transaction di generateNoRm
-    // Bug lama: method ini membuka transaction sendiri padahal sudah dipanggil
-    //           dari dalam store() yang juga pakai DB::transaction — potensi deadlock
     private function generateNoRm(): string
     {
         $today = date('dmy');
         $count = Pasien::whereDate('created_at', today())
-            ->lockForUpdate()   // lockForUpdate tetap berfungsi dalam transaksi parent
+            ->lockForUpdate()
             ->count();
         return 'RM-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
     }

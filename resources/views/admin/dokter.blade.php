@@ -2,6 +2,14 @@
 
 @section('content')
 
+@php
+$poliList = [
+    'Umum', 'Anak', 'Jantung', 'Bedah', 'Saraf',
+    'Mata', 'Kulit', 'Paru', 'Ortopedi', 'Jiwa', 'Kandungan',
+    'Penyakit Dalam', 'Gigi', 'UGD'
+];
+@endphp
+
 <div class="page-section active">
   <div class="page-header">
     <div>
@@ -73,40 +81,58 @@
   </div>
 </div>
 
-<!-- Modal Tambah -->
+<!-- ===== Modal Tambah ===== -->
 <div id="modalTambah" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center;margin-top:50px;">
   <div style="background:#fff;border-radius:12px;padding:28px;width:480px;max-width:95vw">
     <div style="font-size:16px;font-weight:700;margin-bottom:20px">Tambah Dokter</div>
     <form method="POST" action="{{ url('admin/dokter') }}">
       @csrf
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Nama</label>
-        <input name="nama" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="nama" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
+      {{-- SPESIALISASI: dropdown, bukan free text --}}
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Spesialisasi / Poli</label>
-        <input name="spesialisasi" required placeholder="Contoh: Sp.PD, Sp.A, Umum..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <select name="spesialisasi" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+          <option value="" disabled selected>— Pilih Poli —</option>
+          @foreach($poliList as $poli)
+            <option value="{{ $poli }}">{{ $poli }}</option>
+          @endforeach
+        </select>
       </div>
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">No. Telepon</label>
-        <input name="no_telepon" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="no_telepon"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Email</label>
-        <input name="email" type="email" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="email" type="email" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
-      <!-- PASSWORD - wajib untuk akun login dokter -->
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Password <span style="color:#888;font-size:11px">(untuk login dokter)</span></label>
-        <input name="password" type="password" required minlength="6" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="password" type="password" required minlength="6"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
       <div style="margin-bottom:20px">
         <label style="font-size:13px;color:#555">Status</label>
-        <select name="status" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+        <select name="status"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
           <option value="Aktif">Aktif</option>
           <option value="Tidak Aktif">Tidak Aktif</option>
         </select>
       </div>
+
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button type="button" onclick="closeModal()" class="btn" style="background:#e5e7eb;color:#333">Batal</button>
         <button type="submit" class="btn btn-primary">Simpan</button>
@@ -115,40 +141,58 @@
   </div>
 </div>
 
-<!-- Modal Edit -->
+<!-- ===== Modal Edit ===== -->
 <div id="modalEdit" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:12px;padding:28px;width:480px;max-width:95vw">
     <div style="font-size:16px;font-weight:700;margin-bottom:20px">Edit Dokter</div>
     <form method="POST" id="formEdit" action="">
       @csrf @method('PUT')
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Nama</label>
-        <input name="nama" id="editNama" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="nama" id="editNama" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
+      {{-- SPESIALISASI: dropdown, bukan free text --}}
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Spesialisasi / Poli</label>
-        <input name="spesialisasi" id="editSpesialisasi" required placeholder="Contoh: Sp.PD, Sp.A, Umum..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <select name="spesialisasi" id="editSpesialisasi" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+          <option value="" disabled>— Pilih Poli —</option>
+          @foreach($poliList as $poli)
+            <option value="{{ $poli }}">{{ $poli }}</option>
+          @endforeach
+        </select>
       </div>
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">No. Telepon</label>
-        <input name="no_telepon" id="editTelepon" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="no_telepon" id="editTelepon"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Email</label>
-        <input name="email" id="editEmail" type="email" required style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="email" id="editEmail" type="email" required
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
-      <!-- PASSWORD OPSIONAL saat edit -->
+
       <div style="margin-bottom:12px">
         <label style="font-size:13px;color:#555">Password Baru <span style="color:#888;font-size:11px">(kosongkan jika tidak diubah)</span></label>
-        <input name="password" type="password" minlength="6" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
+        <input name="password" type="password" minlength="6"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px;box-sizing:border-box">
       </div>
+
       <div style="margin-bottom:20px">
         <label style="font-size:13px;color:#555">Status</label>
-        <select name="status" id="editStatus" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
+        <select name="status" id="editStatus"
+          style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:4px">
           <option value="Aktif">Aktif</option>
           <option value="Tidak Aktif">Tidak Aktif</option>
         </select>
       </div>
+
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button type="button" onclick="closeEdit()" class="btn" style="background:#e5e7eb;color:#333">Batal</button>
         <button type="submit" class="btn btn-primary">Update</button>
@@ -167,13 +211,27 @@
   function closeModal() {
     document.getElementById('modalTambah').style.display = 'none';
   }
+
   function openEdit(d) {
     document.getElementById('formEdit').action = '/admin/dokter/' + d.id;
-    document.getElementById('editNama').value         = d.nama;
-    document.getElementById('editSpesialisasi').value = d.spesialisasi;
-    document.getElementById('editTelepon').value      = d.no_telepon ?? '';
-    document.getElementById('editEmail').value        = d.email ?? '';
-    document.getElementById('editStatus').value       = d.status;
+    document.getElementById('editNama').value     = d.nama;
+    document.getElementById('editTelepon').value  = d.no_telepon ?? '';
+    document.getElementById('editEmail').value    = d.email ?? '';
+    document.getElementById('editStatus').value   = d.status;
+
+    // Set dropdown spesialisasi sesuai data dokter
+    const editSpes = document.getElementById('editSpesialisasi');
+    editSpes.value = d.spesialisasi;
+    // Kalau spesialisasi lama tidak ada di list (misal "Sp.Kj"), tetap tampilkan
+    if (!editSpes.value) {
+      const opt = document.createElement('option');
+      opt.value = d.spesialisasi;
+      opt.textContent = d.spesialisasi + ' (lama — harap ubah)';
+      opt.style.color = '#e53935';
+      editSpes.appendChild(opt);
+      editSpes.value = d.spesialisasi;
+    }
+
     document.getElementById('modalEdit').style.display = 'flex';
   }
   function closeEdit() {
