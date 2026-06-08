@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Resep;
 use App\Models\Batch;
 use App\Models\Pasien;
+use App\Models\Kunjungan;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -17,14 +18,17 @@ class ResepController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pasien_id'  => 'required|exists:pasiens,id',
+            'kunjungan_id'  => 'required|exists:kunjungans,id',
             'diagnosa'   => 'required|string',
             'obat_list'  => 'required|array',
             'status'     => 'required|in:draft,baru',
         ]);
 
+        $kunjungan = Kunjungan::findOrFail($request->kunjungan_id);
+
         $resep = Resep::create([
-            'pasien_id'       => $request->pasien_id,
+            'kunjungan_id'    => $request->kunjungan_id,
+            'pasien_id'       => $kunjungan->pasien_id, 
             'no_resep'        => Resep::generateNoResep(),
             'diagnosa'        => $request->diagnosa,
             'catatan_dokter'  => $request->catatan_dokter,
@@ -35,11 +39,8 @@ class ResepController extends Controller
 
         // Update status pasien jika resep dikirim (bukan draft)
         if ($request->status === 'baru') {
-            $pasien = Pasien::find($request->pasien_id);
-            if ($pasien) {
-                $pasien->status = 'Selesai';
-                $pasien->save();
-            }
+            $kunjungan->status = 'Selesai';
+            $kunjungan->save();
         }
 
         return response()->json([
@@ -54,7 +55,7 @@ class ResepController extends Controller
      */
     public function index()
     {
-        $reseps = Resep::with('pasien')
+        $reseps = Resep::with('kunjungan.pasien')
             ->latest()
             ->get()
             ->map(function ($r) {
@@ -68,7 +69,7 @@ class ResepController extends Controller
                         })
                         ->first();
 
-                    $jenisPasien = $r->pasien->jenis ?? 'Mandiri';
+                    $jenisPasien = $r->kunjungan?->pasien?->jenis ?? 'Mandiri';
                     $obat['stok']  = $batch ? $batch->jumlah : 0;
                     $obat['harga'] = $batch
                         ? ($jenisPasien === 'BPJS' ? 0 : (float) $batch->harga)
@@ -78,12 +79,12 @@ class ResepController extends Controller
 
                 return [
                     'id'           => (string) $r->id,
-                    'pasienId'     => (string) $r->pasien_id,
+                    'kunjunganId'  => (string) $r->kunjungan?->id ?? '-',
                     'no_resep'     => $r->no_resep ?? '-',
-                    'pasien'       => $r->pasien->nama ?? '-',
-                    'rm'           => $r->pasien->no_rm ?? '-',
-                    'dokter'       => $r->pasien->dokter ?? '-',
-                    'bayar'        => $r->pasien->jenis ?? 'Mandiri',
+                    'pasien'       => $r->kunjungan?->pasien?->nama ?? '-',
+                    'rm'           => $r->kunjungan?->pasien?->no_rm ?? '-',
+                    'dokter' => $r->kunjungan?->dokter?->nama ?? '-',
+                    'bayar'        => $r->kunjungan?->pasien?->jenis ?? 'Mandiri',
                     'diagnosa'     => $r->diagnosa ?? '-',
                     'tanggal'      => $r->created_at->toDateString(),
                     'status'       => $r->status ?? 'baru',
@@ -100,7 +101,7 @@ class ResepController extends Controller
      */
     public function indexApoteker()
     {
-        $reseps = Resep::with('pasien')
+        $reseps = Resep::with('kunjungan.pasien')
             ->whereNotIn('status', ['draft'])
             ->latest()
             ->get()
@@ -115,7 +116,7 @@ class ResepController extends Controller
                         })
                         ->first();
 
-                    $jenisPasien = $r->pasien->jenis ?? 'Mandiri';
+                    $jenisPasien = $r->kunjungan?->pasien?->jenis ?? 'Mandiri';
                     $obat['stok']  = $batch ? $batch->jumlah : 0;
                     $obat['harga'] = $batch
                         ? ($jenisPasien === 'BPJS' ? 0 : (float) $batch->harga)
@@ -125,12 +126,12 @@ class ResepController extends Controller
 
                 return [
                     'id'              => (string) $r->id,
-                    'pasienId'        => (string) $r->pasien_id,
+                    'pasienId'        => (string) $r->kunjungan?->pasien?->id ?? '-',
                     'no_resep'        => $r->no_resep ?? '-',
-                    'pasien'          => $r->pasien->nama ?? '-',
-                    'rm'              => $r->pasien->no_rm ?? '-',
-                    'dokter'          => $r->pasien->dokter ?? '-',
-                    'bayar'           => $r->pasien->jenis ?? 'Mandiri',
+                    'pasien'          => $r->kunjungan?->pasien?->nama ?? '-',
+                    'rm'              => $r->kunjungan?->pasien?->no_rm ?? '-',
+                    'dokter' => $r->kunjungan?->dokter?->nama ?? '-',
+                    'bayar'           => $r->kunjungan?->pasien?->jenis ?? 'Mandiri',
                     'diagnosa'        => $r->diagnosa ?? '-',
                     'catatan_dokter'  => $r->catatan_dokter ?? '-',
                     'tanggal_kontrol' => $r->tanggal_kontrol?->format('d/m/Y') ?? '-',
@@ -154,14 +155,14 @@ class ResepController extends Controller
             'alasan_tolak' => 'nullable|string',
         ]);
 
-        $resep = Resep::with('pasien')->findOrFail($id);
+        $resep = Resep::with('kunjungan.pasien')->findOrFail($id);
         $resep->status = $request->status;
 
         if ($request->status === 'ditolak') {
             $resep->alasan_tolak = $request->alasan_tolak;
-            if ($resep->pasien) {
-                $resep->pasien->status = 'Diperiksa';
-                $resep->pasien->save();
+            if ($resep->kunjungan?->pasien) {
+                $resep->kunjungan->pasien->status = 'Diperiksa';
+                $resep->kunjungan->pasien->save();
             }
         }
 
@@ -195,15 +196,28 @@ class ResepController extends Controller
         $dokter = auth()->user();
         $poli   = $dokter->poli;
 
-        $pasienJson = Pasien::select(
-            'id','nama','no_rm','jenis','poli_tujuan',
-            'tgl_lahir','jenis_kelamin','keluhan',
-            'alergi','berat_badan','tinggi_badan','tekanan_darah'
-        )
-        ->whereIn('status', ['Diperiksa','Menunggu'])
-        ->where('status_kirim', 'Sudah')
-        ->when($poli, fn($q) => $q->where('poli_tujuan', $poli))
-        ->get();
+        $dokterModel = \App\Models\Dokter::where('email', auth()->user()->email)->first();
+
+        $pasienJson = Kunjungan::with('pasien')
+            ->where('status_kirim', 'Terkirim')
+            ->whereIn('status', ['Menunggu', 'Diperiksa'])
+            ->when($dokterModel, fn($q) => $q->where('dokter_id', $dokterModel->id))
+            ->get()
+            ->map(fn($k) => [
+                'id'      => (string) $k->id,   // kunjungan_id — penting untuk submit resep
+                'nama'    => $k->pasien->nama ?? '-',
+                'rm'      => $k->pasien->no_rm ?? '-',
+                'usia'    => $k->pasien->usia ?? '-',
+                'jk'      => $k->pasien->jenis_kelamin ?? '-',
+                'bayar'   => $k->pasien->jenis ?? '-',
+                'poli'    => $k->poli_tujuan,
+                'status'  => $k->status,
+                'keluhan' => $k->keluhan ?? '-',
+                'alergi'  => $k->pasien->alergi ?? '-',
+                'bb'      => $k->berat_badan,
+                'tb'      => $k->tinggi_badan,
+                'td'      => $k->tekanan_darah ?? '-',
+            ]);
 
         $obatJson = Batch::where('jumlah', '>', 0)
             ->where(function ($q) {

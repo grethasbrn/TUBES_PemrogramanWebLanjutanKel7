@@ -15,7 +15,9 @@ class PasienController extends Controller
     */
     public function index()
     {
-        $pasiens = Pasien::all();
+        $pasiens = Pasien::with(['kunjungans' => function($q) {
+            $q->latest();
+        }])->get();
 
         $pasienJson = $pasiens->map(function ($p) {
 
