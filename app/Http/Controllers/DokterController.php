@@ -155,20 +155,19 @@ class DokterController extends Controller
     public function status()
     {
         $dokter = $this->getDokter();
+        $today  = Carbon::today();
 
         $resepTerbaru = Resep::with('kunjungan.pasien')
             ->when($dokter, fn($q) => $q->whereHas('kunjungan', fn($q2) =>
                 $q2->where('dokter_id', $dokter->id)
             ))
+            ->whereNotIn('status', ['draft'])
             ->whereDate('created_at', $today)
             ->latest()
             ->take(5)
-            ->get()
-            ->whereNotIn('status', ['draft'])
-            ->latest()
             ->get();
 
-        $resepJson = $reseps->map(fn($r) => [
+        $resepJson = $resepTerbaru->map(fn($r) => [
             'id'              => (string) $r->id,
             'no_resep'        => $r->no_resep ?? '-',
             'pasien'          => $r->kunjungan->pasien->nama ?? '-',

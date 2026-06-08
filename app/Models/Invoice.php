@@ -29,6 +29,7 @@ class Invoice extends Model
 
     public function getPoliAttribute()
     {
-        return $this->pasien?->poli_tujuan ?? '-';
+        // poli_tujuan ada di kunjungan, bukan di pasien
+        return $this->resep?->kunjungan?->poli_tujuan ?? '-';
     }
 }

@@ -84,7 +84,7 @@ class BatchController extends Controller
         }
 
         // Aktivitas terbaru (resep terbaru)
-        $aktivitas = Resep::with('pasien')->latest()->take(8)->get()->map(function ($r) {
+        $aktivitas = Resep::with('kunjungan.pasien')->latest()->take(8)->get()->map(function ($r) {
             $statusMap = [
                 'baru'     => '📥 Resep baru masuk',
                 'validasi' => '✅ Resep divalidasi',
@@ -95,7 +95,7 @@ class BatchController extends Controller
             ];
             return [
                 'icon'  => '📋',
-                'pesan' => ($statusMap[$r->status] ?? 'Resep') . ' — ' . ($r->pasien->nama ?? '-'),
+                'pesan' => ($statusMap[$r->status] ?? 'Resep') . ' — ' . ($r->kunjungan?->pasien?->nama ?? '-'),
                 'waktu' => $r->created_at->diffForHumans(),
             ];
         });
@@ -188,6 +188,7 @@ class BatchController extends Controller
             'tgl_expired' => 'required|date|after_or_equal:today',
             'tgl_masuk'   => 'required|date',
             'supplier'    => 'nullable|string|max:255',
+            'harga_bpjs' => 'nullable|integer|min:0',
         ]);
 
         Batch::create([
@@ -197,7 +198,7 @@ class BatchController extends Controller
             'no_batch'    => $request->no_batch,
             'jumlah'      => $request->jumlah,
             'harga'       => $request->harga,
-            'harga_bpjs'  => 0,
+            'harga_bpjs' => $request->input('harga_bpjs', 0),
             'tgl_expired' => $request->tgl_expired,
             'tgl_masuk'   => $request->tgl_masuk,
             'supplier'    => $request->supplier,

@@ -104,6 +104,22 @@ class AdminDokterController extends Controller
         $dokter = Dokter::findOrFail($id);
         $nama   = $dokter->nama;
 
+        $kunjunganAktif = \App\Models\Kunjungan::where('dokter_id', $id)
+            ->whereNotIn('status', ['Selesai'])
+            ->count();
+
+        if ($kunjunganAktif > 0) {
+            return redirect()->back()->withErrors(
+                "Tidak bisa hapus dokter {$nama}, masih ada {$kunjunganAktif} pasien aktif."
+            );
+        }
+
+        User::where('email', $dokter->email)->where('role', 'dokter')->delete();
+        $dokter->delete();
+
+        return redirect()->route('admin.dokter.index')
+            ->with('success', "Dokter {$nama} berhasil dihapus.");
+
         // Hapus akun login juga
         User::where('email', $dokter->email)->where('role', 'dokter')->delete();
 

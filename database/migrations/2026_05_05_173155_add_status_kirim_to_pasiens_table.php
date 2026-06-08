@@ -6,17 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::table('pasiens', function (Blueprint $table) {
-            $table->string('status_kirim')->default('Belum');
-        });
+        if (!Schema::hasColumn('pasiens', 'status_kirim')) {
+            Schema::table('pasiens', function (Blueprint $table) {
+                $table->string('status_kirim')->default('Belum')->after('id');
+            });
+        }  
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('pasiens', function (Blueprint $table) {
-            $table->dropColumn('status_kirim');
-        });
+        if (Schema::hasColumn('pasiens', 'status_kirim')) {  
+            Schema::table('pasiens', function (Blueprint $table) {
+                $table->dropColumn('status_kirim');
+            });
+        }
     }
 };

@@ -17,6 +17,12 @@ class InvoiceController extends Controller
      */
     public function buatInvoiceDariResep(Resep $resep): Invoice
     {
+        // Guard: hindari duplikat invoice untuk resep yang sama
+        $existing = Invoice::where('resep_id', $resep->id)->first();
+        if ($existing) {
+            return $existing;
+        }
+
         $pasien   = $resep->pasien;
         $isBPJS   = ($pasien->jenis ?? 'Mandiri') === 'BPJS';
         $obatList = $resep->obat_list ?? [];

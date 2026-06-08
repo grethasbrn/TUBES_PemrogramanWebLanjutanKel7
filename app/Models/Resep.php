@@ -8,7 +8,7 @@ class Resep extends Model
 {
     protected $fillable = [
         'pasien_id',
-        'kunjungan_id',   // ← pastikan ini ada
+        'kunjungan_id',
         'no_resep',
         'diagnosa',
         'catatan_dokter',
@@ -16,11 +16,13 @@ class Resep extends Model
         'status',
         'alasan_tolak',
         'obat_list',
+        'stok_dikurangi',
     ];
 
     protected $casts = [
         'obat_list'       => 'array',
         'tanggal_kontrol' => 'date',
+        'stok_dikurangi' => 'boolean',
     ];
 
     // Relasi ke pasien
@@ -29,8 +31,6 @@ class Resep extends Model
         return $this->belongsTo(Pasien::class);
     }
 
-    // ✅ FIX: Resep belongsTo Kunjungan (bukan hasMany)
-    // Bug lama: public function kunjungans() { return $this->hasMany(Kunjungan::class); }
     public function kunjungan()
     {
         return $this->belongsTo(Kunjungan::class);
@@ -39,8 +39,10 @@ class Resep extends Model
     // Generate nomor resep otomatis
     public static function generateNoResep()
     {
-        $year  = date('Y');
-        $count = self::whereYear('created_at', $year)->count() + 1;
-        return 'RX-' . $year . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+        return \DB::transaction(function () {
+            $year  = date('Y');
+            $count = self::whereYear('created_at', $year)->lockForUpdate()->count() + 1;
+            return 'RX-' . $year . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+        });
     }
 }

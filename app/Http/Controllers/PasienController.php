@@ -386,7 +386,14 @@ class PasienController extends Controller
     {
         $pasien = Pasien::findOrFail($id);
 
-        $kunjungan = $pasien->kunjungans() ->latest() ->first();
+        $kunjungan = $pasien->kunjungans()->latest()->first();
+
+        if (!$kunjungan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pasien belum memiliki data kunjungan.',
+            ], 422);
+        }
 
         if ($kunjungan->validasi !== 'Valid') {
             return response()->json([

@@ -283,10 +283,12 @@ class KunjunganController extends Controller
 
     private function generateNoRm(): string
     {
-        $today = date('dmy');
-        $count = Pasien::whereDate('created_at', today())
-            ->lockForUpdate()
-            ->count();
-        return 'RM-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+        return \DB::transaction(function () {
+            $today = date('dmy');
+            $count = Pasien::whereDate('created_at', today())
+                ->lockForUpdate()
+                ->count();
+            return 'RM-' . $today . '-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+        });
     }
 }

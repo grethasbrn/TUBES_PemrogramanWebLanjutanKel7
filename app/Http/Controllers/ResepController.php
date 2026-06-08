@@ -160,9 +160,9 @@ class ResepController extends Controller
 
         if ($request->status === 'ditolak') {
             $resep->alasan_tolak = $request->alasan_tolak;
-            if ($resep->kunjungan?->pasien) {
-                $resep->kunjungan->pasien->status = 'Diperiksa';
-                $resep->kunjungan->pasien->save();
+            if ($resep->kunjungan) {
+                $resep->kunjungan->status = 'Diperiksa';
+                $resep->kunjungan->save();
             }
         }
 
@@ -171,9 +171,7 @@ class ResepController extends Controller
         // Auto buat invoice saat status = siap
         if ($request->status === 'siap' && !Invoice::where('resep_id', $id)->exists()) {
             $invoiceController = new InvoiceController();
-            $method = new \ReflectionMethod(InvoiceController::class, 'buatInvoiceDariResep');
-            $method->setAccessible(true);
-            $method->invoke($invoiceController, $resep);
+            $invoiceController->buatInvoiceDariResep($resep);
         }
 
         return response()->json(['success' => true, 'status' => $resep->status]);
@@ -204,7 +202,7 @@ class ResepController extends Controller
             ->when($dokterModel, fn($q) => $q->where('dokter_id', $dokterModel->id))
             ->get()
             ->map(fn($k) => [
-                'id'      => (string) $k->id,   // kunjungan_id — penting untuk submit resep
+                'id'      => (string) $k->id,   
                 'nama'    => $k->pasien->nama ?? '-',
                 'rm'      => $k->pasien->no_rm ?? '-',
                 'usia'    => $k->pasien->usia ?? '-',
