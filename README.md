@@ -11,7 +11,7 @@
 
 ## 📋 Deskripsi Proyek
 
-**PharmBee** adalah aplikasi web manajemen apotek yang dikembangkan untuk mengotomatisasi dan mengintegrasikan alur kerja klinik secara menyeluruh — mulai dari pendaftaran pasien, antrian dokter, pembuatan resep, pengelolaan stok obat, hingga penerbitan invoice pembayaran.
+**PharmBee** adalah aplikasi web manajemen apotek rumah sakit yang dikembangkan untuk mengotomatisasi dan mengintegrasikan alur kerja klinik secara menyeluruh — mulai dari pendaftaran pasien, antrian dokter, pembuatan resep digital, pengelolaan stok obat per batch, hingga penerbitan invoice dan laporan keuangan.
 
 Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu **Admin**, **Dokter**, dan **Apoteker**, sehingga setiap bagian dapat bekerja secara mandiri namun tetap terintegrasi dalam satu platform.
 
@@ -20,17 +20,11 @@ Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu *
 ## 👥 Anggota Kelompok
 
 1. GRETHA JOYCE SIBURIAN [251402089]
-
 2. NADHIRA AMEERA SHEREEN NASUTION [251402039]
-
 3. RATU SABRINA TURNIP [251402018]
-
 4. ELYSTA NAOMI NADAPDAP [251402124]
-
-5. SESILIA MARIA GORETTY SIHOMBING [2514020932]
-
+5. SESILIA MARIA GORETTY SIHOMBING [251402093]
 6. EPHIVANI SIMANULLANG [251402086]
-
 7. KEYSAHRANI AMELIA [251402012]
 
 ---
@@ -39,25 +33,27 @@ Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu *
 
 ### 🏥 Admin
 - Mendaftarkan pasien baru beserta data diri dan jenis pembayaran
+- Deteksi otomatis pasien lama berdasarkan NIK
 - Memvalidasi data BPJS pasien
 - Mengirim pasien ke antrian dokter sesuai poli tujuan
-- Mengelola akun dokter
+- Mengelola akun dokter beserta akun login
 - Membuat dan mengunduh invoice PDF
 - Memantau statistik klinik melalui dashboard
-
+- Laporan bulanan dengan export CSV
 
 ### 👨‍⚕️ Dokter
-- Melihat antrian pasien sesuai poli
+- Melihat antrian pasien sesuai poli yang ditangani
 - Mengubah status pemeriksaan pasien
-- Membuat resep digital
-- Melihat riwayat resep
-
+- Membuat resep digital dengan pilihan obat dari stok apoteker
+- Melihat status resep dan kirim ulang jika ditolak apoteker
+- Melihat riwayat pasien dan resep
 
 ### 💊 Apoteker
-- Mengelola stok obat
-- Memproses resep dokter
-- Menerima alert stok dan expired obat
-- Melihat laporan penggunaan obat
+- Mengelola stok obat per batch
+- Memproses resep dokter dan kirim invoice ke admin
+- Menolak resep dengan alasan jika ada masalah
+- Menerima alert stok kritis dan obat mendekati expired
+- Melihat laporan penggunaan obat bulanan
 
 ---
 
@@ -71,7 +67,7 @@ Sistem ini mendukung tiga peran pengguna dengan hak akses yang terpisah, yaitu *
 | 💊 Dashboard Apoteker | Monitoring stok dan resep |
 | 🗂️ Data Pasien | Manajemen data pasien |
 | 📝 Resep | Pembuatan resep digital |
-| 📦 Stok Obat | Pengelolaan obat |
+| 📦 Stok Obat | Pengelolaan obat per batch |
 | 🧾 Invoice | Pembayaran pasien |
 | 📈 Laporan | Statistik sistem |
 
