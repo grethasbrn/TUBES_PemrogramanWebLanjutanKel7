@@ -41,7 +41,7 @@
 @section('scripts')
 <script>
 let allResepStatus = @json($resepJson);
-statusFilter   = 'semua';
+let statusFilter   = 'semua';
 let selectedResepId = null;
 
 function loadStatusResep() {

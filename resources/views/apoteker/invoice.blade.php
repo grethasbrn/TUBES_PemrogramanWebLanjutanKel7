@@ -151,7 +151,7 @@ font-size: 12px;font-family: 'DM Sans', sans-serif;color: var(--text); outline: 
                     <div>
                         <div style="font-size:11px; color:#A63D33; font-weight: 500;">{{ $r->no_resep }}</div>
                         <div style="font-weight:600; font-size:14px; color:var(--text); margin-top:2px;">{{ $r->pasien->nama }}</div>
-                        <div style="font-size:12px; color:var(--text2); margin-top:2px">{{ $r->pasien->no_rm }} ·  {{ $r->pasien->dokter }}</div>
+                        <div style="font-size:12px; color:var(--text2); margin-top:2px">{{ $r->pasien->no_rm }} ·  {{ $r->kunjungan?->dokter?->nama ?? '-' }}</div>
                         
                         <div style="margin-top:8px; display:flex; gap:6px">
                             <span class="badge {{ $payBadge }}">{{ $r->pasien->jenis }}</span>
@@ -193,7 +193,7 @@ font-size: 12px;font-family: 'DM Sans', sans-serif;color: var(--text); outline: 
                     </div>
                     <div class="info-item">
                         <label>Dokter</label>
-                        <span>{{ $selectedResep->pasien->dokter }}</span>
+                        <span>{{ $selectedResep->kunjungan?->dokter?->nama ?? '-' }}</span>
                     </div>
                     <div class="info-item">
                         <label>Jenis Pasien</label>

@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('batches', function (Blueprint $table) {
-            $table->date('tgl_masuk')->nullable()->after('tgl_expired');
-            $table->string('supplier')->nullable()->after('tgl_masuk');
+            if (!Schema::hasColumn('batches', 'tgl_masuk')) $table->date('tgl_masuk')->nullable()->after('tgl_expired');
+            if (!Schema::hasColumn('batches', 'supplier'))  $table->string('supplier')->nullable()->after('tgl_masuk');
         });
     }
 

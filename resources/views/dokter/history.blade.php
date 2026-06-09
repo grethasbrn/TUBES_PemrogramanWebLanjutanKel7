@@ -89,7 +89,7 @@ function selectRiwayat(id) {
 
     renderRiwayatList();
 
-    const resepPasien = riwayatResepData.filter(r => r.pasienId === id);
+    const resepPasien = riwayatResepData.filter(r => r.kunjunganId === id);
     const statusColor = {
         baru:'#fff3e0', validasi:'#e8f0fe', siap:'#e6f4ea',
         selesai:'#f3e8ff', ditolak:'#fce8e6', draft:'#f5f5f5'
