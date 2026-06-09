@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::table('reseps', function (Blueprint $table) {
-        $table->text('alasan_tolak')->nullable()->after('status');
-    });
-}
+        Schema::table('reseps', function (Blueprint $table) {
+            if (!Schema::hasColumn('reseps', 'alasan_tolak')) {
+                $table->text('alasan_tolak')->nullable()->after('status');
+            }
+        });
+    }
 
 public function down()
 {

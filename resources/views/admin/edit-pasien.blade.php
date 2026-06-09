@@ -224,8 +224,6 @@
       </div>
 
       <div class="form-actions">
-
-      <div class="form-actions">
         <a href="{{ route('pasien.index') }}" class="btn btn-secondary">Batal</a>
         <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
       </div>
