@@ -76,7 +76,7 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-    min-width: 140px;
+    min-width: 140px;}
 }
 .rx-stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 .rx-stat-icon.blue   { background: #e8f0fe; color: #1a73e8; }

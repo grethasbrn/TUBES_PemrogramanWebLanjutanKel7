@@ -218,7 +218,21 @@ class KunjunganController extends Controller
 
     public function kirimKeDokter($id)
     {
-        $kunjungan = Kunjungan::findOrFail($id);
+         $kunjungan = Kunjungan::with('dokter')->findOrFail($id);
+
+        if (!$kunjungan->dokter) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dokter tujuan tidak ditemukan.',
+            ], 422);
+        }
+
+        if ($kunjungan->dokter->status !== 'Aktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dokter sedang tidak aktif.',
+            ], 422);
+        }
 
         if ($kunjungan->validasi !== 'Valid') {
             return response()->json([
@@ -248,16 +262,34 @@ class KunjunganController extends Controller
 
     public function kirimSemua()
     {
-        $jumlah = Kunjungan::where('validasi', 'Valid')
+        $kunjungans = Kunjungan::with('dokter')
+            ->where('validasi', 'Valid')
             ->where('status_kirim', 'Belum')
-            ->update([
-                'status_kirim' => 'Terkirim',
-                'status'       => 'Menunggu',
-            ]);
+            ->get();
+
+        $jumlah = 0;
+        $ids = [];
+
+        foreach ($kunjungans as $kunjungan) {
+
+            if (
+                $kunjungan->dokter &&
+                $kunjungan->dokter->status === 'Aktif'
+            ) {
+                $kunjungan->update([
+                    'status_kirim' => 'Terkirim',
+                    'status'       => 'Menunggu',
+                ]);
+
+                $jumlah++;
+                $ids[] = $kunjungan->id;
+            }
+        }
 
         return response()->json([
             'success' => true,
             'jumlah'  => $jumlah,
+            'ids'     => $ids,
             'message' => $jumlah > 0
                 ? "{$jumlah} kunjungan berhasil dikirim ke dokter."
                 : 'Tidak ada kunjungan yang perlu dikirim.',
